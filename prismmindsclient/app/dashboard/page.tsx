@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation"
 import { fetchRecentDebates, createDebate, deleteDebate } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline"
-import { SparklesIcon, Trash2Icon, X, History } from "lucide-react"
+import { SparklesIcon, Trash2Icon, X, History, Download } from "lucide-react"
+import { downloadDebateTranscriptPDF } from "@/lib/pdf-generator"
 
 type DebateMessage = {
   speaker: string
@@ -97,27 +98,96 @@ export default function DashboardPage() {
     if (!fullTranscript || fullTranscript.length === 0) return
     const duration = typeof durationMin === "string" ? Number.parseInt(durationMin || "5") : durationMin || 5
 
+    // Calculate timings for a natural feel
     const perMinuteMs = 10000
     const capMs = 30000
     const revealDurationMs = Math.min(duration * perMinuteMs, capMs)
-    const perMsgDelay = Math.max(200, Math.round(revealDurationMs / fullTranscript.length))
+    const basePerMsgDelay = Math.max(200, Math.round(revealDurationMs / fullTranscript.length))
+    const avgCharactersPerMsg = fullTranscript.reduce((sum, msg) => sum + msg.message.length, 0) / fullTranscript.length
+    const msPerCharacter = Math.min(50, basePerMsgDelay / avgCharactersPerMsg) // Adjust typing speed
 
+    // Reset transcript
     setSelectedDebate((prev) => (prev ? { ...prev, transcript: [] } : prev))
+
     for (let i = 0; i < fullTranscript.length; i++) {
       const msg = fullTranscript[i]
+      
+      // Show typing indicator
       setTyping({ speaker: msg.speaker })
       setStatusMessage(`${msg.speaker} is composing...`)
-      await sleep(Math.max(300, Math.round(perMsgDelay * 0.6)))
+      
+      // Small delay before typing starts
+      await sleep(300)
 
+      // Initialize message with empty content
       setSelectedDebate((prev) => {
         if (!prev) return prev
-        const nextTranscript = [...(prev.transcript || []), msg]
+        const nextTranscript = [
+          ...(prev.transcript || []),
+          { ...msg, message: '' } // Start with empty message
+        ]
         return { ...prev, transcript: nextTranscript }
       })
 
+      // Type out the message character by character
+      let currentText = ''
+      for (let charIndex = 0; charIndex < msg.message.length; charIndex++) {
+        currentText += msg.message[charIndex]
+        
+        setSelectedDebate((prev) => {
+          if (!prev?.transcript) return prev
+          const nextTranscript = [...prev.transcript]
+          nextTranscript[nextTranscript.length - 1] = {
+            ...msg,
+            message: currentText
+          }
+          // Importantly, don't include summary yet
+          return { ...prev, transcript: nextTranscript, summary: undefined }
+        })
+
+        // Scroll to bottom smoothly
+        const modalContent = document.querySelector('.modal-content')
+        if (modalContent) {
+          modalContent.scrollTo({
+            top: modalContent.scrollHeight,
+            behavior: 'smooth'
+          })
+        }
+
+        // Vary typing speed slightly for natural feel
+        const variance = Math.random() * 30 - 15 // ±15ms
+        await sleep(msPerCharacter + variance)
+      }
+
+      // Small pause between messages
       setTyping(null)
       setStatusMessage("")
-      await sleep(Math.max(100, Math.round(perMsgDelay * 0.4)))
+      await sleep(Math.max(300, msg.message.length * 0.05)) // Longer pause for longer messages
+    }
+
+    // After all messages are done, show "Generating summary..." and reveal summary
+    const debateSummary = selectedDebate?.summary
+    if (debateSummary) {
+      setTyping(null)
+      setStatusMessage("Generating summary...")
+      await sleep(1000) // Pause for anticipation
+      
+      setSelectedDebate((prev) => {
+        if (!prev) return prev
+        // Now reveal the summary that was previously hidden
+        return { ...prev, summary: debateSummary }
+      })
+
+      // Scroll to show summary
+      const modalContent = document.querySelector('.modal-content')
+      if (modalContent) {
+        modalContent.scrollTo({
+          top: modalContent.scrollHeight,
+          behavior: 'smooth'
+        })
+      }
+
+      await sleep(500) // Short pause after summary appears
     }
 
     setGenerating(false)
@@ -623,18 +693,50 @@ export default function DashboardPage() {
                   )}
                 </motion.div>
 
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setSelectedDebate(null)}
-                  className="p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0"
-                >
-                  <X className="w-4 sm:w-5 h-4 sm:h-5 text-foreground/60" />
-                </motion.button>
+                <div className="flex items-center gap-2">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={async (e) => {
+                      e.stopPropagation()
+                      if (!selectedDebate) return
+                      try {
+                        // Basic UX: show a small generating state
+                        setStatusMessage("Preparing PDF...")
+                        await downloadDebateTranscriptPDF(
+                          selectedDebate.topic,
+                          selectedDebate.personaA,
+                          selectedDebate.personaB,
+                          selectedDebate.transcript,
+                          selectedDebate.createdAt,
+                          selectedDebate.summary,
+                        )
+                      } catch (err) {
+                        console.error('Failed to download PDF', err)
+                        alert('Failed to generate PDF. Please try again.')
+                      } finally {
+                        setStatusMessage("")
+                      }
+                    }}
+                    className="p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0"
+                    title="Download transcript as PDF"
+                  >
+                    <Download className="w-4 sm:w-5 h-4 sm:h-5 text-foreground/70" />
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setSelectedDebate(null)}
+                    className="p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0"
+                  >
+                    <X className="w-4 sm:w-5 h-4 sm:h-5 text-foreground/60" />
+                  </motion.button>
+                </div>
               </div>
 
               {/* Modal Content */}
-              <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border p-4 sm:p-6">
+              <div className="modal-content flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border p-4 sm:p-6">
                 <div className="space-y-3 sm:space-y-4">
                   <AnimatePresence>
                     {selectedDebate.transcript?.map((message, i, arr) => {

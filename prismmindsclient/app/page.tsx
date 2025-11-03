@@ -142,7 +142,7 @@ export default function Home() {
             </Button>
           </Link>
           <a href="#features">
-            <Button size="lg" variant="outline" className="border-slate-300 text-slate-800 dark:text-slate-200">
+            <Button size="lg" variant="ghost" className="border-slate-300 text-slate-800 dark:text-slate-200">
               Learn More
             </Button>
           </a>
