@@ -317,7 +317,7 @@ export default function DashboardPage() {
               whileTap={{ scale: 0.95 }}
               onClick={async () => {
                 await logout()
-                router.push("/login")
+                router.push("/")
               }}
               className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-all text-slate-400 hover:text-red-600"
               title="Logout"
