@@ -95,8 +95,8 @@ export async function startDebate(topic, personaA, personaB, duration) {
     }
     
     // Calculate number of exchanges based on duration
-    const exchangesPerMinute = 1.5; // 1.5 exchanges per minute
-    const totalExchanges = Math.max(6, Math.min(20, Math.round(duration * exchangesPerMinute))); // min 6, max 20
+    const exchangesPerMinute = 1.2; // Reduced from 1.5 to 1.2 for more focused content
+    const totalExchanges = Math.max(4, Math.min(12, Math.round(duration * exchangesPerMinute))); // min 4, max 12
     
     const prompt = `You are moderating a ${duration}-minute debate between two AI personas.
 
@@ -104,30 +104,42 @@ Topic: ${topic}
 Persona A (${personaA}): Expert representing the perspective in favor/support
 Persona B (${personaB}): Expert representing the questioning/critical perspective
 
-Structure this ${duration}-minute debate with ${totalExchanges} total exchanges, divided into three phases:
+Structure this ${duration}-minute debate with ${totalExchanges} total exchanges, divided into three phases.
+
+IMPORTANT GUIDELINES:
+1. Use clear, everyday language that's easy to understand
+2. Avoid jargon or complex terms - if needed, explain them simply
+3. Keep responses concise and focused (max 3-4 sentences per exchange)
+4. Use real-world examples to illustrate points
+5. Break down complex ideas into simple concepts
 
 Phase 1 - Opening Statements (${Math.round(totalExchanges * 0.2)} exchanges):
-- Each persona introduces their position
-- Clear statement of main arguments
-- Set tone for discussion
+- Brief introduction of main points in simple terms
+- Clear explanation of why this matters to everyday people
+- Focus on 1-2 key arguments only
 
 Phase 2 - Main Discussion (${Math.round(totalExchanges * 0.6)} exchanges):
-- Detailed argument development
-- Point-by-point responses
-- Evidence and examples
-- Logical progression of ideas
+- Build on points using clear examples
+- Respond directly to the other person's last point
+- Use "For example..." and "This means..." to explain ideas
+- Keep technical terms to a minimum
 
 Phase 3 - Closing Arguments (${Math.round(totalExchanges * 0.2)} exchanges):
-- Summarize key points
-- Address main counterarguments
-- Final position statement
+- Summarize main points in simple terms
+- Highlight practical implications
+- End with a clear takeaway
+
+Content Length Guide:
+- Opening statements: 2-3 sentences
+- Main discussion: 3-4 sentences
+- Closing statements: 2-3 sentences
 
 Each persona should:
-- Maintain consistent expertise and perspective
-- Use evidence and logical reasoning
-- Respond directly to opponent's points
-- Show respectful disagreement
-- Match tone to their role/expertise
+- Speak as if explaining to a friend
+- Use everyday examples when possible
+- Build on previous points naturally
+- Show respect while disagreeing
+- Focus on practical implications
 
 IMPORTANT: Return ONLY valid JSON in this exact format (no markdown, no code blocks):
 {
