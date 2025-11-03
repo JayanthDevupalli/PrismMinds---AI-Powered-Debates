@@ -28,12 +28,12 @@ async function getAuthHeader() {
   }
 }
 
-export async function fetchRecentDebates() {
+export async function fetchRecentDebates(limit = 100) {
   try {
     const headers = await getAuthHeader();
-    console.log("🔍 Fetching recent debates from:", `${API_URL}/recent`);
-    
-    const res = await fetch(`${API_URL}/recent`, { 
+    console.log("🔍 Fetching recent debates from:", `${API_URL}/recent?limit=${limit}`);
+
+    const res = await fetch(`${API_URL}/recent?limit=${limit}`, { 
       headers,
       method: 'GET'
     });

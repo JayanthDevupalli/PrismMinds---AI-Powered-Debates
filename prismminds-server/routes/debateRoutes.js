@@ -37,16 +37,20 @@ router.post("/create", verifyFirebaseToken, async (req, res) => {
   }
 });
 
-// 🔹 Get recent 2 debates
+// 🔹 Get recent debates (supports optional ?limit=50)
 router.get("/recent", verifyFirebaseToken, async (req, res) => {
   try {
     const uid = req.user.uid;
+    // Allow client to request a custom limit; default to 50 to avoid huge responses
+    const requested = parseInt(req.query.limit, 10);
+    const limit = Number.isFinite(requested) && requested > 0 ? requested : 50;
+
     const snapshot = await db
       .collection("debates")
       .doc(uid)
       .collection("userDebates")
       .orderBy("createdAt", "desc")
-      .limit(2)
+      .limit(limit)
       .get();
 
     const debates = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
