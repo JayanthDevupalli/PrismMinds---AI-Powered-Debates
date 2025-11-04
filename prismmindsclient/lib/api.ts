@@ -89,6 +89,38 @@ export async function deleteDebate(debateId: string) {
   }
 }
 
+export async function fetchDebateById(id: string) {
+  try {
+    const headers = await getAuthHeader()
+    const url = `${API_URL}/${id}`
+    console.log("🔍 Fetching debate by ID from:", url)
+
+    const res = await fetch(url, { headers })
+
+    if (!res.ok) {
+      const msg = `Backend responded with ${res.status}: ${res.statusText}`
+      console.error(msg)
+      throw new Error(msg)
+    }
+
+    const data = await res.json()
+    console.log("📦 Backend returned:", data)
+
+    // ✅ Defensive check
+    if (!data || !data.id || !data.topic) {
+      console.warn("⚠️ Backend returned empty or invalid debate:", data)
+      throw new Error("Debate not found or still generating.")
+    }
+
+    return data
+  } catch (err) {
+    console.error("❌ fetchDebateById error:", err)
+    throw err
+  }
+}
+
+
+
 export async function createDebate(data: any) {
   try {
     const authHeaders = await getAuthHeader();

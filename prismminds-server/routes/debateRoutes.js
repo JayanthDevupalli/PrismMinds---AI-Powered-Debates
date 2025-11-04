@@ -91,4 +91,37 @@ router.delete("/:id", verifyFirebaseToken, async (req, res) => {
   }
 });
 
+// 🔹 Get a single debate by ID
+router.get("/:id", verifyFirebaseToken, async (req, res) => {
+  try {
+    const uid = req.user.uid;
+    const debateId = req.params.id;
+
+    if (!debateId) {
+      return res.status(400).json({ error: "Debate ID required" });
+    }
+
+    // Reference to the specific debate under this user's collection
+    const debateRef = db
+      .collection("debates")
+      .doc(uid)
+      .collection("userDebates")
+      .doc(debateId);
+
+    const docSnap = await debateRef.get();
+
+    if (!docSnap.exists) {
+      return res.status(404).json({ error: "Debate not found" });
+    }
+
+    // Return debate data with ID
+    const debateData = { id: docSnap.id, ...docSnap.data() };
+    res.json(debateData);
+  } catch (err) {
+    console.error("Get debate by ID error:", err);
+    res.status(500).json({ error: "Failed to fetch debate by ID" });
+  }
+});
+
+
 export default router;

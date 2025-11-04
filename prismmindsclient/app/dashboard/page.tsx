@@ -230,11 +230,11 @@ export default function DashboardPage() {
         throw new Error("Couldn't retrieve the created debate from server")
       }
 
-      setSelectedDebate({ ...createdDebate, transcript: [] })
-      setStatusMessage("Debate ready — starting live playback...")
+      // setSelectedDebate({ ...createdDebate, transcript: [] })
+      // setStatusMessage("Debate ready — starting live playback...")
 
-      await revealTranscript(createdDebate.transcript, debateData.duration)
-
+      // await revealTranscript(createdDebate.transcript, debateData.duration)
+      router.push(`dashboard/debatearea?id=${createdDebate.id}`)
       setForm({ topic: "", personaA: "", personaB: "", duration: "5" })
     } catch (err: any) {
       console.error("Debate creation error:", err)
