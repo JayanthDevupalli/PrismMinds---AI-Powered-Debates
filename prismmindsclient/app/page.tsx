@@ -3,99 +3,160 @@
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import {
-  LightBulbIcon,
-  BoltIcon,
-  UserGroupIcon,
-  DocumentTextIcon,
-  ChatBubbleLeftRightIcon,
-} from "@heroicons/react/24/outline"
+import { useState } from "react"
+import { 
+  Menu,
+  Brain,
+  Zap,
+  Users,
+  FileText,
+  MessageSquare 
+} from "lucide-react"
 
 export default function Home() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  
   const features = [
     {
-      Icon: LightBulbIcon,
+      Icon: Brain,
       title: "AI Personas",
       desc: "Assign distinct roles — supportive, opposing, neutral or custom viewpoints to each agent.",
     },
     {
-      Icon: BoltIcon,
+      Icon: Zap,
       title: "Dynamic Arguments",
       desc: "Agents generate concise bullet arguments, counter, and adapt reasoning in real time.",
     },
     {
-      Icon: UserGroupIcon,
+      Icon: Users,
       title: "Consensus Synthesis",
       desc: "A summarizer AI analyzes transcripts and highlights agreements, disagreements and insights.",
     },
     {
-      Icon: DocumentTextIcon,
+      Icon: FileText,
       title: "Transcript History",
       desc: "Debates are recorded and searchable for later review and research.",
     },
     {
-      Icon: ChatBubbleLeftRightIcon,
+      Icon: MessageSquare,
       title: "Interactive UI",
       desc: "Animated avatars, live text flow, and adjustable debate duration for immersive exploration.",
     },
   ]
 
   return (
-    <main className="min-h-screen relative overflow-x-hidden bg-gradient-to-b from-slate-50 via-sky-50 to-pink-50 text-slate-900 dark:from-slate-900 dark:via-slate-800 dark:to-slate-950">
-      {/* SVG Prism Background */}
+  <main className="min-h-screen relative overflow-x-hidden bg-gradient-to-br from-[#fcfeff] via-[#eef2ff] to-[#fff6fb] text-slate-900 dark:bg-gradient-to-br dark:from-[#071124] dark:via-[#0b1220] dark:to-[#060611]">
+      {/* Decorative UI background (radial blobs + subtle grid + grain) */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        <svg
-          className="absolute w-[150%] left-1/2 -translate-x-1/2 top-[-10%] opacity-60 dark:opacity-40"
-          viewBox="0 0 1440 600"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            fill="url(#grad1)"
-            fillOpacity="0.7"
-            d="M0,320L80,298.7C160,277,320,235,480,240C640,245,800,299,960,293.3C1120,288,1280,224,1360,192L1440,160L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z"
-          >
-            <animate
-              attributeName="d"
-              dur="16s"
-              repeatCount="indefinite"
-              values="
-                M0,320L80,298.7C160,277,320,235,480,240C640,245,800,299,960,293.3C1120,288,1280,224,1360,192L1440,160L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z;
-                M0,320L80,310C160,300,320,250,480,260C640,270,800,330,960,320C1120,310,1280,220,1360,180L1440,140L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z;
-                M0,320L80,298.7C160,277,320,235,480,240C640,245,800,299,960,293.3C1120,288,1280,224,1360,192L1440,160L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z;
-              "
-            />
-          </path>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#fcfeff] via-[#eef2ff] to-[#fff6fb] dark:from-transparent"></div>
+
+        {/* Stronger radial color blobs for clear visibility */}
+        <div className="absolute left-[-16%] top-[-16%] w-[900px] h-[900px] rounded-full bg-gradient-to-tr from-[#9f7aea] to-[#fb7185] opacity-70 blur-[28px] transform -rotate-12 mix-blend-screen"></div>
+        <div className="absolute right-[-10%] bottom-[-10%] w-[760px] h-[760px] rounded-full bg-gradient-to-tr from-[#34d399] to-[#60a5fa] opacity-55 blur-[32px] mix-blend-screen"></div>
+
+        {/* Color overlay vignette to ground the composition */}
+        <div className="absolute inset-0 pointer-events-none -z-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/4 dark:to-black/30 mix-blend-multiply"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/6 to-transparent mix-blend-overlay"></div>
+        </div>
+
+        {/* Subtle grid + film grain overlay for texture (more visible) */}
+        <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <linearGradient id="grad1" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#38bdf8" />
-              <stop offset="50%" stopColor="#7c3aed" />
-              <stop offset="100%" stopColor="#ec4899" />
-            </linearGradient>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M40 0 L0 0 0 40" fill="none" stroke="rgba(15,23,42,0.12)" strokeWidth="1"/>
+            </pattern>
+            <filter id="grain">
+              <feTurbulence baseFrequency="0.6" numOctaves="2" stitchTiles="stitch"/>
+              <feColorMatrix type="saturate" values="0"/>
+              <feComponentTransfer><feFuncA type="linear" slope="0.03"/></feComponentTransfer>
+            </filter>
           </defs>
+          <rect width="100%" height="100%" fill="url(#grid)" opacity="0.7" />
+          <rect width="100%" height="100%" filter="url(#grain)" fill="transparent" opacity="0.8" />
         </svg>
       </div>
 
       {/* Frosted Glass Navbar */}
       <nav className="fixed top-0 w-full z-50 bg-white/30 dark:bg-slate-900/40 backdrop-blur-lg border-b border-slate-200/30 dark:border-slate-700/50">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 bg-gradient-to-tr from-sky-400 to-pink-400 rounded-xl flex items-center justify-center text-white font-bold shadow">
-              🧠
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 bg-gradient-to-tr from-purple-400 to-pink-400 rounded-xl flex items-center justify-center text-white font-bold shadow">
+                🧠
+              </div>
+              <span className="text-lg sm:text-xl font-semibold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                PrismMindsAI
+              </span>
             </div>
-            <span className="text-lg sm:text-xl font-semibold gradient-text hidden sm:block">PrismMinds</span>
+            
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-4">
+              <Link href="/blogs" className="text-slate-700 dark:text-slate-200 hover:text-blue transition">
+                Blogs
+              </Link>
+              <Link href="/login">
+                <Button 
+                  variant="ghost" 
+                  className="relative overflow-hidden text-slate-800 dark:text-slate-200 hover:text-white hover:no-underline transition-all duration-300 border border-purple-300/20 hover:bg-gradient-to-r from-purple-600 to-pink-600 hover:border-transparent hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] group"
+                >
+                  <span className="relative z-10">Login</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-0"></div>
+                </Button>
+              </Link>
+              <Link href="/register">
+                <Button 
+                  className="relative overflow-hidden bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md hover:shadow-[0_0_25px_rgba(168,85,247,0.5)] transition-all duration-300 hover:scale-105 hover:from-purple-600 hover:to-pink-600 border border-purple-400/30"
+                >
+                  Get Started
+                </Button>
+              </Link>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden relative overflow-hidden p-2 rounded-lg hover:bg-white/10 transition-all duration-300 group"
+            >
+              <Menu className="w-6 h-6 text-slate-800 dark:text-slate-200" />
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-all duration-300 -z-10"></div>
+            </button>
           </div>
-          <div className="flex gap-3">
-            <Link href="/login">
-              <Button variant="ghost" className="text-slate-800 dark:text-slate-200">
-                Login
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button className="bg-gradient-to-r from-sky-500 to-pink-500 text-white shadow-sm hover:opacity-90">
-                Get Started
-              </Button>
-            </Link>
-          </div>
+
+          {/* Mobile Menu */}
+          <motion.div 
+            initial={false}
+            animate={{ height: isMobileMenuOpen ? 'auto' : 0, opacity: isMobileMenuOpen ? 1 : 0 }}
+            transition={{ duration: 0.3 }}
+            className="md:hidden overflow-hidden"
+          >
+            <div className="py-4 space-y-4">
+              <Link href="/blogs" className="block">
+                <Button 
+                  variant="ghost"
+                  className="w-full text-left px-4 py-3 text-slate-800 dark:text-slate-200 hover:text-white transition-all duration-200"
+                >
+                  Blogs
+                </Button>
+              </Link>
+              <Link href="/login" className="block">
+                <Button 
+                  variant="ghost" 
+                  className="w-full relative overflow-hidden text-slate-800 dark:text-slate-200 hover:text-white transition-all duration-300 hover:bg-gradient-to-r from-purple-600 to-pink-600 group"
+                >
+                  <span className="relative z-10">Login</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-0"></div>
+                </Button>
+              </Link>
+              <Link href="/register" className="block">
+                <Button 
+                  className="w-full relative overflow-hidden bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
+                >
+                  Get Started
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
         </div>
       </nav>
 
@@ -137,15 +198,26 @@ export default function Home() {
           className="mt-8 flex justify-center gap-4"
         >
           <Link href="/register">
-            <Button size="lg" className="bg-gradient-to-r from-sky-500 to-pink-500 text-white shadow-lg">
-              Start Debating →
+            <Button 
+              size="lg" 
+              className="relative overflow-hidden bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg hover:shadow-[0_0_30px_rgba(168,85,247,0.6)] transition-all duration-300 hover:scale-105 group border border-purple-400/30"
+            >
+              <span className="relative z-10 flex items-center">
+                Start Debating 
+                <span className="transform translate-x-0 group-hover:translate-x-1 transition-transform duration-200">→</span>
+              </span>
             </Button>
           </Link>
-          <a href="#features">
-            <Button size="lg" variant="ghost" className="border-slate-300 text-slate-800 dark:text-slate-200">
-              Learn More
+          <Link href="/features">
+            <Button 
+              size="lg" 
+              variant="ghost" 
+              className="relative overflow-hidden border border-purple-300/20 text-slate-800 dark:text-slate-200 hover:text-white hover:border-transparent transition-all duration-300 hover:shadow-[0_0_25px_rgba(168,85,247,0.4)] group"
+            >
+              <span className="relative z-10">Learn More</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-0"></div>
             </Button>
-          </a>
+          </Link>
         </motion.div>
       </header>
 
