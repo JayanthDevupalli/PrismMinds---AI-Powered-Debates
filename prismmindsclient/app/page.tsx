@@ -4,18 +4,18 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
-import { 
+import {
   Menu,
   Brain,
   Zap,
   Users,
   FileText,
-  MessageSquare 
+  MessageSquare
 } from "lucide-react"
 
 export default function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  
+
   const features = [
     {
       Icon: Brain,
@@ -45,7 +45,7 @@ export default function Home() {
   ]
 
   return (
-  <main className="min-h-screen relative overflow-x-hidden bg-gradient-to-br from-[#fcfeff] via-[#eef2ff] to-[#fff6fb] text-slate-900 dark:bg-gradient-to-br dark:from-[#071124] dark:via-[#0b1220] dark:to-[#060611]">
+    <main className="min-h-screen relative overflow-x-hidden bg-gradient-to-br from-[#fcfeff] via-[#eef2ff] to-[#fff6fb] text-slate-900 dark:bg-gradient-to-br dark:from-[#071124] dark:via-[#0b1220] dark:to-[#060611]">
       {/* Decorative UI background (radial blobs + subtle grid + grain) */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#fcfeff] via-[#eef2ff] to-[#fff6fb] dark:from-transparent"></div>
@@ -64,12 +64,12 @@ export default function Home() {
         <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M40 0 L0 0 0 40" fill="none" stroke="rgba(15,23,42,0.12)" strokeWidth="1"/>
+              <path d="M40 0 L0 0 0 40" fill="none" stroke="rgba(15,23,42,0.12)" strokeWidth="1" />
             </pattern>
             <filter id="grain">
-              <feTurbulence baseFrequency="0.6" numOctaves="2" stitchTiles="stitch"/>
-              <feColorMatrix type="saturate" values="0"/>
-              <feComponentTransfer><feFuncA type="linear" slope="0.03"/></feComponentTransfer>
+              <feTurbulence baseFrequency="0.6" numOctaves="2" stitchTiles="stitch" />
+              <feColorMatrix type="saturate" values="0" />
+              <feComponentTransfer><feFuncA type="linear" slope="0.03" /></feComponentTransfer>
             </filter>
           </defs>
           <rect width="100%" height="100%" fill="url(#grid)" opacity="0.7" />
@@ -89,15 +89,15 @@ export default function Home() {
                 PrismMindsAI
               </span>
             </div>
-            
+
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-4">
               <Link href="/blogs" className="text-slate-700 dark:text-slate-200 hover:text-blue transition">
                 Blogs
               </Link>
               <Link href="/login">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="relative overflow-hidden text-slate-800 dark:text-slate-200 hover:text-white hover:no-underline transition-all duration-300 border border-purple-300/20 hover:bg-gradient-to-r from-purple-600 to-pink-600 hover:border-transparent hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] group"
                 >
                   <span className="relative z-10">Login</span>
@@ -105,7 +105,7 @@ export default function Home() {
                 </Button>
               </Link>
               <Link href="/register">
-                <Button 
+                <Button
                   className="relative overflow-hidden bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md hover:shadow-[0_0_25px_rgba(168,85,247,0.5)] transition-all duration-300 hover:scale-105 hover:from-purple-600 hover:to-pink-600 border border-purple-400/30"
                 >
                   Get Started
@@ -114,7 +114,7 @@ export default function Home() {
             </div>
 
             {/* Mobile Menu Button */}
-            <button 
+            <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden relative overflow-hidden p-2 rounded-lg hover:bg-white/10 transition-all duration-300 group"
             >
@@ -124,7 +124,7 @@ export default function Home() {
           </div>
 
           {/* Mobile Menu */}
-          <motion.div 
+          <motion.div
             initial={false}
             animate={{ height: isMobileMenuOpen ? 'auto' : 0, opacity: isMobileMenuOpen ? 1 : 0 }}
             transition={{ duration: 0.3 }}
@@ -132,7 +132,7 @@ export default function Home() {
           >
             <div className="py-4 space-y-4">
               <Link href="/blogs" className="block">
-                <Button 
+                <Button
                   variant="ghost"
                   className="w-full text-left px-4 py-3 text-slate-800 dark:text-slate-200 hover:text-white transition-all duration-200"
                 >
@@ -140,8 +140,8 @@ export default function Home() {
                 </Button>
               </Link>
               <Link href="/login" className="block">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="w-full relative overflow-hidden text-slate-800 dark:text-slate-200 hover:text-white transition-all duration-300 hover:bg-gradient-to-r from-purple-600 to-pink-600 group"
                 >
                   <span className="relative z-10">Login</span>
@@ -149,7 +149,7 @@ export default function Home() {
                 </Button>
               </Link>
               <Link href="/register" className="block">
-                <Button 
+                <Button
                   className="w-full relative overflow-hidden bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
                 >
                   Get Started
@@ -198,20 +198,20 @@ export default function Home() {
           className="mt-8 flex justify-center gap-4"
         >
           <Link href="/register">
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="relative overflow-hidden bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg hover:shadow-[0_0_30px_rgba(168,85,247,0.6)] transition-all duration-300 hover:scale-105 group border border-purple-400/30"
             >
               <span className="relative z-10 flex items-center">
-                Start Debating 
+                Start Debating
                 <span className="transform translate-x-0 group-hover:translate-x-1 transition-transform duration-200">→</span>
               </span>
             </Button>
           </Link>
           <Link href="/features">
-            <Button 
-              size="lg" 
-              variant="ghost" 
+            <Button
+              size="lg"
+              variant="ghost"
               className="relative overflow-hidden border border-purple-300/20 text-slate-800 dark:text-slate-200 hover:text-white hover:border-transparent transition-all duration-300 hover:shadow-[0_0_25px_rgba(168,85,247,0.4)] group"
             >
               <span className="relative z-10">Learn More</span>
@@ -220,6 +220,69 @@ export default function Home() {
           </Link>
         </motion.div>
       </header>
+
+      {/* Quote Section */}
+       
+    <section className="pb-20 px-6 sm:px-8 relative">
+      <motion.div
+        className="max-w-3xl mx-auto text-center relative group"
+        initial={{ opacity: 0, y: 30, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{
+          duration: 0.9,
+          ease: [0.16, 1, 0.3, 1],
+        }}
+      >
+        {/* top decorative quote */}
+        <motion.div
+          className="absolute left-1/2 -top-5 transform -translate-x-1/2 text-4xl text-purple-400/30 transition-colors duration-500 group-hover:text-purple-400/50"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.6 }}
+        >
+          "
+        </motion.div>
+
+        <motion.blockquote
+          className={
+            "relative rounded-2xl bg-white/60 dark:bg-slate-900/40 backdrop-blur-md " +
+            "border border-slate-200/30 dark:border-slate-700/40 shadow-[0_8px_30px_rgba(0,0,0,0.04)] " +
+            "p-8 sm:p-10 transition-all duration-500 ease-out " +
+            "hover:scale-[1.02] hover:shadow-[0_8px_40px_rgba(147,51,234,0.15)] hover:border-purple-400/40"
+          }
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.9, ease: "easeOut" }}
+        >
+          <p className="text-lg sm:text-xl md:text-2xl font-serif text-slate-700 dark:text-slate-200 leading-relaxed italic">
+            While chatbots give you answers,&nbsp;
+            <span className="font-semibold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
+              DebateAI.app
+            </span>
+            &nbsp;gives you&nbsp;
+            <span className="italic font-semibold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
+              research-enhanced understanding
+            </span>
+            &nbsp;through intellectual sparring between AI titans backed by academic papers and official data.
+          </p>
+
+          <footer className="mt-6 text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wide transition-colors duration-500 group-hover:text-purple-400/80">
+            - Inspired by the pursuit of critical AI reasoning
+          </footer>
+        </motion.blockquote>
+
+        {/* bottom decorative quote */}
+        <motion.div
+          className="absolute left-1/2 -bottom-5 transform -translate-x-1/2 text-4xl text-purple-400/30 transition-colors duration-500 group-hover:text-purple-400/50"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.6 }}
+        >
+          "
+        </motion.div>
+      </motion.div>
+    </section>
+
 
       {/* Features Section */}
       <section id="features" className="pb-24 px-6 sm:px-8">
