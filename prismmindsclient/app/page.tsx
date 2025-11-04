@@ -222,66 +222,80 @@ export default function Home() {
       </header>
 
       {/* Quote Section */}
-       
-    <section className="pb-20 px-6 sm:px-8 relative">
-      <motion.div
-        className="max-w-3xl mx-auto text-center relative group"
-        initial={{ opacity: 0, y: 30, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{
-          duration: 0.9,
-          ease: [0.16, 1, 0.3, 1],
-        }}
-      >
-        {/* top decorative quote */}
+
+      <section className="pb-20 px-6 sm:px-8 relative font-['Merriweather',serif]">
         <motion.div
-          className="absolute left-1/2 -top-5 transform -translate-x-1/2 text-4xl text-purple-400/30 transition-colors duration-500 group-hover:text-purple-400/50"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.6 }}
+          className="max-w-3xl mx-auto text-center relative group"
+          initial={{ opacity: 0, y: 30, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{
+            duration: 0.9,
+            ease: [0.16, 1, 0.3, 1],
+          }}
         >
-          "
+          {/* top decorative quote */}
+          <motion.div
+            className="absolute left-1/2 -top-5 transform -translate-x-1/2 text-5xl text-purple-300/40 transition-colors duration-500 group-hover:text-purple-400/60 font-light"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.6 }}
+          >
+            "
+          </motion.div>
+
+          <motion.blockquote
+            className={
+              "relative rounded-3xl bg-gradient-to-b from-white/70 to-white/40 dark:from-slate-900/50 dark:to-slate-900/20 " +
+              "backdrop-blur-xl border border-slate-300/30 dark:border-slate-700/40 shadow-[0_10px_40px_rgba(0,0,0,0.05)] " +
+              "p-10 sm:p-12 transition-all duration-500 ease-out " +
+              "hover:scale-[1.015] hover:shadow-[0_10px_50px_rgba(147,51,234,0.15)] hover:border-purple-400/40"
+            }
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.9, ease: "easeOut" }}
+          >
+            <p className="text-xl sm:text-2xl md:text-[1.7rem] leading-relaxed font-light text-slate-700 dark:text-slate-200 italic tracking-wide">
+              See the&nbsp;
+              <span className="font-semibold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+                spectrum of thought
+              </span>
+              , not just the&nbsp;
+              <span className="italic font-semibold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+                single opinion
+              </span>
+              .&nbsp;
+              <span className="font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+                PrismMinds
+              </span>
+              &nbsp;is the AI-driven engine for&nbsp;
+              <span className="italic font-semibold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+                intellectual clarity
+              </span>
+              , building the path to&nbsp;
+              <span className="font-semibold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+                collective understanding
+              </span>
+              , one structured debate at a time.
+            </p>
+
+            <footer className="mt-8 text-sm sm:text-base text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] transition-colors duration-500 group-hover:text-purple-400/80 font-medium">
+              ~ The Philosophy Behind PrismMinds ~
+            </footer>
+          </motion.blockquote>
+
+          {/* bottom decorative quote */}
+          <motion.div
+            className="absolute left-1/2 -bottom-6 transform -translate-x-1/2 text-5xl text-purple-300/40 transition-colors duration-500 group-hover:text-purple-400/60 font-light"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.6 }}
+          >
+            "
+          </motion.div>
         </motion.div>
+      </section>
 
-        <motion.blockquote
-          className={
-            "relative rounded-2xl bg-white/60 dark:bg-slate-900/40 backdrop-blur-md " +
-            "border border-slate-200/30 dark:border-slate-700/40 shadow-[0_8px_30px_rgba(0,0,0,0.04)] " +
-            "p-8 sm:p-10 transition-all duration-500 ease-out " +
-            "hover:scale-[1.02] hover:shadow-[0_8px_40px_rgba(147,51,234,0.15)] hover:border-purple-400/40"
-          }
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.9, ease: "easeOut" }}
-        >
-          <p className="text-lg sm:text-xl md:text-2xl font-serif text-slate-700 dark:text-slate-200 leading-relaxed italic">
-            While chatbots give you answers,&nbsp;
-            <span className="font-semibold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
-              DebateAI.app
-            </span>
-            &nbsp;gives you&nbsp;
-            <span className="italic font-semibold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
-              research-enhanced understanding
-            </span>
-            &nbsp;through intellectual sparring between AI titans backed by academic papers and official data.
-          </p>
 
-          <footer className="mt-6 text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wide transition-colors duration-500 group-hover:text-purple-400/80">
-            - Inspired by the pursuit of critical AI reasoning
-          </footer>
-        </motion.blockquote>
-
-        {/* bottom decorative quote */}
-        <motion.div
-          className="absolute left-1/2 -bottom-5 transform -translate-x-1/2 text-4xl text-purple-400/30 transition-colors duration-500 group-hover:text-purple-400/50"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.6 }}
-        >
-          "
-        </motion.div>
-      </motion.div>
-    </section>
 
 
       {/* Features Section */}

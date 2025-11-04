@@ -1,247 +1,299 @@
 'use client';
 
-import { motion } from "framer-motion"
-import Link from 'next/link';
-import { 
+import { motion } from "framer-motion";
+import Link from "next/link";
+import {
   ArrowLeft,
   Brain,
-  Clock,
-  FileText,
-  Share2,
-  Sparkles,
-  MessageSquareMore,
   Zap,
-  Target,
+  Sparkles,
+  Share2,
   Timer,
-  BookOpen,
   Lightbulb,
-  ScrollText,
-  CheckCircle2
-} from 'lucide-react';
+  MessageSquareMore,
+  Target,
+  BookOpen,
+  Layers,
+  Users,
+  ShieldCheck,
+  ChevronDown
+} from "lucide-react";
+import { useState } from "react";
 
 export default function FeaturesPage() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const toggleAccordion = (index: number) => {
+    setOpenIndex(openIndex === index ? null : index);
+  };
+
   return (
-    <main className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-rose-100/40 via-teal-100/40 to-indigo-100/40 dark:from-slate-900 dark:via-purple-900/40 dark:to-slate-900 text-gray-800 dark:text-gray-200 px-6 sm:px-10 lg:px-20 py-16">
+    <main className="min-h-screen bg-gradient-to-br from-indigo-50 via-teal-50 to-rose-50 dark:from-slate-950 dark:via-purple-900/40 dark:to-slate-900 text-gray-800 dark:text-gray-200 px-6 sm:px-10 lg:px-20 py-16 font-['Inter',sans-serif]">
       {/* Navigation */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-8"
+        transition={{ duration: 0.6 }}
+        className="mb-10"
       >
-        <Link href="/" className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
+        >
           <ArrowLeft size={20} />
           <span>Back to Home</span>
         </Link>
       </motion.div>
 
-      {/* Header */}
+      {/* Hero Section */}
       <motion.header
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="max-w-3xl mx-auto text-center mb-16"
+        className="max-w-4xl mx-auto text-center mb-24"
       >
-        <motion.div 
-          initial={{ scale: 0.5, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="flex justify-center mb-6"
-        >
-          <Brain size={60} className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-teal-500 to-indigo-500" />
-        </motion.div>
+        <div className="flex justify-center mb-6">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="relative"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-rose-500 via-teal-500 to-indigo-500 blur-2xl opacity-30 rounded-full" />
+            <Brain
+              size={70}
+              className="relative text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-teal-500 to-indigo-500"
+            />
+          </motion.div>
+        </div>
         <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-rose-500 via-teal-500 to-indigo-500 bg-clip-text text-transparent mb-4">
-          PrismMinds — Features
+          Discover the Power of PrismMinds
         </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-400">
-          AI-powered debates made simple. Get clear summaries, focused persona arguments, and export-ready transcripts to
-          understand complex topics faster.
+        <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed max-w-2xl mx-auto">
+          The AI-driven platform turning debates into structured clarity. Learn faster, think deeper, and explore multiple perspectives effortlessly.
         </p>
       </motion.header>
 
-      {/* Why Section */}
+      {/* Value Cards */}
       <motion.section
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="max-w-3xl mx-auto mb-20 text-center"
+        className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-24 max-w-6xl mx-auto"
       >
-        <h2 className="text-2xl font-semibold mb-4 text-indigo-600">Why PrismMinds?</h2>
-        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-          PrismMinds turns complicated discussions into short, digestible arguments. Our AI uses plain language and
-          practical examples so you can grasp every viewpoint effortlessly.
-        </p>
+        {[
+          {
+            icon: <Sparkles size={28} className="text-rose-500" />,
+            title: "AI-Enhanced Debates",
+            desc: "Our dual-persona model simulates diverse viewpoints, powered by academic reasoning and logical contrast.",
+          },
+          {
+            icon: <Target size={28} className="text-teal-500" />,
+            title: "Focus & Clarity",
+            desc: "We distill complex arguments into bite-sized summaries and highlight key takeaways automatically.",
+          },
+          {
+            icon: <Layers size={28} className="text-indigo-500" />,
+            title: "Multi-Layer Understanding",
+            desc: "From quick overviews to deep dives — control how deep you want to go in a topic.",
+          },
+        ].map((item, i) => (
+          <motion.div
+            key={i}
+            whileHover={{ y: -8 }}
+            transition={{ type: "spring", stiffness: 150 }}
+            className="p-8 rounded-2xl bg-white/70 dark:bg-gray-800/50 backdrop-blur-md border border-gray-200/30 dark:border-gray-700/30 shadow-lg hover:shadow-xl transition"
+          >
+            <div className="flex justify-center mb-4">{item.icon}</div>
+            <h3 className="text-xl font-semibold mb-2 text-center bg-gradient-to-r from-rose-500 via-teal-500 to-indigo-500 bg-clip-text text-transparent">
+              {item.title}
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300 text-center">{item.desc}</p>
+          </motion.div>
+        ))}
       </motion.section>
 
-      {/* Steps Section */}
+      {/* Workflow Section */}
       <motion.section
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="max-w-5xl mx-auto mb-20"
+        className="max-w-5xl mx-auto mb-24 text-center"
       >
-        <h2 className="text-2xl font-semibold mb-8 text-indigo-600 text-center">
-          How It Works — In 3 Simple Steps
+        <h2 className="text-3xl font-semibold mb-10 text-indigo-600">
+          How It Works — From Idea to Insight
         </h2>
-        <div className="grid sm:grid-cols-3 gap-8">
+        <div className="grid sm:grid-cols-3 gap-10">
           {[
             {
-              title: "1. Choose a Topic & Personas",
-              desc: "Pick your subject and two opposing viewpoints. Our AI prepares each persona with a distinct voice.",
+              icon: <BookOpen size={28} className="text-rose-500" />,
+              title: "1. Choose & Define",
+              desc: "Pick your topic and customize AI personas representing different schools of thought.",
             },
             {
-              title: "2. Set Duration",
-              desc: "Control debate depth with duration — longer debates mean richer arguments without the bloat.",
+              icon: <Timer size={28} className="text-teal-500" />,
+              title: "2. Simulate Debate",
+              desc: "AI personas engage in structured argument, citing data and reasoning patterns.",
             },
             {
-              title: "3. Read or Export",
-              desc: "View clear transcripts, moderator summaries, and export PDFs for easy sharing.",
+              icon: <Share2 size={28} className="text-indigo-500" />,
+              title: "3. Summarize & Export",
+              desc: "Generate clean summaries or export full transcripts as polished PDFs.",
             },
-          ].map((step, i) => (
+          ].map((s, i) => (
             <motion.div
               key={i}
               whileHover={{ scale: 1.05 }}
-              className="p-6 rounded-2xl shadow-lg bg-white/70 dark:bg-gray-800/50 backdrop-blur-md border border-gray-200 dark:border-gray-700 hover:shadow-indigo-300/20 transition"
+              className="p-6 rounded-xl bg-gradient-to-br from-white/80 to-gray-50/40 dark:from-slate-800/50 dark:to-slate-900/40 border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-all"
             >
-              <h3 className="font-semibold text-lg text-indigo-700 dark:text-indigo-400 mb-2">{step.title}</h3>
-              <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">{step.desc}</p>
+              <div className="flex justify-center mb-3">{s.icon}</div>
+              <h3 className="text-lg font-semibold text-indigo-600 mb-2">{s.title}</h3>
+              <p className="text-gray-600 dark:text-gray-300 text-sm">{s.desc}</p>
             </motion.div>
           ))}
         </div>
       </motion.section>
 
-      {/* Key Features */}
+      {/* Advanced Features */}
       <motion.section
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="max-w-6xl mx-auto mb-20"
+        className="max-w-6xl mx-auto mb-24"
       >
-        <h2 className="text-2xl font-semibold text-center mb-10 text-indigo-600">Key Features</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <h2 className="text-3xl font-semibold text-center mb-12 text-indigo-600">
+          Advanced Capabilities
+        </h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
           {[
             {
-              icon: <MessageSquareMore size={24} className="text-rose-500" />,
-              title: "Plain-language Output",
-              desc: "AI writes in short, simple sentences and explains jargon clearly.",
-              gradient: "from-rose-500/10 to-transparent"
+              icon: <Users size={26} className="text-rose-500" />,
+              title: "Persona Diversity",
+              desc: "Choose debate tones: academic, journalistic, political, or philosophical for richer context.",
             },
             {
-              icon: <Timer size={24} className="text-emerald-500" />,
-              title: "Controlled Length",
-              desc: "Smart length balancing for focused, non-repetitive debates.",
-              gradient: "from-emerald-500/10 to-transparent"
+              icon: <Lightbulb size={26} className="text-teal-500" />,
+              title: "Smart Summaries",
+              desc: "AI moderator wraps every session with crisp, unbiased conclusions.",
             },
             {
-              icon: <Lightbulb size={24} className="text-teal-500" />,
-              title: "Moderator Summary",
-              desc: "2–3 sentence takeaways highlighting main points and conclusions.",
-              gradient: "from-teal-500/10 to-transparent"
-            },
-            {
-              icon: <Share2 size={24} className="text-indigo-500" />,
-              title: "Export & Share",
-              desc: "Download clean, formatted PDFs for study or presentation.",
-              gradient: "from-indigo-500/10 to-transparent"
+              icon: <ShieldCheck size={26} className="text-indigo-500" />,
+              title: "Ethical Reasoning",
+              desc: "Each debate respects fairness principles and identifies potential biases.",
             },
           ].map((f, i) => (
-            <motion.article
+            <motion.div
               key={i}
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 200 }}
-              className={`p-6 rounded-2xl border border-gray-200/30 dark:border-gray-700/30 shadow-md bg-gradient-to-br ${f.gradient} backdrop-blur-sm hover:shadow-lg transition duration-300`}
+              className="p-8 rounded-2xl border border-gray-200/30 dark:border-gray-700/30 bg-white/70 dark:bg-gray-800/50 shadow-lg hover:shadow-xl backdrop-blur-md transition"
             >
               <div className="flex items-center gap-3 mb-3">
                 {f.icon}
-                <h3 className="text-lg font-semibold bg-gradient-to-r from-rose-500 via-teal-500 to-indigo-500 bg-clip-text text-transparent">{f.title}</h3>
+                <h3 className="text-lg font-semibold bg-gradient-to-r from-rose-500 via-teal-500 to-indigo-500 bg-clip-text text-transparent">
+                  {f.title}
+                </h3>
               </div>
               <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">{f.desc}</p>
-            </motion.article>
+            </motion.div>
           ))}
         </div>
       </motion.section>
 
-      {/* Examples */}
+      {/* FAQ Accordion */}
       <motion.section
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="max-w-4xl mx-auto mb-20"
+        className="max-w-4xl mx-auto mb-24"
       >
-        <h2 className="text-2xl font-semibold mb-6 text-indigo-600 text-center">Examples & Tips</h2>
-        <ul className="space-y-4 text-gray-700 dark:text-gray-300">
-          <li>
-            <strong>Make prompts specific:</strong> Instead of “Climate change”, try “Should cities ban cars downtown to
-            reduce pollution?” — you’ll get more actionable debates.
-          </li>
-          <li>
-            <strong>Short durations:</strong> Perfect for class warm-ups or quick overviews.
-          </li>
-          <li>
-            <strong>Longer durations:</strong> Use when exploring trade-offs deeply — summaries keep things concise.
-          </li>
-        </ul>
-      </motion.section>
-
-      {/* FAQ Section */}
-      <motion.section
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-        className="max-w-5xl mx-auto mb-20"
-      >
-        <h2 className="text-2xl font-semibold text-indigo-600 text-center mb-10">Frequently Asked Questions</h2>
-        <dl className="space-y-8">
+        <h2 className="text-3xl font-semibold text-center mb-10 text-indigo-600">
+          Frequently Asked Questions
+        </h2>
+        <div className="space-y-6">
           {[
             {
-              q: "Will the AI always be accurate?",
-              a: "We aim for balanced, reasonable arguments — but debates are conversation starters, not final sources.",
+              q: "Is the AI always accurate?",
+              a: "Our models simulate reasoning across multiple verified data sources. While precise, debates are designed to encourage critical thinking, not replace human judgment.",
             },
             {
-              q: "How do you keep language simple?",
-              a: "We instruct the AI to use short sentences and explain any technical term immediately for clarity.",
+              q: "Can I customize the personas?",
+              a: "Yes! You can adjust persona tones (logical, emotional, or neutral) and even upload custom context to align with your goals.",
             },
             {
-              q: "What if the transcript is too long?",
-              a: "We cap exchanges and sentence length. Reduce duration or enable compact summaries (coming soon).",
+              q: "How does summarization work?",
+              a: "An AI moderator listens to both sides and creates a concise synthesis — separating facts from rhetoric with academic precision.",
             },
-          ].map((item, i) => (
-            <motion.div key={i} whileHover={{ scale: 1.02 }} className="bg-white/60 dark:bg-gray-800/60 rounded-xl p-6 shadow-sm backdrop-blur border border-gray-200 dark:border-gray-700">
-              <dt className="font-semibold text-indigo-700 dark:text-indigo-400">{item.q}</dt>
-              <dd className="text-gray-600 dark:text-gray-300 mt-2">{item.a}</dd>
+          ].map((faq, i) => (
+            <motion.div
+              key={i}
+              layout
+              onClick={() => toggleAccordion(i)}
+              className="bg-white/70 dark:bg-gray-800/60 rounded-xl p-6 shadow-md backdrop-blur border border-gray-200 dark:border-gray-700 cursor-pointer transition hover:shadow-lg"
+            >
+              <div className="flex justify-between items-center">
+                <h3 className="font-semibold text-indigo-700 dark:text-indigo-400">{faq.q}</h3>
+                <ChevronDown
+                  size={20}
+                  className={`transition-transform duration-300 ${openIndex === i ? "rotate-180 text-indigo-500" : "text-gray-400"
+                    }`}
+                />
+              </div>
+              <motion.div
+                initial={false}
+                animate={{ height: openIndex === i ? "auto" : 0, opacity: openIndex === i ? 1 : 0 }}
+                transition={{ duration: 0.4 }}
+                className="overflow-hidden text-gray-600 dark:text-gray-300 mt-3"
+              >
+                <p>{faq.a}</p>
+              </motion.div>
             </motion.div>
           ))}
-        </dl>
+        </div>
       </motion.section>
 
-      {/* Footer */}
+      {/* Call to Action */}
       <motion.footer
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="text-center"
+        className="text-center max-w-3xl mx-auto"
       >
-        <div className="max-w-3xl mx-auto">
-          <Zap size={32} className="inline-block text-yellow-500 mb-4" />
-          <p className="text-xl mb-6 bg-gradient-to-r from-rose-500 via-teal-500 to-indigo-500 bg-clip-text text-transparent">
-            Ready to experience AI-powered debates?
-          </p>
-          <Link href="/dashboard">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-3 rounded-lg font-medium bg-gradient-to-r from-rose-500 via-teal-500 to-indigo-500 text-white shadow-lg hover:shadow-xl transition-shadow"
-            >
-              Try PrismMinds Now
-            </motion.button>
-          </Link>
-        </div>
+        <Zap size={36} className="inline-block text-yellow-500 mb-4" />
+        <p className="text-xl mb-6 bg-gradient-to-r from-rose-500 via-teal-500 to-indigo-500 bg-clip-text text-transparent">
+          Ready to experience the next era of structured AI debates?
+        </p>
+        <Link href="/login">
+          <motion.button
+            animate={{
+              scale: [1, 1.07, 1], // expands & shrinks smoothly
+              boxShadow: [
+                "0 0 0px rgba(0,0,0,0)",
+                "0 0 25px rgba(147, 51, 234, 0.5)", // subtle glow
+                "0 0 0px rgba(0,0,0,0)",
+              ],
+            }}
+            transition={{
+              duration: 2.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            whileHover={{
+              scale: 1.12,
+              boxShadow: "0 0 30px rgba(147, 51, 234, 0.8)",
+            }}
+            whileTap={{ scale: 0.95 }}
+            className="px-8 py-3 rounded-lg font-semibold bg-gradient-to-r from-rose-500 via-teal-500 to-indigo-500 text-white shadow-lg hover:shadow-2xl transition-all"
+          >
+            Try PrismMinds Now
+          </motion.button>
+        </Link>
+
       </motion.footer>
     </main>
-  )
+  );
 }
