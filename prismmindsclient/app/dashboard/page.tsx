@@ -111,11 +111,11 @@ export default function DashboardPage() {
 
     for (let i = 0; i < fullTranscript.length; i++) {
       const msg = fullTranscript[i]
-      
+
       // Show typing indicator
       setTyping({ speaker: msg.speaker })
       setStatusMessage(`${msg.speaker} is composing...`)
-      
+
       // Small delay before typing starts
       await sleep(300)
 
@@ -133,7 +133,7 @@ export default function DashboardPage() {
       let currentText = ''
       for (let charIndex = 0; charIndex < msg.message.length; charIndex++) {
         currentText += msg.message[charIndex]
-        
+
         setSelectedDebate((prev) => {
           if (!prev?.transcript) return prev
           const nextTranscript = [...prev.transcript]
@@ -171,7 +171,7 @@ export default function DashboardPage() {
       setTyping(null)
       setStatusMessage("Generating summary...")
       await sleep(1000) // Pause for anticipation
-      
+
       setSelectedDebate((prev) => {
         if (!prev) return prev
         // Now reveal the summary that was previously hidden
@@ -210,13 +210,16 @@ export default function DashboardPage() {
     setCreating(true)
     setGenerating(true)
     setStatusMessage("Preparing debate...")
+    // const [mm, ss] = form.duration.split(":").map(Number)
+    // const totalMinutes = mm + ss / 60
 
     try {
       const debateData = {
         topic: form.topic,
         personaA: form.personaA,
         personaB: form.personaB,
-        duration: Number.parseInt(form.duration),
+        // duration: totalMinutes,
+        duration: form.duration,
       }
 
       setStatusMessage("Generating debate with the AI — this may take a few seconds...")
@@ -499,13 +502,24 @@ export default function DashboardPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    type="number"
-                    placeholder="Duration (minutes)"
+                    type="text"
+                    placeholder="Duration (MM:SS)"
+                    pattern="^([0-5]?[0-9]):([0-5][0-9])$"
                     value={form.duration}
-                    onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      // Allow typing partial valid patterns like "0" or "01:"
+                      if (/^(\d{0,2}:?\d{0,2})$/.test(value)) {
+                        setForm({ ...form, duration: value })
+                      }
+                    }}
                     className="w-full px-4 sm:px-5 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl border border-border/50 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm placeholder:text-muted-foreground"
                     required
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Example: <span className="font-semibold">01:00</span> = 1 minute, <span className="font-semibold">02:30</span> = 2.5 minutes
+                  </p>
+
 
                   <motion.button
                     initial={{ opacity: 0, y: 10 }}
@@ -775,11 +789,10 @@ export default function DashboardPage() {
                               className={`flex ${typing.speaker === selectedDebate.personaA ? "justify-start" : "justify-end"}`}
                             >
                               <div
-                                className={`max-w-sm p-4 rounded-2xl ${
-                                  typing.speaker === selectedDebate.personaA
+                                className={`max-w-sm p-4 rounded-2xl ${typing.speaker === selectedDebate.personaA
                                     ? "bg-white dark:bg-slate-800 text-foreground"
                                     : "bg-gradient-to-br from-primary to-accent text-white"
-                                } shadow-lg`}
+                                  } shadow-lg`}
                               >
                                 <div className="flex items-center gap-2">
                                   <span className="text-xs font-medium">{typing.speaker}</span>
@@ -808,21 +821,19 @@ export default function DashboardPage() {
                             className={`flex ${message.speaker === selectedDebate.personaA ? "justify-start" : "justify-end"}`}
                           >
                             <div
-                              className={`max-w-xs sm:max-w-sm p-3 sm:p-4 rounded-lg sm:rounded-2xl ${
-                                message.speaker === selectedDebate.personaA
+                              className={`max-w-xs sm:max-w-sm p-3 sm:p-4 rounded-lg sm:rounded-2xl ${message.speaker === selectedDebate.personaA
                                   ? "bg-white dark:bg-slate-800 text-foreground rounded-tl-none"
                                   : "bg-gradient-to-br from-primary to-accent text-white rounded-tr-none"
-                              } shadow-lg`}
+                                } shadow-lg`}
                             >
                               <div className="flex items-center justify-between mb-1 sm:mb-2 pb-1 sm:pb-2 border-b border-current/10">
                                 <p className="text-xs font-bold">{message.speaker}</p>
                                 {message.timestamp && (
                                   <span
-                                    className={`text-xs ml-2 ${
-                                      message.speaker === selectedDebate.personaA
+                                    className={`text-xs ml-2 ${message.speaker === selectedDebate.personaA
                                         ? "text-muted-foreground"
                                         : "text-white/60"
-                                    }`}
+                                      }`}
                                   >
                                     {message.timestamp}
                                   </span>
