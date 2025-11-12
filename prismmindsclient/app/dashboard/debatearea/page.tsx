@@ -423,6 +423,7 @@ export default function DebateArea() {
 
     let mounted = true
     async function loadDebate() {
+      if(!debateId) return;
       try {
         const data = await fetchDebateById(debateId)
         if (!mounted) return
