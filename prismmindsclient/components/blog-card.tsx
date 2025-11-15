@@ -8,6 +8,7 @@ interface Blog {
   title: string
   description: string
   image: string
+  imageAlt?: string
   tag: string
   tagColor: string
   date: string
@@ -25,24 +26,23 @@ interface BlogCardProps {
 export default function BlogCard({ blog, isHovered, index }: BlogCardProps) {
   return (
     <div
-      className="h-full rounded-lg overflow-hidden bg-card border border-border transition-all duration-300 hover:border-accent/50"
+      className="h-full blog-card"
       style={{
         animation: `slideUp 0.6s ease-out ${index * 0.1}s both`,
       }}
     >
       {/* Image Container with Overlay */}
-      <div className="relative w-full h-48 sm:h-56 overflow-hidden bg-muted">
-        <img
+      <div className="blog-image-wrap w-full h-48 sm:h-56">
+          <img
           src={blog.image || "/placeholder.svg"}
-          alt={blog.title}
+          alt={blog.imageAlt || blog.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="blog-image-overlay" />
 
         {/* Tag Badge */}
         <div className="absolute top-4 left-4">
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${blog.tagColor}`}>
+          <span className={`blog-badge ${blog.tagColor}`}>
             {blog.tag}
           </span>
         </div>
@@ -51,7 +51,7 @@ export default function BlogCard({ blog, isHovered, index }: BlogCardProps) {
       {/* Content Container */}
       <div className="p-5 sm:p-6 flex flex-col h-full">
         {/* Title */}
-        <h3 className="text-xl font-bold mb-3 line-clamp-2 group-hover:text-accent transition-colors duration-300">
+        <h3 className="text-xl blog-title-serif mb-3 line-clamp-2 group-hover:text-primary transition-colors duration-300">
           {blog.title}
         </h3>
 

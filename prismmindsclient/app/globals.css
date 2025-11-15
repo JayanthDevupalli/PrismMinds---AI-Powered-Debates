@@ -83,75 +83,73 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated color scheme for modern, trendy aesthetic with vibrant tech colors */
-  --background: oklch(0.98 0.005 200);
-  --foreground: oklch(0.12 0.02 200);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.12 0.02 200);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.12 0.02 200);
-  --primary: oklch(0.45 0.3 280);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.55 0.25 40);
-  --secondary-foreground: oklch(0.99 0 0);
-  --muted: oklch(0.93 0.02 200);
-  --muted-foreground: oklch(0.5 0.05 200);
-  --accent: oklch(0.55 0.28 40);
-  --accent-foreground: oklch(0.99 0 0);
-  --destructive: oklch(0.5 0.3 25);
-  --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.92 0.02 200);
-  --input: oklch(0.95 0.01 200);
-  --ring: oklch(0.45 0.3 280);
-  --chart-1: oklch(0.45 0.3 280);
-  --chart-2: oklch(0.55 0.28 40);
-  --chart-3: oklch(0.6 0.25 180);
-  --chart-4: oklch(0.5 0.28 300);
-  --chart-5: oklch(0.65 0.22 50);
+  /* CLASSIC-MODERN palette — calm, readable, moderate contrast */
+  --background: #FBF7F2; /* warm off-white */
+  --foreground: #1F2933; /* charcoal / near-black for text */
+  --card: #FFFFFF; /* card background */
+  --card-foreground: #1F2933;
+  --popover: #FFFFFF;
+  --popover-foreground: #1F2933;
+  --primary: #1F4E79; /* deep navy */
+  --primary-foreground: #FFFFFF;
+  --secondary: #E8DFD3; /* gentle warm secondary */
+  --secondary-foreground: #1F2933;
+  --muted: #F3F1EE; /* subtle muted surface */
+  --muted-foreground: #6B7280; /* muted text */
+  --accent: #A67C52; /* warm tan accent */
+  --accent-foreground: #FFFFFF;
+  --destructive: #C96B4B;
+  --border: #E6E2DB; /* card border */
+  --input: #F9F6F1;
+  --ring: #B7C7D9; /* faint ring */
+  --chart-1: #1F4E79;
+  --chart-2: #A67C52;
+  --chart-3: #6CA6AB;
+  --chart-4: #394D5B;
+  --chart-5: #C3A16B;
   --radius: 0.75rem;
-  --sidebar: oklch(0.98 0.005 200);
-  --sidebar-foreground: oklch(0.12 0.02 200);
-  --sidebar-primary: oklch(0.45 0.3 280);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.55 0.28 40);
-  --sidebar-accent-foreground: oklch(0.99 0 0);
-  --sidebar-border: oklch(0.92 0.02 200);
-  --sidebar-ring: oklch(0.45 0.3 280);
+  --sidebar: #FBF7F2;
+  --sidebar-foreground: #1F2933;
+  --sidebar-primary: #1F4E79;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #A67C52;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #E6E2DB;
+  --sidebar-ring: #B7C7D9;
 }
 
 .dark {
-  --background: oklch(0.08 0.02 200);
-  --foreground: oklch(0.95 0.02 200);
-  --card: oklch(0.12 0.02 200);
-  --card-foreground: oklch(0.95 0.02 200);
-  --popover: oklch(0.12 0.02 200);
-  --popover-foreground: oklch(0.95 0.02 200);
-  --primary: oklch(0.6 0.28 280);
-  --primary-foreground: oklch(0.08 0.02 200);
-  --secondary: oklch(0.65 0.25 40);
-  --secondary-foreground: oklch(0.08 0.02 200);
-  --muted: oklch(0.25 0.02 200);
-  --muted-foreground: oklch(0.65 0.05 200);
-  --accent: oklch(0.65 0.28 40);
-  --accent-foreground: oklch(0.08 0.02 200);
-  --destructive: oklch(0.55 0.28 25);
-  --destructive-foreground: oklch(0.95 0.02 200);
-  --border: oklch(0.2 0.02 200);
-  --input: oklch(0.15 0.02 200);
-  --ring: oklch(0.6 0.28 280);
-  --chart-1: oklch(0.6 0.28 280);
-  --chart-2: oklch(0.65 0.25 40);
-  --chart-3: oklch(0.7 0.22 180);
-  --chart-4: oklch(0.6 0.25 300);
-  --chart-5: oklch(0.75 0.2 50);
-  --sidebar: oklch(0.1 0.02 200);
-  --sidebar-foreground: oklch(0.95 0.02 200);
-  --sidebar-primary: oklch(0.6 0.28 280);
-  --sidebar-primary-foreground: oklch(0.08 0.02 200);
-  --sidebar-accent: oklch(0.65 0.28 40);
-  --sidebar-accent-foreground: oklch(0.08 0.02 200);
-  --sidebar-border: oklch(0.2 0.02 200);
-  --sidebar-ring: oklch(0.6 0.28 280);
+  --background: #0b1220; /* near-black */
+  --foreground: #E8EEF3; /* light text */
+  --card: #0f1722; /* card dark */
+  --card-foreground: #E8EEF3;
+  --popover: #0f1722;
+  --popover-foreground: #E8EEF3;
+  --primary: #3B6A92; /* darker navy for dark mode */
+  --primary-foreground: #F5F9FC;
+  --secondary: #2A2220;
+  --secondary-foreground: #E8EEF3;
+  --muted: #0E1B26;
+  --muted-foreground: #98A4B3;
+  --accent: #A67C52;
+  --accent-foreground: #F5F9FC;
+  --destructive: #C96B4B;
+  --border: #17202A;
+  --input: #0B141B;
+  --ring: #3B6A92;
+  --chart-1: #3B6A92;
+  --chart-2: #A67C52;
+  --chart-3: #6CA6AB;
+  --chart-4: #394D5B;
+  --chart-5: #C3A16B;
+  --sidebar: #0f1722;
+  --sidebar-foreground: #E8EEF3;
+  --sidebar-primary: #3B6A92;
+  --sidebar-primary-foreground: #F5F9FC;
+  --sidebar-accent: #A67C52;
+  --sidebar-accent-foreground: #F5F9FC;
+  --sidebar-border: #17202A;
+  --sidebar-ring: #3B6A92;
 }
 
 @theme inline {
@@ -256,6 +254,58 @@
 
   .animate-fade-scale {
     animation: fadeInScale 0.3s ease-out;
+  }
+}
+
+/* Blog-specific component classes for editorial cards */
+@layer components {
+  .blog-card {
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+    background: var(--color-card);
+    transition: box-shadow 220ms ease, transform 220ms ease, border-color 220ms ease;
+    overflow: hidden;
+  }
+
+  .blog-card:hover {
+    box-shadow: 0 8px 24px rgba(31, 41, 51, 0.08);
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--color-primary) 12%, var(--color-border));
+  }
+
+  .blog-image-wrap {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .blog-image-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0));
+    pointer-events: none;
+  }
+
+  .blog-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.7rem;
+    background: color-mix(in srgb, var(--color-secondary) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-secondary) 20%, var(--color-border));
+    color: var(--color-secondary-foreground);
+  }
+
+  .blog-title-serif {
+    font-family: var(--font-serif);
+    font-weight: 600;
+  }
+
+  .blog-meta {
+    color: var(--color-muted-foreground);
+    font-size: 0.85rem;
   }
 }
 m

@@ -3,6 +3,7 @@ export interface Blog {
   title: string
   description: string
   image: string
+  imageAlt?: string
   tag: string
   tagColor: string
   date: string
@@ -19,15 +20,16 @@ export const blogs: Blog[] = [
     description:
       "Exploring the critical ethical considerations in AI development, including bias, transparency, and accountability in decision-making systems.",
     image: "/ai-ethics-debate-digital-illustration.jpg",
+    imageAlt: "Illustration: AI ethics debate concept",
     tag: "Ethics",
-    tagColor: "bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-300",
+    tagColor: "bg-secondary/10 text-secondary border border-secondary/20",
     date: "Nov 8, 2024",
     readTime: "12 min read",
     author: "Dr. Sarah Chen",
     category: "Ethics",
     content: `# The Ethics of AI: Building a Responsible Future
 
-## Introduction
+### Introduction
 As artificial intelligence becomes increasingly integrated into every aspect of our society, the ethical implications of these systems have never been more important. From healthcare decisions to criminal justice, AI systems are making choices that profoundly affect human lives.
 
 ## The Core Challenges
@@ -57,8 +59,9 @@ Building AI systems responsibly is not optional—it's essential for creating te
     description:
       "Investigating the scaling laws of LLMs, current bottlenecks, and whether we can continue improving performance through sheer scale.",
     image: "/large-language-models-neural-network-abstract.jpg",
+    imageAlt: "Abstract neural network layers illustration",
     tag: "Research",
-    tagColor: "bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-300",
+    tagColor: "bg-primary/10 text-primary border border-primary/20",
     date: "Nov 5, 2024",
     readTime: "15 min read",
     author: "Prof. James Mitchell",
@@ -94,8 +97,9 @@ Rather than infinite scaling, the future likely involves smarter architectures, 
     description:
       "Analyzing the real impact of AI on employment, economic transition strategies, and how societies can prepare workers for the future.",
     image: "/workplace-automation-ai-robots-collaboration.jpg",
+    imageAlt: "Robots and humans collaborating in a workplace",
     tag: "Economy",
-    tagColor: "bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-300",
+    tagColor: "bg-accent/10 text-accent border border-accent/20",
     date: "Nov 2, 2024",
     readTime: "13 min read",
     author: "Elena Rodriguez",
@@ -135,8 +139,9 @@ With proper preparation and policy, AI can be a tool for prosperity rather than 
     description:
       "Examining how AI models that process text, images, audio, and video together are changing what's possible with artificial intelligence.",
     image: "/multimodal-ai-vision-language-audio-processing.jpg",
+    imageAlt: "Illustration of multimodal AI processing image and text",
     tag: "Technology",
-    tagColor: "bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-300",
+    tagColor: "bg-primary/10 text-primary border border-primary/20",
     date: "Oct 30, 2024",
     readTime: "14 min read",
     author: "Marcus Lee",
@@ -184,8 +189,9 @@ Multimodal models will likely become the standard, enabling AI systems to unders
     description:
       "Debating whether AI-generated art, music, and literature constitute genuine creativity or mere pattern recombination.",
     image: "/ai-generated-art-digital-creativity-imagination.jpg",
+    imageAlt: "AI-generated abstract art representation",
     tag: "Philosophy",
-    tagColor: "bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-300",
+    tagColor: "bg-secondary/10 text-secondary border border-secondary/20",
     date: "Oct 27, 2024",
     readTime: "11 min read",
     author: "Dr. Alexandra Patel",
@@ -227,8 +233,9 @@ Rather than asking if AI can be creative, perhaps we should ask: what new forms 
     description:
       "Understanding how researchers are working to ensure AI systems remain aligned with human values and stay within safe boundaries.",
     image: "/ai-safety-guardrails-alignment-control-mechanisms.jpg",
+    imageAlt: "Guardrail metaphor for AI alignment and safety",
     tag: "Safety",
-    tagColor: "bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-300",
+    tagColor: "bg-accent/10 text-accent border border-accent/20",
     date: "Oct 24, 2024",
     readTime: "16 min read",
     author: "Dr. Robert Chen",
