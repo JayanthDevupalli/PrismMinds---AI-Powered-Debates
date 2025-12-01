@@ -28,9 +28,66 @@ type Debate = {
 }
 
 /**
- * Lightweight expressive TTS helper.
- * Uses browser speechSynthesis where available.
+ * Enhanced TTS helper with emotion detection and humanized voice characteristics.
+ * Detects sentiment/tone in text and adjusts voice parameters accordingly.
  */
+
+type EmotionTone = "angry" | "calm" | "cool" | "excited" | "thoughtful" | "sarcastic" | "neutral"
+
+function detectEmotion(text: string): EmotionTone {
+  const lower = text.toLowerCase()
+  
+  // Angry indicators
+  if (/absolutely|ridiculous|completely wrong|nonsense|absurd|outrageous|unacceptable/i.test(lower)) {
+    return "angry"
+  }
+  
+  // Excited indicators
+  if (/incredible|amazing|brilliant|fantastic|wonderful|excellent|wonderful|thrilled/i.test(lower)) {
+    return "excited"
+  }
+  
+  // Cool/confident indicators
+  if (/clearly|obviously|undoubtedly|definitely|certainly|without question/i.test(lower)) {
+    return "cool"
+  }
+  
+  // Calm/measured indicators
+  if (/perhaps|maybe|consider|however|nonetheless|alternatively|perspective/i.test(lower)) {
+    return "thoughtful"
+  }
+  
+  // Sarcastic indicators
+  if (/right|sure|yeah|of course|naturally|supposedly/i.test(lower) && text.includes("?")) {
+    return "sarcastic"
+  }
+  
+  return "neutral"
+}
+
+interface VoiceConfig {
+  rate: number
+  pitch: number
+  volume: number
+  pauseMultiplier: number
+}
+
+function getEmotionVoiceConfig(emotion: EmotionTone): VoiceConfig {
+  switch (emotion) {
+    case "angry":
+      return { rate: 1.3, pitch: 1.4, volume: 1.0, pauseMultiplier: 0.7 }
+    case "excited":
+      return { rate: 1.25, pitch: 1.35, volume: 1.0, pauseMultiplier: 0.8 }
+    case "cool":
+      return { rate: 0.95, pitch: 0.95, volume: 1.0, pauseMultiplier: 1.2 }
+    case "thoughtful":
+      return { rate: 0.9, pitch: 1.0, volume: 0.95, pauseMultiplier: 1.4 }
+    case "sarcastic":
+      return { rate: 1.05, pitch: 1.15, volume: 1.0, pauseMultiplier: 1.1 }
+    default:
+      return { rate: 1.0, pitch: 1.0, volume: 1.0, pauseMultiplier: 1.0 }
+  }
+}
 
 async function speakTextSync(
   text: string,
@@ -54,26 +111,43 @@ async function speakTextSync(
       }
     }
 
+    // Detect emotion from text
+    const emotion = detectEmotion(text)
+    const emotionConfig = getEmotionVoiceConfig(emotion)
+
     const lower = speaker.toLowerCase()
-    if (lower.includes("pros") || lower.includes("support")) {
-      utter.voice =
-        voices.find((v) => /male|daniel|mark|david/i.test(v.name)) || voices[0]
-      utter.rate = 1.15
-      utter.pitch = 1.0
-    } else if (lower.includes("cons") || lower.includes("against")) {
-      utter.voice =
-        voices.find((v) => /female|amy|victoria|zira|susan/i.test(v.name)) ||
-        voices.find((v) => /english/i.test(v.lang)) ||
-        voices[1] ||
-        voices[0]
-      utter.rate = 1.05
-      utter.pitch = 1.25
+    
+    // Persona A: Male voice (Pro Advocate) - confident, balanced
+    if (lower.includes("pros") || lower.includes("support") || lower.includes("advocate")) {
+      const maleVoice = voices.find((v) => /male|daniel|mark|david|google uk english male/i.test(v.name)) || 
+                        voices.find((v) => v.name.includes("Google")) ||
+                        voices[0]
+      utter.voice = maleVoice
+      utter.rate = emotionConfig.rate * 1.1
+      utter.pitch = emotionConfig.pitch
+    } 
+    // Persona B: Female voice (Skeptic) - analytical, questioning
+    else if (lower.includes("cons") || lower.includes("against") || lower.includes("skeptic") || lower.includes("critic")) {
+      const femaleVoice = voices.find((v) => /female|amy|victoria|zira|susan|google uk english female/i.test(v.name)) ||
+                          voices.find((v) => /english/i.test(v.lang) && v.name.includes("Female")) ||
+                          voices.find((v) => v.name.includes("Google")) ||
+                          voices[1] || voices[0]
+      utter.voice = femaleVoice
+      utter.rate = emotionConfig.rate * 1.0
+      utter.pitch = emotionConfig.pitch * 1.15
     }
 
-    if (text.includes("?")) utter.pitch += 0.1
-    if (text.includes("!")) utter.rate += 0.1
+    // Apply emotion-based volume
+    utter.volume = emotionConfig.volume
 
-    utter.text = text.replace(/([.?!])\s/g, "$1 ... ")
+    // Enhanced pronunciation: add natural pauses for readability
+    const enhancedText = text
+      .replace(/([.!?])\s+/g, "$1 ... ") // Pause at sentence ends
+      .replace(/,\s+/g, ", ") // Natural pause at commas
+      .replace(/;\s+/g, "; ") // Emphasis at semicolons
+      .replace(/—/g, ", ") // Convert dashes to pauses
+
+    utter.text = enhancedText
 
     utter.onboundary = (e) => {
       if (e.name === "word" && onProgress) onProgress(e.charIndex)
@@ -88,7 +162,7 @@ async function speakTextSync(
 /* ---------------------------
    DebateVisualizer (Aurora Professional)
    --------------------------- */
-function DebateVisualizer({ debate }: { debate: Debate }) {
+function DebateVisualizer({ debate, onPlayingChange }: { debate: Debate; onPlayingChange?: (isPlaying: boolean) => void }) {
   const [currentIndex, setCurrentIndex] = useState<number>(0)
   const [displayText, setDisplayText] = useState<string>("")
   const [speaking, setSpeaking] = useState<string | null>(null)
@@ -100,6 +174,11 @@ function DebateVisualizer({ debate }: { debate: Debate }) {
 
   const synthRef = useRef<typeof window.speechSynthesis | null>(typeof window !== "undefined" ? window.speechSynthesis : null)
   const queue = debate.transcript || []
+
+  // Notify parent when playing state changes
+  useEffect(() => {
+    onPlayingChange?.(isPlaying && started)
+  }, [isPlaying, started, onPlayingChange])
 
   const phaseColors: Record<string, string> = {
     opening: "from-sky-50 via-sky-100 to-white",
@@ -156,6 +235,42 @@ function DebateVisualizer({ debate }: { debate: Debate }) {
 
   const currentMsg = queue[currentIndex]
   const bgPhase = currentMsg?.phase ? phaseColors[currentMsg.phase] : phaseColors.opening
+
+  // Detect emotion from current message
+  const currentEmotion = currentMsg ? detectEmotion(currentMsg.message) : "neutral"
+  const personaAEmotion = personaAIsSpeaking ? currentEmotion : "neutral"
+  const personaBEmotion = personaBIsSpeaking ? currentEmotion : "neutral"
+
+  // Map emotions to visual feedback
+  const getEmotionStyles = (emotion: EmotionTone, isActive: boolean) => {
+    if (!isActive) return { shadow: "shadow-md", glow: "" }
+    
+    switch (emotion) {
+      case "angry":
+        return { shadow: "shadow-lg", glow: "ring-2 ring-red-400" }
+      case "excited":
+        return { shadow: "shadow-lg", glow: "ring-2 ring-yellow-300" }
+      case "cool":
+        return { shadow: "shadow-lg", glow: "ring-2 ring-blue-400" }
+      case "thoughtful":
+        return { shadow: "shadow-md", glow: "ring-1 ring-purple-300" }
+      case "sarcastic":
+        return { shadow: "shadow-md", glow: "ring-2 ring-orange-400" }
+      default:
+        return { shadow: "shadow-md", glow: "" }
+    }
+  }
+
+  const getEmotionLabel = (emotion: EmotionTone) => {
+    switch (emotion) {
+      case "angry": return "😤 Firm"
+      case "excited": return "🤩 Enthusiastic"
+      case "cool": return "😎 Confident"
+      case "thoughtful": return "🤔 Analytical"
+      case "sarcastic": return "😏 Witty"
+      default: return "😊 Neutral"
+    }
+  }
 
   // Start button logic with a short 3..2..1 countdown
   const startWithCountdown = () => {
@@ -260,17 +375,31 @@ function DebateVisualizer({ debate }: { debate: Debate }) {
       <div className="flex items-start justify-center gap-16 md:gap-24">
         {/* Persona A */}
         <div className="flex flex-col items-center max-w-xs">
+          {/* Avatar with emotional feedback */}
           <motion.div
             animate={
               personaAIsSpeaking
-                ? { scale: [1, 1.06, 1], boxShadow: ["0 0 0 rgba(0,0,0,0)", "0 0 28px rgba(59,130,246,0.25)", "0 0 0 rgba(0,0,0,0)"] }
-                : { opacity: [0.9, 1, 0.9] }
+                ? { scale: [1, 1.08, 1], boxShadow: ["0 0 0 rgba(0,0,0,0)", "0 0 32px rgba(59,130,246,0.4)", "0 0 0 rgba(0,0,0,0)"] }
+                : { opacity: [0.85, 1, 0.85] }
             }
-            transition={{ duration: 1.6, repeat: Infinity }}
-            className="w-24 h-24 rounded-full bg-white flex items-center justify-center text-sky-700 font-semibold text-xl shadow-md"
+            transition={{ duration: 1.4, repeat: Infinity }}
+            className={`w-24 h-24 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center text-white font-semibold text-lg shadow-md transition-all ${
+              getEmotionStyles(personaAEmotion, personaAIsSpeaking).glow
+            }`}
           >
             {debate.personaA.slice(0, 2).toUpperCase()}
           </motion.div>
+
+          {/* Emotion indicator */}
+          {personaAIsSpeaking && (
+            <motion.div
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-2 text-xs font-semibold text-sky-600 bg-sky-50 px-2 py-1 rounded-full"
+            >
+              {getEmotionLabel(personaAEmotion)}
+            </motion.div>
+          )}
 
           <motion.div
             layout
@@ -296,17 +425,31 @@ function DebateVisualizer({ debate }: { debate: Debate }) {
 
         {/* Persona B */}
         <div className="flex flex-col items-center max-w-xs">
+          {/* Avatar with emotional feedback */}
           <motion.div
             animate={
               personaBIsSpeaking
-                ? { scale: [1, 1.06, 1], boxShadow: ["0 0 0 rgba(0,0,0,0)", "0 0 28px rgba(249,115,22,0.2)", "0 0 0 rgba(0,0,0,0)"] }
-                : { opacity: [0.9, 1, 0.9] }
+                ? { scale: [1, 1.08, 1], boxShadow: ["0 0 0 rgba(0,0,0,0)", "0 0 32px rgba(249,115,22,0.35)", "0 0 0 rgba(0,0,0,0)"] }
+                : { opacity: [0.85, 1, 0.85] }
             }
-            transition={{ duration: 1.6, repeat: Infinity }}
-            className="w-24 h-24 rounded-full bg-white flex items-center justify-center text-amber-600 font-semibold text-xl shadow-md"
+            transition={{ duration: 1.4, repeat: Infinity }}
+            className={`w-24 h-24 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-semibold text-lg shadow-md transition-all ${
+              getEmotionStyles(personaBEmotion, personaBIsSpeaking).glow
+            }`}
           >
             {debate.personaB.slice(0, 2).toUpperCase()}
           </motion.div>
+
+          {/* Emotion indicator */}
+          {personaBIsSpeaking && (
+            <motion.div
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-2 text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-1 rounded-full"
+            >
+              {getEmotionLabel(personaBEmotion)}
+            </motion.div>
+          )}
 
           <motion.div
             layout
@@ -316,7 +459,7 @@ function DebateVisualizer({ debate }: { debate: Debate }) {
             className="mt-4 w-[18rem] sm:w-[20rem] bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-sm"
           >
             {thinking && personaAIsSpeaking ? (
-              <div className="h-3 rounded-full bg-gradient-to-r from-amber-200 via-orange-200 to-amber-200 animate-pulse" />
+              <div className="h-3 rounded-full bg-gradient-to-r from-orange-200 via-red-200 to-orange-200 animate-pulse" />
             ) : (
               <p className="text-sm text-slate-800 leading-relaxed">
                 {currentMsg?.speaker === debate.personaB
@@ -413,6 +556,7 @@ export default function DebateArea() {
   const [debate, setDebate] = useState<Debate | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [statusMessage, setStatusMessage] = useState<string>("")
+  const [debateIsPlaying, setDebateIsPlaying] = useState<boolean>(false)
 
   useEffect(() => {
     if (!debateId) {
@@ -472,6 +616,7 @@ export default function DebateArea() {
             personaA={debate.personaA}
             personaB={debate.personaB}
             duration={debate.duration}
+            running={debateIsPlaying}
           />
         </div>
 
@@ -517,7 +662,7 @@ export default function DebateArea() {
           {/* page content */}
           <div className="pt-20">
             <div className="max-w-5xl mx-auto">
-              <DebateVisualizer debate={debate} />
+              <DebateVisualizer debate={debate} onPlayingChange={setDebateIsPlaying} />
             </div>
           </div>
         </div>

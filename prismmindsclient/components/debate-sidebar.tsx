@@ -8,9 +8,11 @@ interface DebateSidebarProps {
   personaA: string
   personaB: string
   duration: string
+  running?: boolean
+  onTimerComplete?: () => void
 }
 
-export function DebateSidebar({ topic, personaA, personaB, duration }: DebateSidebarProps) {
+export function DebateSidebar({ topic, personaA, personaB, duration, running = false, onTimerComplete }: DebateSidebarProps) {
   return (
     <motion.aside
       initial={{ x: -20, opacity: 0 }}
@@ -39,7 +41,7 @@ export function DebateSidebar({ topic, personaA, personaB, duration }: DebateSid
           ⏱️ Debate Timer
         </h3>
         <div className="flex justify-center">
-          <DebateTimer duration={duration} />
+          <DebateTimer duration={duration} running={running} onComplete={onTimerComplete} />
         </div>
       </div>
 

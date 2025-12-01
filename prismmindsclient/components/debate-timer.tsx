@@ -1,121 +1,4 @@
-// "use client"
 
-// import { useEffect, useMemo, useState } from "react"
-// import { motion } from "framer-motion"
-
-// interface DebateTimerProps {
-//   /** Expected format: "MM:SS" or "HH:MM:SS" */
-//   duration?: string
-// }
-
-// export function DebateTimer({ duration }: DebateTimerProps) {
-//   const [remaining, setRemaining] = useState(0)
-//   const [total, setTotal] = useState(0)
-//   console.log("DebateTimer duration prop:", duration)
-//   // Parse duration safely
-//   const parseDuration = (value?: string): number => {
-//     if (!value || typeof value !== "string") return 0
-//     const parts = value.split(":").map(Number)
-//     if (parts.some(isNaN)) return 0
-//     if (parts.length === 3) {
-//       const [h, m, s] = parts
-//       return h * 3600 + m * 60 + s
-//     }
-//     if (parts.length === 2) {
-//       const [m, s] = parts
-//       return m * 60 + s
-//     }
-//     return 0
-//   }
-
-//   const formatTime = (seconds: number): string => {
-//     const h = Math.floor(seconds / 3600)
-//     const m = Math.floor((seconds % 3600) / 60)
-//     const s = seconds % 60
-//     return h > 0
-//       ? `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
-//       : `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
-//   }
-
-//   // ✅ Initialize once when duration changes
-//   useEffect(() => {
-//     const totalSeconds = parseDuration(duration)
-//     setTotal(totalSeconds)
-//     setRemaining(totalSeconds)
-
-//     if (!totalSeconds) return
-
-//     // start countdown once
-//     const timer = setInterval(() => {
-//       setRemaining((prev) => {
-//         if (prev <= 1) {
-//           clearInterval(timer)
-//           return 0
-//         }
-//         return prev - 1
-//       })
-//     }, 1000)
-
-//     return () => clearInterval(timer)
-//   }, [duration])
-
-//   // compute circular progress
-//   const progress = useMemo(
-//     () => (total > 0 ? (remaining / total) * 100 : 0),
-//     [remaining, total],
-//   )
-
-//   return (
-//     <div className="flex flex-col items-center justify-center p-4 select-none">
-//       <div className="relative w-44 h-44 sm:w-52 sm:h-52">
-//         {/* Circular progress ring */}
-//         <svg className="absolute inset-0 w-full h-full -rotate-90">
-//           <circle
-//             cx="50%"
-//             cy="50%"
-//             r="90"
-//             stroke="hsl(var(--muted-foreground))"
-//             strokeWidth="10"
-//             fill="none"
-//             className="opacity-20"
-//           />
-//           <motion.circle
-//             cx="50%"
-//             cy="50%"
-//             r="90"
-//             stroke="hsl(var(--primary))"
-//             strokeWidth="10"
-//             fill="none"
-//             strokeLinecap="round"
-//             strokeDasharray={2 * Math.PI * 90}
-//             strokeDashoffset={2 * Math.PI * 90 * (1 - progress / 100)}
-//             animate={{
-//               strokeDashoffset: 2 * Math.PI * 90 * (1 - progress / 100),
-//             }}
-//             transition={{ duration: 0.8, ease: "linear" }}
-//           />
-//         </svg>
-
-//         {/* Time display */}
-//         <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-//           <motion.div
-//             key={remaining}
-//             initial={{ scale: 0.9, opacity: 0 }}
-//             animate={{ scale: 1, opacity: 1 }}
-//             transition={{ duration: 0.25 }}
-//           >
-//             <p className="text-4xl sm:text-5xl font-mono font-bold text-primary leading-tight">
-//               {formatTime(remaining)}
-//             </p>
-//             <p className="text-xs uppercase text-muted-foreground mt-1 tracking-widest">
-//               {remaining > 0 ? "Remaining" : "Time’s Up!"}
-//             </p>
-//           </motion.div>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
@@ -169,17 +52,19 @@ export function DebateTimer({ duration, running = false, onComplete }: DebateTim
   const progress = useMemo(() => (total > 0 ? (remaining / total) * 100 : 0), [remaining, total])
 
   return (
-    <div className="flex flex-col items-center justify-center select-none">
-      <div className="relative w-44 h-44">
-        {/* Base ring */}
-        <svg className="absolute inset-0 w-full h-full -rotate-90">
-          <circle cx="50%" cy="50%" r="90" stroke="rgba(15,23,42,0.06)" strokeWidth="10" fill="none" />
+    <div className="flex flex-col items-center justify-center w-full">
+      <div className="relative w-56 h-56 flex items-center justify-center">
+        {/* SVG Circle */}
+        <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet">
+          {/* Background circle */}
+          <circle cx="100" cy="100" r="90" stroke="rgba(15,23,42,0.08)" strokeWidth="8" fill="none" />
+          {/* Animated progress circle */}
           <motion.circle
-            cx="50%"
-            cy="50%"
+            cx="100"
+            cy="100"
             r="90"
             stroke="url(#timerGradient)"
-            strokeWidth="10"
+            strokeWidth="8"
             strokeLinecap="round"
             fill="none"
             strokeDasharray={2 * Math.PI * 90}
@@ -196,18 +81,18 @@ export function DebateTimer({ duration, running = false, onComplete }: DebateTim
           </defs>
         </svg>
 
-        {/* Label */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
+        {/* Timer Text */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
           <motion.div
             key={remaining}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.25 }}
           >
-            <div className="text-3xl font-mono font-semibold text-slate-800">
+            <div className="text-4xl font-mono font-bold text-slate-800 dark:text-slate-100">
               {formatTime(remaining)}
             </div>
-            <div className="text-xs text-slate-500 uppercase mt-1">
+            <div className="text-xs text-slate-500 dark:text-slate-400 uppercase mt-2 tracking-widest text-center">
               {remaining > 0 ? "Remaining" : "Finished"}
             </div>
           </motion.div>
