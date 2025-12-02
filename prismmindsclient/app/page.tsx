@@ -312,16 +312,26 @@ export default function Home() {
               key={i}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * i }}
+              transition={{ delay: 0.06 * i }}
               viewport={{ once: true }}
-              whileHover={{ scale: 1.03 }}
-              className="p-6 rounded-2xl backdrop-blur-lg bg-white/40 dark:bg-slate-800/40 border border-slate-200/30 dark:border-slate-700/40 shadow-md hover:shadow-lg transition-all"
+              whileHover={{ scale: 1.04, y: -6 }}
+              className="relative overflow-hidden p-6 rounded-3xl bg-gradient-to-br from-white/80 to-white/60 dark:from-slate-900/60 dark:to-slate-900/40 border border-transparent shadow-lg hover:shadow-2xl transform transition-all duration-300"
             >
-              <div className="w-12 h-12 mb-4 rounded-lg flex items-center justify-center bg-gradient-to-tr from-sky-400 to-pink-400 text-white">
-                <f.Icon className="w-6 h-6" />
+              {/* decorative accent */}
+              <div className="pointer-events-none absolute -right-6 -top-6 w-40 h-40 rounded-full bg-gradient-to-tr from-purple-300 to-pink-300 opacity-30 blur-3xl" />
+
+              <div className="relative z-10 flex items-start gap-4">
+                <div className="p-1 rounded-lg bg-gradient-to-tr from-sky-400 to-pink-400">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-white/90 dark:bg-slate-800/70 text-sky-600">
+                    <f.Icon className="w-6 h-6" />
+                  </div>
+                </div>
+
+                <div className="flex-1">
+                  <h4 className="text-lg font-semibold mb-1 text-slate-900 dark:text-slate-100">{f.title}</h4>
+                  <p className="text-sm text-slate-600 dark:text-slate-300">{f.desc}</p>
+                </div>
               </div>
-              <h4 className="text-lg font-semibold mb-2">{f.title}</h4>
-              <p className="text-sm text-slate-600 dark:text-slate-300">{f.desc}</p>
             </motion.div>
           ))}
         </div>

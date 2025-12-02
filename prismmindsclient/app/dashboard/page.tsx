@@ -48,6 +48,7 @@ export default function DashboardPage() {
   const [currentView, setCurrentView] = useState<"main" | "transcripts">("main")
   const [searchQuery, setSearchQuery] = useState("")
   const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE)
+  const [transcriptIndex, setTranscriptIndex] = useState(0)
   const transcriptEndRef = useRef<HTMLDivElement>(null)
 
   const [form, setForm] = useState({
@@ -90,6 +91,8 @@ export default function DashboardPage() {
 
   useEffect(() => {
     setDisplayedCount(ITEMS_PER_PAGE)
+    // reset index when search changes so pager stays within bounds
+    setTranscriptIndex(0)
   }, [searchQuery])
 
   const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms))
@@ -281,10 +284,11 @@ export default function DashboardPage() {
                 } catch (err) {
                   console.error('Failed to load transcripts:', err)
                 } finally {
-                  setLoading(false)
-                  setCurrentView("transcripts")
-                  setDisplayedCount(ITEMS_PER_PAGE)
-                  setSearchQuery("")
+                        setLoading(false)
+                        setCurrentView("transcripts")
+                        setDisplayedCount(ITEMS_PER_PAGE)
+                        setSearchQuery("")
+                        setTranscriptIndex(0)
                 }
               }}
               className="flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 border border-border/50 transition-all text-xs sm:text-sm font-medium text-foreground"
@@ -333,8 +337,7 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {currentView === "transcripts" ? (
-          // TRANSCRIPTS VIEW
+        {currentView === "transcripts" && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -351,8 +354,7 @@ export default function DashboardPage() {
                 </h2>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground px-12 sm:px-0">
-                Showing <span className="font-bold text-foreground">{displayedDebates.length}</span> of{" "}
-                <span className="font-bold text-foreground">{filteredDebates.length}</span> debates
+                Showing <span className="font-bold text-foreground">{filteredDebates.length}</span> total debates
               </p>
             </motion.div>
 
@@ -367,7 +369,7 @@ export default function DashboardPage() {
               className="w-full px-4 sm:px-5 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl border border-border/50 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm placeholder:text-muted-foreground font-medium"
             />
 
-            {/* Transcripts List */}
+            {/* Transcripts Pagination */}
             {filteredDebates.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -382,68 +384,78 @@ export default function DashboardPage() {
                 </p>
               </motion.div>
             ) : (
-              <>
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3 sm:space-y-4">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3 sm:space-y-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="text-sm text-muted-foreground">
+                    Page <span className="mx-2 font-semibold text-foreground">{Math.floor(transcriptIndex / 5) + 1}</span> of <span className="mx-2 font-semibold text-foreground">{Math.ceil(filteredDebates.length / 5)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setTranscriptIndex((i) => Math.max(0, i - 5))}
+                      disabled={transcriptIndex === 0}
+                      className="px-3 py-2 rounded-lg bg-white/60 dark:bg-slate-800/60 border border-border/50 hover:bg-white dark:hover:bg-slate-800 disabled:opacity-40 transition"
+                    >
+                      ← Prev
+                    </button>
+                    <button
+                      onClick={() => setTranscriptIndex((i) => Math.min(filteredDebates.length - 1, i + 5))}
+                      disabled={transcriptIndex + 5 >= filteredDebates.length}
+                      className="px-3 py-2 rounded-lg bg-white/60 dark:bg-slate-800/60 border border-border/50 hover:bg-white dark:hover:bg-slate-800 disabled:opacity-40 transition"
+                    >
+                      Next →
+                    </button>
+                  </div>
+                </div>
+
+                {/* Transcript cards grid (up to 5 per page) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   <AnimatePresence>
-                    {displayedDebates.map((debate, index) => (
+                    {filteredDebates.slice(transcriptIndex, transcriptIndex + 5).map((debate, idx) => (
                       <motion.div
                         key={debate.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        transition={{ delay: index * 0.05 }}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ delay: idx * 0.05 }}
+                        className="p-4 sm:p-5 rounded-lg sm:rounded-xl bg-gradient-to-br from-white to-slate-50 dark:from-slate-800/60 dark:to-slate-900/60 border border-border/50 hover:border-primary/50 hover:shadow-lg transition-all cursor-pointer group"
                         onClick={() => setSelectedDebate(debate)}
-                        className="p-4 sm:p-6 rounded-lg sm:rounded-2xl bg-gradient-to-br from-white to-slate-50 dark:from-slate-800/60 dark:to-slate-900/60 border border-border/50 hover:border-primary/50 hover:shadow-lg transition-all cursor-pointer group"
                       >
-                        <div className="flex items-start justify-between gap-3 sm:gap-4">
+                        <div className="flex items-start justify-between gap-2 sm:gap-3">
                           <div className="flex-1 min-w-0">
-                            <h3 className="text-base sm:text-xl font-bold text-foreground group-hover:text-primary transition-colors mb-1 sm:mb-2 line-clamp-2">
+                            <h3 className="text-sm sm:text-base font-bold text-foreground transition-colors mb-1 line-clamp-2 group-hover:text-primary">
                               {debate.topic}
                             </h3>
-                            <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 break-words">
+                            <p className="text-xs text-muted-foreground mb-2 break-words">
                               <span className="font-semibold text-primary">{debate.personaA}</span>
-                              <span className="mx-1 sm:mx-2">vs</span>
+                              <span className="mx-1">vs</span>
                               <span className="font-semibold text-accent">{debate.personaB}</span>
                             </p>
-                            <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+                            <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
                               <span className="text-xs text-muted-foreground whitespace-nowrap">
                                 📅 {new Date(debate.createdAt).toLocaleDateString()}
                               </span>
-                              <span className="text-xs bg-gradient-to-r from-primary/20 to-accent/20 text-primary font-bold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full whitespace-nowrap">
+                              <span className="text-xs bg-gradient-to-r from-primary/20 to-accent/20 text-primary font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
                                 ⏱️ {debate.duration}min
                               </span>
                             </div>
                           </div>
                           <motion.div
                             whileHover={{ scale: 1.2, x: 5 }}
-                            className="p-2 sm:p-3 rounded-lg bg-gradient-to-br from-primary/10 to-accent/10 text-primary opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                            className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-primary/10 to-accent/10 text-primary opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
                           >
-                            <ArrowLeftOnRectangleIcon className="w-4 sm:w-5 h-4 sm:h-5 rotate-180" />
+                            <ArrowLeftOnRectangleIcon className="w-3.5 sm:w-4 h-3.5 sm:h-4 rotate-180" />
                           </motion.div>
                         </div>
                       </motion.div>
                     ))}
                   </AnimatePresence>
-                </motion.div>
-
-                {/* Loading indicator for more debates */}
-                {displayedCount < filteredDebates.length && (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-6 sm:py-8">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-                      className="w-6 h-6 border-3 border-primary/30 border-t-primary rounded-full mx-auto"
-                    />
-                  </motion.div>
-                )}
-
-                {/* Intersection observer target for infinite scroll */}
-                <div ref={transcriptEndRef} />
-              </>
+                </div>
+              </motion.div>
             )}
           </motion.div>
-        ) : (
-          // MAIN DASHBOARD VIEW
+        )}
+
+        {currentView !== "transcripts" && (
           <>
             {/* Create Debate Section */}
             <motion.div

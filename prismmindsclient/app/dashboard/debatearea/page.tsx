@@ -153,8 +153,8 @@ async function speakTextSync(
       if (e.name === "word" && onProgress) onProgress(e.charIndex)
     }
 
-    utter.onend = resolve
-    utter.onerror = resolve
+    utter.onend = () => resolve()
+    utter.onerror = () => resolve()
     synth.speak(utter)
   })
 }
