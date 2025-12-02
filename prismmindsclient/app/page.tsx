@@ -337,6 +337,62 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Blog CTA (attractive hero card) */}
+      <section id="blog-cta" className="py-20 px-6 sm:px-8">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="relative rounded-3xl overflow-hidden p-12 sm:p-16 text-center"
+          >
+            {/* Background gradient layers - light theme */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-purple-100/60 to-pink-100/70 dark:from-slate-900/70 dark:via-purple-900/50 dark:to-pink-900/60" />
+            <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/30 dark:to-transparent" />
+
+            {/* Decorative blobs - lighter, softer */}
+            <div className="absolute -top-20 -right-20 w-40 h-40 bg-pink-300/40 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-pulse" />
+            <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-purple-300/40 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse" />
+
+            <div className="relative z-10">
+              <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-gradient-to-r from-purple-100/80 to-pink-100/80 border border-purple-300/30 text-purple-700 dark:bg-purple-900/40 dark:text-purple-200 dark:border-purple-700/50 mb-6">
+                <Brain className="w-5 h-5" />
+                <span className="text-sm font-semibold">Weekly insights • Prompts • Patterns</span>
+              </div>
+
+              <h2 className="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent mb-4 leading-tight">
+                Dive into Our Blog
+              </h2>
+              
+              <p className="text-slate-700 dark:text-slate-200 text-lg sm:text-xl mb-10 max-w-2xl mx-auto">
+                Master debate design, craft powerful prompts, and unlock the full potential of AI-driven reasoning.
+              </p>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="flex flex-col sm:flex-row items-center justify-center gap-4"
+              >
+                <Link href="/blogs">
+                  <Button 
+                    size="lg" 
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow-lg hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all duration-300 hover:scale-105"
+                  >
+                    Explore Blogs
+                  </Button>
+                </Link>
+                <Link href="/blogs" className="text-purple-600 dark:text-purple-300 hover:text-pink-600 dark:hover:text-pink-400 transition font-medium">
+                  Browse all articles →
+                </Link>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="pb-24 px-6">
         <div className="max-w-3xl mx-auto text-center backdrop-blur-lg bg-white/40 dark:bg-slate-800/40 rounded-3xl border border-slate-200/30 dark:border-slate-700/40 shadow-lg p-10">
