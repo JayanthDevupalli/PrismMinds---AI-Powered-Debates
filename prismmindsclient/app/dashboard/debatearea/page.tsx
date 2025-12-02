@@ -1,6 +1,6 @@
 "use client"
 
-import { useSearchParams, useParams, useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import React, { useEffect, useState, useRef, useCallback } from "react"
 import { motion } from "framer-motion"
 import { X, Download, Play, Pause, SkipForward, RotateCcw } from "lucide-react"
@@ -548,10 +548,19 @@ function DebateVisualizer({ debate, onPlayingChange }: { debate: Debate; onPlayi
    Main DebateArea page (wraps sidebar + visualizer)
    --------------------------- */
 export default function DebateArea() {
-  const params = useSearchParams()
   const routeParams = useParams()
   const router = useRouter()
-  const debateId = params.get("id") || (routeParams?.id as string | undefined)
+  const [searchId, setSearchId] = useState<string | null>(null)
+
+  useEffect(() => {
+    // read search param on client only
+    if (typeof window !== "undefined") {
+      const p = new URLSearchParams(window.location.search)
+      setSearchId(p.get("id"))
+    }
+  }, [])
+
+  const debateId = searchId || (routeParams?.id as string | undefined)
 
   const [debate, setDebate] = useState<Debate | null>(null)
   const [loading, setLoading] = useState<boolean>(true)

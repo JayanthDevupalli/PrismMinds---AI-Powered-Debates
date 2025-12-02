@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { Mic2 } from "lucide-react"
 import { DebateTimer } from "./debate-timer"
 
 interface DebateSidebarProps {
@@ -71,7 +72,10 @@ export function DebateSidebar({ topic, personaA, personaB, duration, running = f
           transition={{ delay: 0.15 }}
           className="space-y-2 p-3 rounded-lg bg-primary/10 border border-primary/20"
         >
-          <label className="text-xs font-semibold text-primary">🎤 Persona A</label>
+          <label className="text-xs font-semibold text-primary flex items-center gap-2">
+            <Mic2 className="w-3.5 h-3.5" />
+            Persona A
+          </label>
           <p className="text-sm font-medium text-foreground">{personaA}</p>
         </motion.div>
 
@@ -82,7 +86,10 @@ export function DebateSidebar({ topic, personaA, personaB, duration, running = f
           transition={{ delay: 0.2 }}
           className="space-y-2 p-3 rounded-lg bg-accent/10 border border-accent/20"
         >
-          <label className="text-xs font-semibold text-accent">🎤 Persona B</label>
+          <label className="text-xs font-semibold text-accent flex items-center gap-2">
+            <Mic2 className="w-3.5 h-3.5" />
+            Persona B
+          </label>
           <p className="text-sm font-medium text-foreground">{personaB}</p>
         </motion.div>
       </div>

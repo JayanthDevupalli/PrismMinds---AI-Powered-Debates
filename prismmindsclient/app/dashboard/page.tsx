@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 import { fetchRecentDebates, createDebate, deleteDebate } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline"
-import { SparklesIcon, Trash2Icon, X, History, Download } from "lucide-react"
+import { SparklesIcon, Trash2Icon, X, History, Download, ScrollText, Sparkles, Rocket, BookOpen, Mic2, MessageCircle, Target, BarChart3 } from "lucide-react"
 import { downloadDebateTranscriptPDF } from "@/lib/pdf-generator"
 
 type DebateMessage = {
@@ -49,7 +49,9 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE)
   const [transcriptIndex, setTranscriptIndex] = useState(0)
+  const [scrollProgress, setScrollProgress] = useState(0)
   const transcriptEndRef = useRef<HTMLDivElement>(null)
+  const modalContentRef = useRef<HTMLDivElement>(null)
 
   const [form, setForm] = useState({
     topic: "",
@@ -94,6 +96,24 @@ export default function DashboardPage() {
     // reset index when search changes so pager stays within bounds
     setTranscriptIndex(0)
   }, [searchQuery])
+
+  // Track scroll progress in the modal
+  useEffect(() => {
+    const handleScroll = () => {
+      if (modalContentRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = modalContentRef.current
+        const totalScroll = scrollHeight - clientHeight
+        const progress = totalScroll > 0 ? (scrollTop / totalScroll) * 100 : 0
+        setScrollProgress(progress)
+      }
+    }
+
+    const modalContent = modalContentRef.current
+    if (modalContent) {
+      modalContent.addEventListener("scroll", handleScroll)
+      return () => modalContent.removeEventListener("scroll", handleScroll)
+    }
+  }, [selectedDebate])
 
   const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms))
 
@@ -347,7 +367,7 @@ export default function DashboardPage() {
             <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
               <div className="flex items-start gap-2 sm:gap-3 mb-2">
                 <span className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-lg sm:text-xl flex-shrink-0">
-                  📜
+                  <ScrollText className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent break-words">
                   All Transcripts
@@ -385,38 +405,61 @@ export default function DashboardPage() {
               </motion.div>
             ) : (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3 sm:space-y-4">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="text-sm text-muted-foreground">
+                <motion.div 
+                  className="flex items-center justify-between gap-4"
+                  layout
+                >
+                  <motion.div 
+                    className="text-sm text-muted-foreground"
+                    key={`page-${transcriptIndex}`}
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
                     Page <span className="mx-2 font-semibold text-foreground">{Math.floor(transcriptIndex / 5) + 1}</span> of <span className="mx-2 font-semibold text-foreground">{Math.ceil(filteredDebates.length / 5)}</span>
-                  </div>
+                  </motion.div>
                   <div className="flex items-center gap-2">
-                    <button
+                    <motion.button
                       onClick={() => setTranscriptIndex((i) => Math.max(0, i - 5))}
                       disabled={transcriptIndex === 0}
-                      className="px-3 py-2 rounded-lg bg-white/60 dark:bg-slate-800/60 border border-border/50 hover:bg-white dark:hover:bg-slate-800 disabled:opacity-40 transition"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="px-3 py-2 rounded-lg bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/50 hover:from-primary/30 hover:to-accent/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all font-medium text-sm"
                     >
                       ← Prev
-                    </button>
-                    <button
+                    </motion.button>
+                    <motion.button
                       onClick={() => setTranscriptIndex((i) => Math.min(filteredDebates.length - 1, i + 5))}
                       disabled={transcriptIndex + 5 >= filteredDebates.length}
-                      className="px-3 py-2 rounded-lg bg-white/60 dark:bg-slate-800/60 border border-border/50 hover:bg-white dark:hover:bg-slate-800 disabled:opacity-40 transition"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="px-3 py-2 rounded-lg bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/50 hover:from-primary/30 hover:to-accent/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all font-medium text-sm"
                     >
                       Next →
-                    </button>
+                    </motion.button>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Transcript cards grid (up to 5 per page) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                  <AnimatePresence>
+                <motion.div 
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"
+                  layout
+                  key={`grid-${transcriptIndex}`}
+                >
+                  <AnimatePresence mode="popLayout">
                     {filteredDebates.slice(transcriptIndex, transcriptIndex + 5).map((debate, idx) => (
                       <motion.div
                         key={debate.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ delay: idx * 0.05 }}
+                        layout
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                        transition={{ 
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 25,
+                          delay: idx * 0.08
+                        }}
                         className="p-4 sm:p-5 rounded-lg sm:rounded-xl bg-gradient-to-br from-white to-slate-50 dark:from-slate-800/60 dark:to-slate-900/60 border border-border/50 hover:border-primary/50 hover:shadow-lg transition-all cursor-pointer group"
                         onClick={() => setSelectedDebate(debate)}
                       >
@@ -449,7 +492,7 @@ export default function DashboardPage() {
                       </motion.div>
                     ))}
                   </AnimatePresence>
-                </div>
+                </motion.div>
               </motion.div>
             )}
           </motion.div>
@@ -467,7 +510,7 @@ export default function DashboardPage() {
               <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-900/60 dark:to-slate-900/30 rounded-2xl sm:rounded-3xl border border-border/50 backdrop-blur-xl p-6 sm:p-8 shadow-xl shadow-primary/5">
                 <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
                   <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-base sm:text-lg flex-shrink-0">
-                    ✨
+                    <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </span>
                   Start a New Debate
                 </h2>
@@ -553,7 +596,10 @@ export default function DashboardPage() {
                         Creating...
                       </span>
                     ) : (
-                      "🚀 Start Debate"
+                      <span className="flex items-center justify-center gap-2">
+                        <Rocket className="w-4 h-4" />
+                        Start Debate
+                      </span>
                     )}
                   </motion.button>
                 </form>
@@ -564,7 +610,7 @@ export default function DashboardPage() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
               <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
                 <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-secondary to-accent flex items-center justify-center text-base sm:text-lg flex-shrink-0">
-                  📚
+                  <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </span>
                 Recent Debates
               </h2>
@@ -693,21 +739,57 @@ export default function DashboardPage() {
             >
               {/* Modal Header */}
               <div className="sticky top-0 z-10 bg-gradient-to-b from-white/95 to-white/80 dark:from-slate-900/95 dark:to-slate-900/80 backdrop-blur-xl border-b border-border/30 p-4 sm:p-6 flex justify-between items-start">
-                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-                  <h2 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-1 break-words">
+                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex-1">
+                  <h2 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2 break-words">
                     {selectedDebate.topic}
                   </h2>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    <span className="font-semibold text-primary">{selectedDebate.personaA}</span>
-                    <span className="mx-1 sm:mx-2">vs</span>
-                    <span className="font-semibold text-accent">{selectedDebate.personaB}</span>
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-primary/20 text-primary text-xs font-bold">P1</span>
+                      <span className="text-xs font-semibold text-primary">{selectedDebate.personaA}</span>
+                    </div>
+                    <span className="text-muted-foreground text-xs font-bold">vs</span>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-accent/20 text-accent text-xs font-bold">P2</span>
+                      <span className="text-xs font-semibold text-accent">{selectedDebate.personaB}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Debate Stats */}
+                  <div className="grid grid-cols-3 gap-2 mb-3">
+                    <div className="text-xs bg-primary/5 border border-primary/20 rounded-lg p-2">
+                      <div className="text-muted-foreground text-xs">Duration</div>
+                      <div className="font-bold text-primary">{selectedDebate.duration}m</div>
+                    </div>
+                    <div className="text-xs bg-accent/5 border border-accent/20 rounded-lg p-2">
+                      <div className="text-muted-foreground text-xs">Messages</div>
+                      <div className="font-bold text-accent">{selectedDebate.transcript?.length || 0}</div>
+                    </div>
+                    <div className="text-xs bg-secondary/5 border border-secondary/20 rounded-lg p-2">
+                      <div className="text-muted-foreground text-xs">Date</div>
+                      <div className="font-bold text-secondary text-[11px]">{new Date(selectedDebate.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  {selectedDebate.transcript && selectedDebate.transcript.length > 0 && (
+                    <div className="w-full">
+                      <div className="text-xs text-muted-foreground mb-1">Scroll Progress: {Math.round(scrollProgress)}%</div>
+                      <div className="w-full h-2 bg-border rounded-full overflow-hidden">
+                        <motion.div 
+                          className="h-full bg-gradient-to-r from-primary via-accent to-secondary"
+                          style={{ width: `${scrollProgress}%` }}
+                          transition={{ type: "tween", duration: 0.2 }}
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   {generating && statusMessage && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="mt-3 text-xs font-medium text-yellow-600 dark:text-yellow-400 flex items-center gap-2"
+                      className="mt-2 text-xs font-medium text-yellow-600 dark:text-yellow-400 flex items-center gap-2"
                     >
                       <motion.div
                         animate={{ rotate: 360 }}
@@ -719,7 +801,7 @@ export default function DashboardPage() {
                   )}
                 </motion.div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -762,7 +844,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Modal Content */}
-              <div className="modal-content flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border p-4 sm:p-6">
+              <div ref={modalContentRef} className="modal-content flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border p-4 sm:p-6">
                 <div className="space-y-3 sm:space-y-4">
                   <AnimatePresence>
                     {selectedDebate.transcript?.map((message, i, arr) => {
@@ -782,12 +864,23 @@ export default function DashboardPage() {
                               className="flex items-center gap-3 sm:gap-4 my-4 sm:my-8"
                             >
                               <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent"></div>
-                              <span className="text-xs font-bold text-primary/70 uppercase tracking-widest px-2.5 sm:px-3 py-1 sm:py-1.5 bg-primary/5 rounded-full border border-primary/20 whitespace-nowrap">
-                                {message.phase === "opening"
-                                  ? "🎤 Opening"
-                                  : message.phase === "discussion"
-                                    ? "💬 Discussion"
-                                    : "🎯 Closing"}
+                              <span className="text-xs font-bold text-primary/70 uppercase tracking-widest px-2.5 sm:px-3 py-1 sm:py-1.5 bg-primary/5 rounded-full border border-primary/20 whitespace-nowrap flex items-center gap-1.5">
+                                {message.phase === "opening" ? (
+                                  <>
+                                    <Mic2 className="w-3.5 h-3.5" />
+                                    Opening
+                                  </>
+                                ) : message.phase === "discussion" ? (
+                                  <>
+                                    <MessageCircle className="w-3.5 h-3.5" />
+                                    Discussion
+                                  </>
+                                ) : (
+                                  <>
+                                    <Target className="w-3.5 h-3.5" />
+                                    Closing
+                                  </>
+                                )}
                               </span>
                               <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent"></div>
                             </motion.div>
@@ -830,13 +923,16 @@ export default function DashboardPage() {
                           <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className={`flex ${message.speaker === selectedDebate.personaA ? "justify-start" : "justify-end"}`}
+                            className={`flex gap-3 ${message.speaker === selectedDebate.personaA ? "justify-start" : "justify-end"}`}
                           >
+                            {message.speaker === selectedDebate.personaA && (
+                              <div className="w-8 h-8 rounded-lg bg-primary/20 text-primary flex items-center justify-center flex-shrink-0 font-bold text-xs">P1</div>
+                            )}
                             <div
                               className={`max-w-xs sm:max-w-sm p-3 sm:p-4 rounded-lg sm:rounded-2xl ${message.speaker === selectedDebate.personaA
-                                  ? "bg-white dark:bg-slate-800 text-foreground rounded-tl-none"
-                                  : "bg-gradient-to-br from-primary to-accent text-white rounded-tr-none"
-                                } shadow-lg`}
+                                  ? "bg-white dark:bg-slate-800 text-foreground rounded-tl-none border border-primary/20"
+                                  : "bg-gradient-to-br from-primary to-accent text-white rounded-tr-none shadow-lg"
+                                }`}
                             >
                               <div className="flex items-center justify-between mb-1 sm:mb-2 pb-1 sm:pb-2 border-b border-current/10">
                                 <p className="text-xs font-bold">{message.speaker}</p>
@@ -853,6 +949,9 @@ export default function DashboardPage() {
                               </div>
                               <p className="text-xs sm:text-sm leading-relaxed">{message.message}</p>
                             </div>
+                            {message.speaker === selectedDebate.personaB && (
+                              <div className="w-8 h-8 rounded-lg bg-accent/20 text-accent flex items-center justify-center flex-shrink-0 font-bold text-xs">P2</div>
+                            )}
                           </motion.div>
                         </motion.div>
                       )
@@ -864,10 +963,55 @@ export default function DashboardPage() {
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="mt-6 sm:mt-8 p-4 sm:p-5 rounded-lg sm:rounded-2xl bg-gradient-to-br from-secondary/10 to-accent/10 border border-secondary/30 dark:border-accent/30"
+                      className="mt-8 p-4 sm:p-6 rounded-lg sm:rounded-2xl bg-gradient-to-br from-secondary/10 via-accent/5 to-primary/5 border border-secondary/30 dark:border-accent/30 shadow-lg"
                     >
-                      <h3 className="text-xs sm:text-sm font-bold mb-2 sm:mb-3 text-foreground">📊 Summary</h3>
-                      <p className="text-xs sm:text-sm leading-relaxed text-foreground/75">{selectedDebate.summary}</p>
+                      <div className="flex items-start gap-3 mb-3">
+                        <BarChart3 className="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
+                        <h3 className="text-sm sm:text-base font-bold text-foreground">Debate Summary</h3>
+                      </div>
+                      <p className="text-xs sm:text-sm leading-relaxed text-foreground/85 mb-4">{selectedDebate.summary}</p>
+                      
+                      {/* Key Takeaways */}
+                      {selectedDebate.debate_metrics?.key_themes && selectedDebate.debate_metrics.key_themes.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-secondary/20">
+                          <h4 className="text-xs font-bold text-secondary mb-3 uppercase tracking-widest">Key Themes</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedDebate.debate_metrics.key_themes.slice(0, 5).map((theme, i) => (
+                              <motion.div
+                                key={i}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: i * 0.1 }}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-secondary/20 border border-secondary/30 rounded-full text-xs font-medium text-secondary"
+                              >
+                                <span className="w-1.5 h-1.5 bg-secondary rounded-full" />
+                                {theme}
+                              </motion.div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Phase Statistics */}
+                      {selectedDebate.debate_metrics?.exchanges_per_phase && (
+                        <div className="mt-4 pt-4 border-t border-secondary/20">
+                          <h4 className="text-xs font-bold text-secondary mb-3 uppercase tracking-widest">Exchanges by Phase</h4>
+                          <div className="grid grid-cols-3 gap-2">
+                            <div className="text-center p-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-primary/20">
+                              <div className="text-xs text-muted-foreground">Opening</div>
+                              <div className="text-base font-bold text-primary">{selectedDebate.debate_metrics.exchanges_per_phase.opening}</div>
+                            </div>
+                            <div className="text-center p-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-accent/20">
+                              <div className="text-xs text-muted-foreground">Discussion</div>
+                              <div className="text-base font-bold text-accent">{selectedDebate.debate_metrics.exchanges_per_phase.discussion}</div>
+                            </div>
+                            <div className="text-center p-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-secondary/20">
+                              <div className="text-xs text-muted-foreground">Closing</div>
+                              <div className="text-base font-bold text-secondary">{selectedDebate.debate_metrics.exchanges_per_phase.closing}</div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </motion.div>
                   )}
                 </div>
