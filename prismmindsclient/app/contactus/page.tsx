@@ -118,7 +118,7 @@ export default function ContactUsPage() {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    placeholder="John Doe"
+                    placeholder="Enter your full name"
                     required
                     className="w-full rounded-lg border border-slate-200/50 dark:border-slate-700/50 bg-white/50 dark:bg-slate-800/50 px-4 py-3 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
                   />
@@ -249,7 +249,7 @@ export default function ContactUsPage() {
                       </div>
                       <div>
                         <p className="text-sm text-slate-600 dark:text-slate-400">Phone</p>
-                        <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">+1 (555) 123-4567</p>
+                        <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">+91 xxxxxxxxxx</p>
                       </div>
                     </div>
                   </div>
@@ -264,7 +264,7 @@ export default function ContactUsPage() {
                       </div>
                       <div>
                         <p className="text-sm text-slate-600 dark:text-slate-400">Location</p>
-                        <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">San Francisco, CA</p>
+                        <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">Telangana, IND</p>
                       </div>
                     </div>
                   </div>
