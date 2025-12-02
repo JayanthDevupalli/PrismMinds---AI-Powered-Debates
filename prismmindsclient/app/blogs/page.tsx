@@ -4,7 +4,7 @@ import React, { useMemo, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { ArrowRight, ArrowLeft } from "lucide-react"
+import { ArrowRight, ArrowLeft, ChevronDown } from "lucide-react"
 import { blogs } from "@/lib/blog-data"
 
 export default function BlogsPage() {
@@ -49,6 +49,23 @@ export default function BlogsPage() {
               Explore Articles
             </button>
           </a>
+
+          {/* Scroll down animation - Balanced */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="mt-16 flex justify-center"
+          >
+            <motion.a
+              href="#latest-articles"
+              animate={{ y: [0, 10, 0] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+              className="inline-flex items-center justify-center p-3 rounded-full bg-primary/15 border border-primary/40 hover:bg-primary/25 hover:border-primary/60 transition-all"
+            >
+              <ChevronDown className="w-6 h-6 text-primary" />
+            </motion.a>
+          </motion.div>
         </div>
       </section>
 
