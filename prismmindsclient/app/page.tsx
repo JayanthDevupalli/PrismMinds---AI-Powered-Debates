@@ -419,7 +419,7 @@ export default function Home() {
             <Link href="#" className="hover:text-sky-600 dark:hover:text-sky-400 transition">
               Privacy
             </Link>
-            <Link href="#" className="hover:text-sky-600 dark:hover:text-sky-400 transition">
+            <Link href="/contactus" className="hover:text-sky-600 dark:hover:text-sky-400 transition">
               Contact
             </Link>
           </div>
