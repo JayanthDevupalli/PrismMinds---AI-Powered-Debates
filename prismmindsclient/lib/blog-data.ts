@@ -19,7 +19,7 @@ export const blogs: Blog[] = [
     title: "The Ethics of AI: Building a Responsible Future",
     description:
       "Exploring the critical ethical considerations in AI development, including bias, transparency, and accountability in decision-making systems.",
-    image: "/ai-ethics-debate-digital-illustration.jpg",
+    image: "https://images.pexels.com/photos/20574226/pexels-photo-20574226.jpeg",
     imageAlt: "Illustration: AI ethics debate concept",
     tag: "Ethics",
     tagColor: "bg-secondary/10 text-secondary border border-secondary/20",
@@ -58,7 +58,7 @@ Building AI systems responsibly is not optional—it's essential for creating te
     title: "Are We Hitting the Limits of Large Language Models?",
     description:
       "Investigating the scaling laws of LLMs, current bottlenecks, and whether we can continue improving performance through sheer scale.",
-    image: "/large-language-models-neural-network-abstract.jpg",
+    image: "https://images.pexels.com/photos/2599244/pexels-photo-2599244.jpeg",
     imageAlt: "Abstract neural network layers illustration",
     tag: "Research",
     tagColor: "bg-primary/10 text-primary border border-primary/20",
@@ -96,7 +96,7 @@ Rather than infinite scaling, the future likely involves smarter architectures, 
     title: "AI and Job Displacement: Preparing the Workforce",
     description:
       "Analyzing the real impact of AI on employment, economic transition strategies, and how societies can prepare workers for the future.",
-    image: "/workplace-automation-ai-robots-collaboration.jpg",
+    image: "https://images.pexels.com/photos/6153354/pexels-photo-6153354.jpeg",
     imageAlt: "Robots and humans collaborating in a workplace",
     tag: "Economy",
     tagColor: "bg-accent/10 text-accent border border-accent/20",
@@ -138,7 +138,7 @@ With proper preparation and policy, AI can be a tool for prosperity rather than 
     title: "The Multimodal AI Revolution: Beyond Text",
     description:
       "Examining how AI models that process text, images, audio, and video together are changing what's possible with artificial intelligence.",
-    image: "/multimodal-ai-vision-language-audio-processing.jpg",
+    image: "https://images.pexels.com/photos/8728560/pexels-photo-8728560.jpeg",
     imageAlt: "Illustration of multimodal AI processing image and text",
     tag: "Technology",
     tagColor: "bg-primary/10 text-primary border border-primary/20",
@@ -188,7 +188,7 @@ Multimodal models will likely become the standard, enabling AI systems to unders
     title: "Can AI Be Creative? The Question of Authenticity",
     description:
       "Debating whether AI-generated art, music, and literature constitute genuine creativity or mere pattern recombination.",
-    image: "/ai-generated-art-digital-creativity-imagination.jpg",
+    image: "https://images.pexels.com/photos/8438918/pexels-photo-8438918.jpeg",
     imageAlt: "AI-generated abstract art representation",
     tag: "Philosophy",
     tagColor: "bg-secondary/10 text-secondary border border-secondary/20",
@@ -232,7 +232,7 @@ Rather than asking if AI can be creative, perhaps we should ask: what new forms 
     title: "Building Guardrails: AI Safety and Alignment",
     description:
       "Understanding how researchers are working to ensure AI systems remain aligned with human values and stay within safe boundaries.",
-    image: "/ai-safety-guardrails-alignment-control-mechanisms.jpg",
+    image: "https://images.pexels.com/photos/1181354/pexels-photo-1181354.jpeg",
     imageAlt: "Guardrail metaphor for AI alignment and safety",
     tag: "Safety",
     tagColor: "bg-accent/10 text-accent border border-accent/20",

@@ -1,343 +1,618 @@
-"use client"
+"use client";
 
-import React, { useState } from "react"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { ArrowLeft, Send, Mail, User, MessageSquare, Instagram, Twitter, Linkedin, Phone } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import Link from "next/link";
+import { Mail, Phone, MapPin, Send, Globe, ArrowLeft } from "lucide-react";
+import { motion, useMotionValue, useTransform } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import emailjs from "@emailjs/browser";
 
-export default function ContactUsPage() {
-  const [formData, setFormData] = useState({
+interface FormData {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+  subject?: string;
+  message?: string;
+}
+
+const orbTransition = {
+  duration: 18,
+  repeat: Infinity,
+  repeatType: "reverse" as const,
+  ease: "easeInOut" as const,
+};
+
+export default function ContactPage() {
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
+    subject: "",
     message: "",
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
+  });
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  const tiltX = useMotionValue(0);
+  const tiltY = useMotionValue(0);
+  const cardRotateX = useTransform(tiltY, (v) => -v / 12);
+  const cardRotateY = useTransform(tiltX, (v) => v / 12);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+  const btnX = useMotionValue(0);
+  const btnY = useMotionValue(0);
+  const btnScale = useTransform(btnX, [-20, 20], [0.98, 1.02]);
+
+  const shimmerX = useMotionValue(0);
+  const [focused, setFocused] = useState<string | null>(null);
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+    if (!formData.name.trim()) newErrors.name = "Name is required";
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+      newErrors.email = "Enter a valid email";
+    if (!formData.subject.trim()) newErrors.subject = "Subject is required";
+    if (!formData.message.trim()) newErrors.message = "Message is required";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
 
     try {
-      // Replace with your actual API endpoint
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      })
+      const result = await emailjs.send(
+        "service_48tm6vv",
+        "template_ijxzaxi",
+        {
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+        },
+        "GPglvP4vgVbAQ5kKU"
+      );
 
-      if (response.ok) {
-        setSubmitStatus("success")
-        setFormData({ name: "", email: "", message: "" })
-        setTimeout(() => setSubmitStatus("idle"), 4000)
-      } else {
-        setSubmitStatus("error")
-        setTimeout(() => setSubmitStatus("idle"), 4000)
-      }
+      console.log("Email sent:", result.text);
+
+      // Show success UI message
+      setSuccessMessage("Your message has been sent successfully!");
+
+      // Clear form fields
+      setFormData({ name: "", email: "", subject: "", message: "" });
+
+      // Clear validation errors
+      setErrors({});
     } catch (error) {
-      setSubmitStatus("error")
-      setTimeout(() => setSubmitStatus("idle"), 4000)
-    } finally {
-      setIsSubmitting(false)
+      console.error("Error sending email:", error);
+      setSuccessMessage("Failed to send message. Please try again later.");
+      setTimeout(() => setSuccessMessage(""), 4000);
     }
-  }
+
+
+    setIsSubmitting(false);
+  };
+
+
+  const handleCardPointerMove = (e: React.MouseEvent) => {
+    const el = e.currentTarget as HTMLElement;
+    const rect = el.getBoundingClientRect();
+    const x = e.clientX - (rect.left + rect.width / 2);
+    const y = e.clientY - (rect.top + rect.height / 2);
+    tiltX.set(x / (rect.width / 2));
+    tiltY.set(y / (rect.height / 2));
+    shimmerX.set((x / rect.width) * 100);
+  };
+
+  const handleCardPointerLeave = () => {
+    tiltX.set(0);
+    tiltY.set(0);
+    shimmerX.set(0);
+  };
+
+  const handleBtnMove = (e: React.MouseEvent) => {
+    const el = e.currentTarget as HTMLElement;
+    const rect = el.getBoundingClientRect();
+    const x = e.clientX - (rect.left + rect.width / 2);
+    const y = e.clientY - (rect.top + rect.height / 2);
+    btnX.set(x / 6);
+    btnY.set(y / 6);
+  };
+
+  const handleBtnLeave = () => {
+    btnX.set(0);
+    btnY.set(0);
+  };
+
+  const inputClassBase =
+    "w-full px-4 pt-5 pb-2 text-sm rounded-xl bg-white/60 border backdrop-blur-xl shadow-inner outline-none transition-all duration-200";
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#fcfeff] via-[#eef2ff] to-[#fff6fb] dark:bg-gradient-to-br dark:from-[#071124] dark:via-[#0b1220] dark:to-[#060611] text-slate-900 dark:text-slate-50">
-      {/* Decorative background */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute left-[-16%] top-[-16%] w-[900px] h-[900px] rounded-full bg-gradient-to-tr from-[#9f7aea] to-[#fb7185] opacity-70 blur-[28px] transform -rotate-12 mix-blend-screen" />
-        <div className="absolute right-[-10%] bottom-[-10%] w-[760px] h-[760px] rounded-full bg-gradient-to-tr from-[#34d399] to-[#60a5fa] opacity-55 blur-[32px] mix-blend-screen" />
-      </div>
+    <main className="relative min-h-screen bg-gradient-to-b from-white via-neutral-50 to-neutral-100 overflow-hidden">
 
-      {/* Back to Home */}
+      {/* Floating Back Button */}
+      {/* Floating Back Link (perfect on mobile + desktop) */}
       <motion.div
-        initial={{ opacity: 0, x: -16 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-6 px-6 pt-6"
+        initial={{ opacity: 0, y: -6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="absolute top-6 right-6 md:top-8 md:right-10 z-50"
       >
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 transition-colors"
+          className="flex items-center gap-[6px] text-neutral-600 hover:text-black transition-colors duration-200"
         >
-          <ArrowLeft size={20} />
-          <span>Back to Home</span>
+          <ArrowLeft className="w-4 h-4" />
+          <span className="text-sm font-medium">Back</span>
         </Link>
       </motion.div>
 
-      {/* Hero Section */}
-      <section className="relative w-full py-24 sm:py-32 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
+
+      {/* Ambient orbs */}
+      <motion.div
+        className="absolute top-8 left-8 w-72 h-72 bg-amber-300/18 rounded-full blur-3xl pointer-events-none"
+        animate={{ x: [0, 12, -10, 0], y: [0, 10, -8, 0] }}
+        transition={orbTransition}
+      />
+      <motion.div
+        className="absolute bottom-16 right-8 w-80 h-80 bg-sky-300/14 rounded-full blur-3xl pointer-events-none"
+        animate={{ x: [0, -16, 10, 0], y: [0, -12, 6, 0] }}
+        transition={{ ...orbTransition, duration: 22 }}
+      />
+
+      {/* Hero */}
+      <section className="py-12 md:py-16 text-center">
+        <motion.h1
+          initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="max-w-3xl mx-auto"
+          className="text-4xl md:text-5xl font-extrabold tracking-tight"
         >
-          <h1 className="text-4xl sm:text-6xl font-extrabold mb-6 leading-tight">
-            Get in <span className="bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">Touch</span>
-          </h1>
-          <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-            Have a question or want to collaborate? We'd love to hear from you. Drop us a message and we'll get back to you as soon as possible.
-          </p>
+          Let’s{" "}
+          <span className="bg-gradient-to-r from-amber-400 to-orange-500 text-transparent bg-clip-text">
+            Connect
+          </span>
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.12 }}
+          className="text-neutral-600 mt-3 max-w-2xl mx-auto"
+        >
+          Quick questions, big ideas, or a project brief — we’re ready.
+        </motion.p>
+      </section>
+
+      {/* Main grid */}
+      <section className="px-6 max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 pb-24">
+
+        {/* FORM */}
+        <motion.div
+          onMouseMove={handleCardPointerMove}
+          onMouseLeave={handleCardPointerLeave}
+          style={{ rotateX: cardRotateX, rotateY: cardRotateY, perspective: 1200 }}
+          className="relative rounded-2xl bg-white/70 backdrop-blur-xl border border-white/60 p-6 md:p-8 
+                     shadow-lg hover:shadow-[0_14px_40px_rgba(2,6,23,0.08)] transition-transform"
+        >
+          {/* shimmer overlay */}
+          <motion.div
+            style={{ left: shimmerX }}
+            className="pointer-events-none absolute inset-y-0 -left-24 w-64 bg-gradient-to-r 
+                       from-white/0 via-white/30 to-white/0 opacity-30 blur-xl transform -translate-x-1/2"
+          />
+
+          <h3 className="text-2xl md:text-3xl font-semibold mb-4">Send a Message</h3>
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+
+            {/* FIELDS — unchanged from previous version */}
+            {/** Name */}
+            <div className="relative">
+              <input
+                name="name"
+                placeholder=" "
+                value={formData.name}
+                onChange={(e) => setFormData((s) => ({ ...s, name: e.target.value }))}
+                onFocus={() => setFocused("name")}
+                onBlur={() => focused === "name" && setFocused(null)}
+                className={`${inputClassBase} ${errors.name ? "border-red-400" : "border-neutral-300"}`}
+              />
+              <label className={`absolute left-4 text-xs text-neutral-600 transition-all pointer-events-none 
+                  ${formData.name ? "top-0 text-[11px]" : "top-3"}`}>
+                Full Name
+              </label>
+              <motion.span
+                animate={{ width: focused === "name" ? "100%" : 0, opacity: focused === "name" ? 1 : 0 }}
+                className="block h-[2px] bg-amber-400 absolute bottom-0 left-0 rounded origin-left"
+              />
+              {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
+            </div>
+
+            {/** Email */}
+            <div className="relative">
+              <input
+                name="email"
+                placeholder=" "
+                value={formData.email}
+                onChange={(e) => setFormData((s) => ({ ...s, email: e.target.value }))}
+                onFocus={() => setFocused("email")}
+                onBlur={() => focused === "email" && setFocused(null)}
+                className={`${inputClassBase} ${errors.email ? "border-red-400" : "border-neutral-300"}`}
+              />
+              <label className={`absolute left-4 text-xs text-neutral-600 transition-all pointer-events-none 
+                  ${formData.email ? "top-0 text-[11px]" : "top-3"}`}>
+                Email Address
+              </label>
+              <motion.span
+                animate={{ width: focused === "email" ? "100%" : 0, opacity: focused === "email" ? 1 : 0 }}
+                className="block h-[2px] bg-sky-400 absolute bottom-0 left-0 rounded origin-left"
+              />
+              {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
+            </div>
+
+            {/** Subject */}
+            <div className="relative">
+              <input
+                name="subject"
+                placeholder=" "
+                value={formData.subject}
+                onChange={(e) => setFormData((s) => ({ ...s, subject: e.target.value }))}
+                onFocus={() => setFocused("subject")}
+                onBlur={() => focused === "subject" && setFocused(null)}
+                className={`${inputClassBase} ${errors.subject ? "border-red-400" : "border-neutral-300"}`}
+              />
+              <label className={`absolute left-4 text-xs text-neutral-600 transition-all pointer-events-none 
+                  ${formData.subject ? "top-0 text-[11px]" : "top-3"}`}>
+                Subject
+              </label>
+              <motion.span
+                animate={{ width: focused === "subject" ? "100%" : 0, opacity: focused === "subject" ? 1 : 0 }}
+                className="block h-[2px] bg-amber-400 absolute bottom-0 left-0 rounded origin-left"
+              />
+              {errors.subject && <p className="text-xs text-red-500 mt-1">{errors.subject}</p>}
+            </div>
+
+            {/** Message */}
+            <div className="relative">
+              <textarea
+                name="message"
+                rows={4}
+                placeholder=" "
+                value={formData.message}
+                onChange={(e) => setFormData((s) => ({ ...s, message: e.target.value }))}
+                onFocus={() => setFocused("message")}
+                onBlur={() => focused === "message" && setFocused(null)}
+                className={`${inputClassBase} ${errors.message ? "border-red-400" : "border-neutral-300"} resize-none`}
+              />
+              <label className={`absolute left-4 text-xs text-neutral-600 transition-all pointer-events-none 
+                  ${formData.message ? "top-0 text-[11px]" : "top-3"}`}>
+                Message
+              </label>
+              <motion.span
+                animate={{ width: focused === "message" ? "100%" : 0, opacity: focused === "message" ? 1 : 0 }}
+                className="block h-[2px] bg-emerald-400 absolute bottom-0 left-0 rounded origin-left"
+              />
+              {errors.message && <p className="text-xs text-red-500 mt-1">{errors.message}</p>}
+            </div>
+
+            {/* Button */}
+            <motion.div
+              style={{ x: btnX, y: btnY, scale: btnScale }}
+              onMouseMove={handleBtnMove}
+              onMouseLeave={handleBtnLeave}
+            >
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="relative overflow-hidden w-full py-3 rounded-xl text-sm font-semibold 
+                           shadow-lg bg-gradient-to-r from-amber-400 to-amber-500 text-neutral-900 hover:shadow-xl transition"
+              >
+                <motion.span
+                  style={{ x: shimmerX }}
+                  className="absolute -left-24 top-0 h-full w-36 bg-white/25 mix-blend-screen blur-[6px] pointer-events-none"
+                />
+                <span className="relative z-10 inline-flex items-center gap-2">
+                  <Send className="w-4 h-4" />
+                  {isSubmitting ? "Sending..." : "Send Message"}
+                </span>
+              </Button>
+            </motion.div>
+
+          </form>
+          <div className="w-full text-center">
+            {successMessage && (
+              <motion.p
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-sm mt-3 text-emerald-600 font-medium"
+              >
+                {successMessage}
+              </motion.p>
+            )}
+          </div>
+
         </motion.div>
-      </section>
 
-      {/* Contact Form Section */}
-      <section className="w-full py-12 px-4 sm:px-6 lg:px-8 pb-24">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
-            {/* Left: Form */}
+        {/* CONTACT INFO */}
+        <div className="space-y-5">
+          {[
+            { icon: Mail, title: "Email", text: "contact@prismmindai.com" },
+            { icon: Phone, title: "Phone", text: "+91 (555) 123-4567" },
+            { icon: MapPin, title: "Location", text: "Hyderabad, India" },
+            { icon: Globe, title: "Website", text: "www.prismmindai.com" },
+          ].map((item) => (
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="rounded-3xl p-8 sm:p-10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/30 dark:border-slate-700/40 shadow-lg"
+              key={item.title}
+              whileHover={{ scale: 1.02, y: -4 }}
+              transition={{ duration: 0.22 }}
+              className="p-4 md:p-5 bg-white/75 backdrop-blur-xl rounded-xl border border-neutral-200 shadow-sm flex items-start gap-4"
             >
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-6">Send us a Message</h2>
-
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Name Field */}
-                <div>
-                  <label htmlFor="name" className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-purple-600" />
-                      Full Name
-                    </div>
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="Enter your full name"
-                    required
-                    className="w-full rounded-lg border border-slate-200/50 dark:border-slate-700/50 bg-white/50 dark:bg-slate-800/50 px-4 py-3 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
-                  />
-                </div>
-
-                {/* Email Field */}
-                <div>
-                  <label htmlFor="email" className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                    <div className="flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-purple-600" />
-                      Email Address
-                    </div>
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="you@example.com"
-                    required
-                    className="w-full rounded-lg border border-slate-200/50 dark:border-slate-700/50 bg-white/50 dark:bg-slate-800/50 px-4 py-3 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
-                  />
-                </div>
-
-                {/* Message Field */}
-                <div>
-                  <label htmlFor="message" className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="w-4 h-4 text-purple-600" />
-                      Message
-                    </div>
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    placeholder="Tell us what's on your mind..."
-                    rows={5}
-                    required
-                    className="w-full rounded-lg border border-slate-200/50 dark:border-slate-700/50 bg-white/50 dark:bg-slate-800/50 px-4 py-3 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition resize-none"
-                  />
-                </div>
-
-                {/* Status Messages */}
-                {submitStatus === "success" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="rounded-lg bg-green-100/80 dark:bg-green-900/30 border border-green-300/50 dark:border-green-700/50 p-4 text-green-800 dark:text-green-200"
-                  >
-                    ✓ Message sent successfully! We'll be in touch soon.
-                  </motion.div>
-                )}
-
-                {submitStatus === "error" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="rounded-lg bg-red-100/80 dark:bg-red-900/30 border border-red-300/50 dark:border-red-700/50 p-4 text-red-800 dark:text-red-200"
-                  >
-                    ✗ Something went wrong. Please try again.
-                  </motion.div>
-                )}
-
-                {/* Send Button */}
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold py-3 rounded-lg hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-5 h-5" />
-                        Send Message
-                      </>
-                    )}
-                  </Button>
-                </motion.div>
-              </form>
-            </motion.div>
-
-            {/* Right: Contact Info & Social */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="flex flex-col justify-between"
-            >
-              {/* Contact Info */}
-              <div className="rounded-3xl p-8 sm:p-10 bg-gradient-to-br from-white/70 to-white/50 dark:from-slate-900/60 dark:to-slate-900/40 backdrop-blur-xl border border-slate-200/30 dark:border-slate-700/40 shadow-lg mb-8">
-                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-8">Let's Connect</h2>
-
-                <div className="space-y-6">
-                  {/* Email */}
-                  <div>
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white">
-                        <Mail className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">Email</p>
-                        <a href="mailto:contact@prismmindai.com" className="text-lg font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 transition">
-                          contact@prismmindai.com
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Phone */}
-                  <div>
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white">
-                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">Phone</p>
-                        <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">+91 xxxxxxxxxx</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Location */}
-                  <div>
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-white">
-                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">Location</p>
-                        <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">Telangana, IND</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <div className="w-12 h-12 rounded-xl bg-amber-300/20 flex items-center justify-center">
+                <item.icon className="w-5 h-5 text-amber-500" />
               </div>
-
-              {/* Social Media */}
-              <div className="rounded-3xl p-8 sm:p-10 bg-gradient-to-br from-white/70 to-white/50 dark:from-slate-900/60 dark:to-slate-900/40 backdrop-blur-xl border border-slate-200/30 dark:border-slate-700/40 shadow-lg">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-6">Follow Our Work</h3>
-
-                <div className="grid grid-cols-3 gap-4">
-                  {/* Instagram */}
-                  <motion.a
-                    href="https://instagram.com/prismmindai"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex flex-col items-center justify-center p-5 rounded-2xl bg-gradient-to-br from-pink-500/20 to-rose-500/20 border border-pink-300/30 dark:border-pink-700/30 hover:border-pink-500/60 transition-all group"
-                  >
-                    <Instagram className="w-7 h-7 text-pink-600 dark:text-pink-400 group-hover:scale-110 transition mb-2" />
-                    <span className="text-xs font-medium text-slate-700 dark:text-slate-300">Instagram</span>
-                  </motion.a>
-
-                  {/* Twitter */}
-                  <motion.a
-                    href="https://twitter.com/prismmindai"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex flex-col items-center justify-center p-5 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-300/30 dark:border-blue-700/30 hover:border-blue-500/60 transition-all group"
-                  >
-                    <Twitter className="w-7 h-7 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition mb-2" />
-                    <span className="text-xs font-medium text-slate-700 dark:text-slate-300">Twitter</span>
-                  </motion.a>
-
-                  {/* LinkedIn */}
-                  <motion.a
-                    href="https://linkedin.com/company/prismmindai"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex flex-col items-center justify-center p-5 rounded-2xl bg-gradient-to-br from-blue-700/20 to-blue-600/20 border border-blue-400/30 dark:border-blue-700/30 hover:border-blue-600/60 transition-all group"
-                  >
-                    <Linkedin className="w-7 h-7 text-blue-700 dark:text-blue-500 group-hover:scale-110 transition mb-2" />
-                    <span className="text-xs font-medium text-slate-700 dark:text-slate-300">LinkedIn</span>
-                  </motion.a>
-                </div>
+              <div>
+                <h4 className="font-semibold text-neutral-900">{item.title}</h4>
+                <p className="text-neutral-600 text-sm">{item.text}</p>
               </div>
             </motion.div>
-          </div>
+          ))}
         </div>
+
       </section>
 
-      {/* Footer */}
-      <footer className="backdrop-blur-xl bg-white/30 dark:bg-slate-900/40 border-t border-slate-200/30 dark:border-slate-700/40 py-8 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center text-sm text-slate-700 dark:text-slate-300 gap-3">
-          <p>© {new Date().getFullYear()} PrismMinds — Enhancing Human Understanding.</p>
-          <div className="flex gap-6">
-            <Link href="#" className="hover:text-purple-600 dark:hover:text-purple-400 transition">
-              About
-            </Link>
-            <Link href="#" className="hover:text-purple-600 dark:hover:text-purple-400 transition">
-              Privacy
-            </Link>
-            <Link href="/blogs" className="hover:text-purple-600 dark:hover:text-purple-400 transition">
-              Blog
-            </Link>
-          </div>
-        </div>
+      <footer className="text-center py-8 text-neutral-500">
+        © 2025 PrismMinds
       </footer>
     </main>
-  )
+  );
 }
+
+// "use client";
+
+// import { useState } from "react";
+// import Link from "next/link";
+// import { Mail, Phone, MapPin, Send, Globe } from "lucide-react";
+// import { motion } from "framer-motion";
+// import { Button } from "@/components/ui/button";
+
+// interface FormData {
+//   name: string;
+//   email: string;
+//   subject: string;
+//   message: string;
+// }
+
+// interface FormErrors {
+//   name?: string;
+//   email?: string;
+//   subject?: string;
+//   message?: string;
+// }
+
+// const orbTransition = {
+//   duration: 18,
+//   repeat: Infinity,
+//   repeatType: "reverse" as const,
+//   ease: "easeInOut" as const,
+// };
+
+// export default function ContactPage() {
+//   const [formData, setFormData] = useState<FormData>({
+//     name: "",
+//     email: "",
+//     subject: "",
+//     message: "",
+//   });
+
+//   const [errors, setErrors] = useState<FormErrors>({});
+//   const [isSubmitting] = useState(false);
+
+//   const validateForm = (): boolean => {
+//     const newErrors: FormErrors = {};
+
+//     if (!formData.name.trim()) newErrors.name = "Name is required";
+//     if (!formData.email.trim()) newErrors.email = "Email is required";
+//     if (!formData.subject.trim()) newErrors.subject = "Subject is required";
+//     if (!formData.message.trim()) newErrors.message = "Message is required";
+
+//     setErrors(newErrors);
+//     return Object.keys(newErrors).length === 0;
+//   };
+
+//   return (
+//     <main className="relative min-h-screen bg-gradient-to-b from-white via-neutral-50 to-neutral-100 overflow-hidden">
+
+//       {/* Animated Background Orbs */}
+//       <motion.div
+//         className="absolute top-10 left-10 w-72 h-72 bg-amber-300/20 rounded-full blur-3xl"
+//         animate={{ x: [0, 18, -12, 0], y: [0, 14, -10, 0] }}
+//         transition={orbTransition}
+//       />
+
+//       <motion.div
+//         className="absolute bottom-20 right-10 w-80 h-80 bg-sky-300/20 rounded-full blur-3xl"
+//         animate={{ x: [0, -22, 14, 0], y: [0, -18, 8, 0] }}
+//         transition={{ ...orbTransition, duration: 22 }}
+//       />
+
+//       {/* Header */}
+//       <header className="sticky top-0 backdrop-blur-xl bg-white/70 border-b border-neutral-200 z-50">
+//         <div className="max-w-6xl mx-auto py-4 px-6 flex justify-between">
+//           <div />
+//           <Link
+//             href="/"
+//             className="text-neutral-600 hover:text-black flex items-center gap-2 transition"
+//           >
+//             <span className="text-xl">←</span> Back
+//           </Link>
+//         </div>
+//       </header>
+
+//       {/* Hero Section */}
+//       <section className="py-16 text-center">
+//         <motion.h1
+//           initial={{ opacity: 0, y: 20 }}
+//           animate={{ opacity: 1, y: 0 }}
+//           className="text-5xl font-bold"
+//         >
+//           Let’s{" "}
+//           <span className="bg-gradient-to-r from-amber-400 to-orange-500 text-transparent bg-clip-text">
+//             Connect
+//           </span>
+//         </motion.h1>
+
+//         <motion.p
+//           initial={{ opacity: 0 }}
+//           animate={{ opacity: 1 }}
+//           transition={{ delay: 0.2 }}
+//           className="text-neutral-600 mt-4"
+//         >
+//           We’re here to help build great things together.
+//         </motion.p>
+//       </section>
+
+//       {/* Main Content */}
+//       <section className="px-6 max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 pb-20">
+
+//         {/* ================= COMPACT FORM UI ================= */}
+//         <motion.div
+//           initial={{ opacity: 0, y: 30 }}
+//           whileInView={{ opacity: 1, y: 0 }}
+//           transition={{ duration: 0.6 }}
+//           className="relative backdrop-blur-xl bg-white/70 shadow-lg p-8 rounded-2xl border border-white/50
+//                      hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+//         >
+//           <h2 className="text-2xl font-semibold mb-6 text-neutral-900">Send a Message</h2>
+
+//           <form className="flex flex-col gap-5">
+
+//             {/* NAME */}
+//             <div className="relative">
+//               <input
+//                 type="text"
+//                 name="name"
+//                 placeholder=" "
+//                 value={formData.name}
+//                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+//                 className={`w-full px-4 pt-5 pb-2 text-sm rounded-xl bg-white/60 border
+//                 ${errors.name ? "border-red-400" : "border-neutral-300"}
+//                 backdrop-blur-xl shadow-inner outline-none focus:ring-2
+//                 focus:ring-amber-300/50 transition`}
+//               />
+//               <label className="absolute left-4 top-1.5 text-neutral-600 text-xs pointer-events-none">
+//                 Full Name
+//               </label>
+//             </div>
+
+//             {/* EMAIL */}
+//             <div className="relative">
+//               <input
+//                 type="email"
+//                 name="email"
+//                 placeholder=" "
+//                 value={formData.email}
+//                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+//                 className={`w-full px-4 pt-5 pb-2 text-sm rounded-xl bg-white/60 border
+//                 ${errors.email ? "border-red-400" : "border-neutral-300"}
+//                 backdrop-blur-xl shadow-inner outline-none focus:ring-2
+//                 focus:ring-amber-300/50 transition`}
+//               />
+//               <label className="absolute left-4 top-1.5 text-neutral-600 text-xs pointer-events-none">
+//                 Email Address
+//               </label>
+//             </div>
+
+//             {/* SUBJECT */}
+//             <div className="relative">
+//               <input
+//                 type="text"
+//                 name="subject"
+//                 placeholder=" "
+//                 value={formData.subject}
+//                 onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+//                 className={`w-full px-4 pt-5 pb-2 text-sm rounded-xl bg-white/60 border
+//                 ${errors.subject ? "border-red-400" : "border-neutral-300"}
+//                 backdrop-blur-xl shadow-inner outline-none focus:ring-2
+//                 focus:ring-amber-300/50 transition`}
+//               />
+//               <label className="absolute left-4 top-1.5 text-neutral-600 text-xs pointer-events-none">
+//                 Subject
+//               </label>
+//             </div>
+
+//             {/* MESSAGE */}
+//             <div className="relative">
+//               <textarea
+//                 name="message"
+//                 rows={4}
+//                 placeholder=" "
+//                 value={formData.message}
+//                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+//                 className={`w-full px-4 pt-6 pb-2 text-sm rounded-xl bg-white/60 border
+//                 ${errors.message ? "border-red-400" : "border-neutral-300"}
+//                 backdrop-blur-xl shadow-inner outline-none focus:ring-2
+//                 focus:ring-amber-300/50 transition resize-none`}
+//               />
+//               <label className="absolute left-4 top-2 text-neutral-600 text-xs pointer-events-none">
+//                 Message
+//               </label>
+//             </div>
+
+//             {/* SUBMIT BUTTON */}
+//             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
+//               <Button
+//                 disabled={isSubmitting}
+//                 className="w-full bg-gradient-to-r from-amber-400 to-amber-500 text-neutral-900 py-3
+//                            rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition"
+//               >
+//                 <Send className="w-4 h-4 mr-2" /> Send Message
+//               </Button>
+//             </motion.div>
+//           </form>
+//         </motion.div>
+
+//         {/* Contact Info Cards */}
+//         <div className="space-y-6">
+//           {[
+//             { icon: Mail, title: "Email", text: "contact@prismmindai.com" },
+//             { icon: Phone, title: "Phone", text: "+91 (555) 123-4567" },
+//             { icon: MapPin, title: "Location", text: "Hyderabad, India" },
+//             { icon: Globe, title: "Website", text: "www.prismmindai.com" },
+//           ].map((item) => (
+//             <motion.div
+//               key={item.title}
+//               whileHover={{ scale: 1.03, y: -4 }}
+//               className="p-6 bg-white/70 backdrop-blur-xl border border-neutral-200 rounded-2xl shadow-md hover:shadow-xl cursor-pointer transition"
+//             >
+//               <div className="flex gap-4 items-start">
+//                 <div className="w-12 h-12 rounded-xl bg-amber-300/20 flex items-center justify-center">
+//                   <item.icon className="w-6 h-6 text-amber-500" />
+//                 </div>
+//                 <div>
+//                   <h3 className="font-semibold">{item.title}</h3>
+//                   <p className="text-neutral-600">{item.text}</p>
+//                 </div>
+//               </div>
+//             </motion.div>
+//           ))}
+//         </div>
+//       </section>
+
+//       <footer className="text-center py-8 text-neutral-500">
+//         © 2025 PrismMinds
+//       </footer>
+//     </main>
+//   );
+// }

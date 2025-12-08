@@ -66,142 +66,204 @@ export default function FeaturesPage() {
             />
           </motion.div>
         </div>
-        <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-rose-500 via-teal-500 to-indigo-500 bg-clip-text text-transparent mb-4">
+        <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-rose-500 via-teal-500 to-indigo-500 bg-clip-text text-transparent mb-4 mt-[-50px]">
           Discover the Power of PrismMinds
         </h1>
         <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed max-w-2xl mx-auto">
           The AI-driven platform turning debates into structured clarity. Learn faster, think deeper, and explore multiple perspectives effortlessly.
         </p>
       </motion.header>
-
-      {/* Value Cards */}
+      {/* VIDEO SECTION – Clean Centered Viewer */}
       <motion.section
-        initial={{ opacity: 0, y: 40 }}
+        initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 0.6 }}
         viewport={{ once: true }}
-        className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-24 max-w-6xl mx-auto"
+        className="max-w-4xl mx-auto mb-20 px-2"
       >
-        {[
-          {
-            icon: <Sparkles size={28} className="text-rose-500" />,
-            title: "AI-Enhanced Debates",
-            desc: "Our dual-persona model simulates diverse viewpoints, powered by academic reasoning and logical contrast.",
-          },
-          {
-            icon: <Target size={28} className="text-teal-500" />,
-            title: "Focus & Clarity",
-            desc: "We distill complex arguments into bite-sized summaries and highlight key takeaways automatically.",
-          },
-          {
-            icon: <Layers size={28} className="text-indigo-500" />,
-            title: "Multi-Layer Understanding",
-            desc: "From quick overviews to deep dives — control how deep you want to go in a topic.",
-          },
-        ].map((item, i) => (
-          <motion.div
-            key={i}
-            whileHover={{ y: -8 }}
-            transition={{ type: "spring", stiffness: 150 }}
-            className="p-8 rounded-2xl bg-white/70 dark:bg-gray-800/50 backdrop-blur-md border border-gray-200/30 dark:border-gray-700/30 shadow-lg hover:shadow-xl transition"
-          >
-            <div className="flex justify-center mb-4">{item.icon}</div>
-            <h3 className="text-xl font-semibold mb-2 text-center bg-gradient-to-r from-rose-500 via-teal-500 to-indigo-500 bg-clip-text text-transparent">
-              {item.title}
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 text-center">{item.desc}</p>
-          </motion.div>
-        ))}
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          transition={{ type: "spring", stiffness: 140 }}
+          className="rounded-2xl overflow-hidden shadow-xl border border-gray-200/30 
+               dark:border-gray-700/30 bgw-white/40 dark:bg-gray-800/40 backdrop-blur-md"
+        >
+          <div className="relative aspect-video w-full">
+            <iframe
+              className="w-full h-full"
+              src="https://www.youtube.com/embed/kmZmHXnnvzs"
+              allowFullScreen
+            ></iframe>
+          </div>
+        </motion.div>
       </motion.section>
 
-      {/* Workflow Section */}
+
+      {/* Value Cards */}
+      {/* Value Cards — New Futuristic Layout */}
       <motion.section
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="max-w-5xl mx-auto mb-24 text-center"
+        className="max-w-6xl mx-auto mb-28"
       >
-        <h2 className="text-3xl font-semibold mb-10 text-indigo-600">
-          How It Works — From Idea to Insight
+        <h2 className="text-3xl font-semibold text-center mb-14 bg-gradient-to-r from-rose-500 via-teal-500 to-indigo-500 bg-clip-text text-transparent">
+          Why PrismMinds Stands Out
         </h2>
-        <div className="grid sm:grid-cols-3 gap-10">
+
+        <div className="grid md:grid-cols-3 gap-10">
           {[
             {
-              icon: <BookOpen size={28} className="text-rose-500" />,
-              title: "1. Choose & Define",
-              desc: "Pick your topic and customize AI personas representing different schools of thought.",
+              icon: <Sparkles size={28} />,
+              title: "AI-Enhanced Debates",
+              desc: "Dual-persona reasoning that explores multiple viewpoints with structured logic.",
             },
             {
-              icon: <Timer size={28} className="text-teal-500" />,
-              title: "2. Simulate Debate",
-              desc: "AI personas engage in structured argument, citing data and reasoning patterns.",
+              icon: <Target size={28} />,
+              title: "Focus & Clarity",
+              desc: "Complex arguments distilled into clean summaries and focused insights.",
             },
             {
-              icon: <Share2 size={28} className="text-indigo-500" />,
-              title: "3. Summarize & Export",
-              desc: "Generate clean summaries or export full transcripts as polished PDFs.",
+              icon: <Layers size={28} />,
+              title: "Layered Understanding",
+              desc: "Choose the depth — from quick takeaways to deep analytical dives.",
             },
-          ].map((s, i) => (
+          ].map((item, i) => (
             <motion.div
               key={i}
-              whileHover={{ scale: 1.05 }}
-              className="p-6 rounded-xl bg-gradient-to-br from-white/80 to-gray-50/40 dark:from-slate-800/50 dark:to-slate-900/40 border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-all"
+              whileHover={{ y: -5 }}
+              transition={{ type: "spring", stiffness: 160 }}
+              className="relative p-8 rounded-2xl bg-white/50 dark:bg-gray-900/40 shadow-xl border border-gray-200/40 dark:border-gray-700/40 backdrop-blur-xl"
             >
-              <div className="flex justify-center mb-3">{s.icon}</div>
-              <h3 className="text-lg font-semibold text-indigo-600 mb-2">{s.title}</h3>
-              <p className="text-gray-600 dark:text-gray-300 text-sm">{s.desc}</p>
+              <div className="flex justify-center mb-4">
+                <div className="p-3 rounded-full bg-gray-100 dark:bg-gray-800 shadow-sm text-indigo-600 dark:text-indigo-300">
+                  {item.icon}
+                </div>
+              </div>
+
+              <h3 className="text-xl font-semibold text-center mb-2 bg-gradient-to-r from-rose-500 via-teal-500 to-indigo-500 bg-clip-text text-transparent">
+                {item.title}
+              </h3>
+              <p className="text-gray-700 dark:text-gray-300 text-center">
+                {item.desc}
+              </p>
             </motion.div>
           ))}
         </div>
       </motion.section>
 
-      {/* Advanced Features */}
+
+      {/* Workflow Section */}
+      {/* Workflow — Sleek Step Layout */}
       <motion.section
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="max-w-6xl mx-auto mb-24"
+        className="max-w-5xl mx-auto mb-28"
       >
-        <h2 className="text-3xl font-semibold text-center mb-12 text-indigo-600">
-          Advanced Capabilities
+        <h2 className="text-3xl font-semibold text-center mb-14 bg-gradient-to-r from-indigo-500 via-teal-500 to-rose-500 bg-clip-text text-transparent">
+          How PrismMinds Works
         </h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
+
+        <div className="grid md:grid-cols-3 gap-10">
           {[
             {
-              icon: <Users size={26} className="text-rose-500" />,
+              icon: <BookOpen size={28} />,
+              title: "Choose & Define",
+              desc: "Select your topic and configure debate personas.",
+            },
+            {
+              icon: <Timer size={28} />,
+              title: "Simulate Debate",
+              desc: "AI personas engage in structured reasoning.",
+            },
+            {
+              icon: <Share2 size={28} />,
+              title: "Summarize & Export",
+              desc: "Get clean summaries or export as polished PDFs.",
+            },
+          ].map((step, i) => (
+            <motion.div
+              key={i}
+              whileHover={{ scale: 1.03 }}
+              className="p-8 rounded-xl bg-white/50 dark:bg-gray-900/40 backdrop-blur-xl border border-gray-200/40 dark:border-gray-700/40 shadow-lg text-center"
+            >
+              <div className="flex justify-center mb-4">
+                <div className="p-3 rounded-xl bg-white/20 dark:bg-white/5 backdrop-blur-md shadow-sm border border-white/30">
+                  {step.icon}
+                </div>
+              </div>
+
+              <h3 className="text-lg font-semibold mb-2 text-indigo-600 dark:text-indigo-300">
+                {step.title}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
+                {step.desc}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+      </motion.section>
+
+
+      {/* Advanced Features */}
+      {/* Advanced Capabilities — New Premium Frosted Style */}
+      <motion.section
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+        className="max-w-6xl mx-auto mb-28"
+      >
+        <h2 className="text-3xl font-semibold text-center mb-14 bg-gradient-to-r from-teal-500 via-indigo-500 to-rose-500 bg-clip-text text-transparent">
+          Advanced Capabilities
+        </h2>
+
+        <div className="grid md:grid-cols-3 gap-10">
+          {[
+            {
+              icon: <Users size={24} className="text-rose-500" />,
               title: "Persona Diversity",
-              desc: "Choose debate tones: academic, journalistic, political, or philosophical for richer context.",
+              desc: "Choose tones: academic, journalistic, political, or philosophical for richer context.",
             },
             {
-              icon: <Lightbulb size={26} className="text-teal-500" />,
+              icon: <Lightbulb size={24} className="text-teal-500" />,
               title: "Smart Summaries",
-              desc: "AI moderator wraps every session with crisp, unbiased conclusions.",
+              desc: "AI moderator synthesizes unbiased conclusions automatically.",
             },
             {
-              icon: <ShieldCheck size={26} className="text-indigo-500" />,
+              icon: <ShieldCheck size={24} className="text-indigo-500" />,
               title: "Ethical Reasoning",
-              desc: "Each debate respects fairness principles and identifies potential biases.",
+              desc: "Built-in fairness checks that identify potential bias in arguments.",
             },
           ].map((f, i) => (
             <motion.div
               key={i}
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 200 }}
-              className="p-8 rounded-2xl border border-gray-200/30 dark:border-gray-700/30 bg-white/70 dark:bg-gray-800/50 shadow-lg hover:shadow-xl backdrop-blur-md transition"
+              whileHover={{ scale: 1.04 }}
+              transition={{ type: "spring", stiffness: 180 }}
+              className="p-8 rounded-2xl bg-white/40 dark:bg-gray-900/40 border border-white/30 dark:border-gray-700/30 backdrop-blur-xl shadow-lg hover:shadow-xl transition"
             >
-              <div className="flex items-center gap-3 mb-3">
-                {f.icon}
-                <h3 className="text-lg font-semibold bg-gradient-to-r from-rose-500 via-teal-500 to-indigo-500 bg-clip-text text-transparent">
+              {/* ICON — Frosted Glass Badge */}
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 rounded-xl bg-white/30 dark:bg-gray-800/40 backdrop-blur-md border border-white/40 dark:border-gray-700/40 shadow-sm">
+                  {f.icon}
+                </div>
+
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                   {f.title}
                 </h3>
               </div>
-              <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">{f.desc}</p>
+
+              <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                {f.desc}
+              </p>
             </motion.div>
           ))}
         </div>
       </motion.section>
+
+
 
       {/* FAQ Accordion */}
       <motion.section
