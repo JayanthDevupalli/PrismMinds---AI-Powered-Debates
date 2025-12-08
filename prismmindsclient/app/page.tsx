@@ -392,21 +392,30 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+      {/* Contact Us Showcase */}
+<section className="py-20 px-6 sm:px-8">
+  <div className="max-w-4xl mx-auto text-center">
+    <h2 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">
+      Need Help or Want to Collaborate?
+    </h2>
 
-      {/* CTA Section */}
-      <section className="pb-24 px-6">
-        <div className="max-w-3xl mx-auto text-center backdrop-blur-lg bg-white/40 dark:bg-slate-800/40 rounded-3xl border border-slate-200/30 dark:border-slate-700/40 shadow-lg p-10">
-          <h3 className="text-2xl font-bold mb-3">Join the Conversation</h3>
-          <p className="text-slate-600 dark:text-slate-300 mb-6">
-            Explore perspectives. Challenge assumptions. Discover truth through AI-driven dialogue.
-          </p>
-          <Link href="/register">
-            <Button size="lg" className="bg-gradient-to-r from-sky-500 to-pink-500 text-white shadow-md">
-              Create Account
-            </Button>
-          </Link>
-        </div>
-      </section>
+    <p className="mt-4 text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+      Our team would love to hear from you — questions, ideas, or partnership opportunities.
+    </p>
+
+    <div className="mt-8">
+      <Link href="/contactus">
+        <Button
+          size="lg"
+          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-xl hover:scale-105 transition-all duration-300"
+        >
+          Contact Us
+        </Button>
+      </Link>
+    </div>
+  </div>
+</section>
+
 
       {/* Footer */}
       <footer className="backdrop-blur-xl bg-white/30 dark:bg-slate-900/40 border-t border-slate-200/30 dark:border-slate-700/40 py-8 px-6">
