@@ -79,7 +79,7 @@ export default function Home() {
 
       {/* Frosted Glass Navbar */}
       <nav className="fixed top-0 w-full z-50 bg-white/30 dark:bg-slate-900/40 backdrop-blur-lg border-b border-slate-200/30 dark:border-slate-700/50">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 py-3">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 py-3 md:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 bg-gradient-to-tr from-purple-400 to-pink-400 rounded-xl flex items-center justify-center text-white font-bold shadow">
@@ -214,7 +214,7 @@ export default function Home() {
               variant="ghost"
               className="relative overflow-hidden border border-purple-300/20 text-slate-800 dark:text-slate-200 hover:text-white hover:border-transparent transition-all duration-300 hover:shadow-[0_0_25px_rgba(168,85,247,0.4)] group"
             >
-              <span className="relative z-10">Learn More</span>
+              <span className="relative z-10">Know More</span>
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-0"></div>
             </Button>
           </Link>

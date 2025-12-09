@@ -52,6 +52,7 @@ export default function DashboardPage() {
   const [scrollProgress, setScrollProgress] = useState(0)
   const transcriptEndRef = useRef<HTMLDivElement>(null)
   const modalContentRef = useRef<HTMLDivElement>(null)
+  const [debateMode, setDebateMode] = useState<"ai" | "human">("ai");
 
   const [form, setForm] = useState({
     topic: "",
@@ -304,11 +305,11 @@ export default function DashboardPage() {
                 } catch (err) {
                   console.error('Failed to load transcripts:', err)
                 } finally {
-                        setLoading(false)
-                        setCurrentView("transcripts")
-                        setDisplayedCount(ITEMS_PER_PAGE)
-                        setSearchQuery("")
-                        setTranscriptIndex(0)
+                  setLoading(false)
+                  setCurrentView("transcripts")
+                  setDisplayedCount(ITEMS_PER_PAGE)
+                  setSearchQuery("")
+                  setTranscriptIndex(0)
                 }
               }}
               className="flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 border border-border/50 transition-all text-xs sm:text-sm font-medium text-foreground"
@@ -405,11 +406,11 @@ export default function DashboardPage() {
               </motion.div>
             ) : (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3 sm:space-y-4">
-                <motion.div 
+                <motion.div
                   className="flex items-center justify-between gap-4"
                   layout
                 >
-                  <motion.div 
+                  <motion.div
                     className="text-sm text-muted-foreground"
                     key={`page-${transcriptIndex}`}
                     initial={{ opacity: 0, y: -5 }}
@@ -441,7 +442,7 @@ export default function DashboardPage() {
                 </motion.div>
 
                 {/* Transcript cards grid (up to 5 per page) */}
-                <motion.div 
+                <motion.div
                   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"
                   layout
                   key={`grid-${transcriptIndex}`}
@@ -454,7 +455,7 @@ export default function DashboardPage() {
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                        transition={{ 
+                        transition={{
                           type: "spring",
                           stiffness: 300,
                           damping: 25,
@@ -500,221 +501,302 @@ export default function DashboardPage() {
 
         {currentView !== "transcripts" && (
           <>
-            {/* Create Debate Section */}
+            {/* Debate Mode Selector */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="mb-8 sm:mb-12"
+              className="w-full flex justify-center mb-8"
             >
-              <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-900/60 dark:to-slate-900/30 rounded-2xl sm:rounded-3xl border border-border/50 backdrop-blur-xl p-6 sm:p-8 shadow-xl shadow-primary/5">
-                <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                  <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-base sm:text-lg flex-shrink-0">
-                    <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                  </span>
-                  Start a New Debate
-                </h2>
+              <div className="flex items-center bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl 
+                rounded-full border border-border/50 shadow-lg px-2 py-2 gap-2">
 
-                <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-                  <motion.input
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.15 }}
-                    type="text"
-                    placeholder="What would you like to debate about?"
-                    value={form.topic}
-                    onChange={(e) => setForm({ ...form, topic: e.target.value })}
-                    className="w-full px-4 sm:px-5 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl border border-border/50 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm placeholder:text-muted-foreground font-medium"
-                    required
-                  />
+                {/* AI → AI */}
+                <motion.button
+                  onClick={() => setDebateMode("ai")}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className={`px-5 py-2 rounded-full text-sm font-semibold transition-all
+      ${debateMode === "ai"
+                      ? "bg-gradient-to-r from-primary to-accent text-white shadow-md"
+                      : "text-muted-foreground hover:text-foreground"
+                    }`}
+                >
+                  AI → AI Debate
+                </motion.button>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    <motion.input
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2 }}
-                      type="text"
-                      placeholder="First Persona"
-                      value={form.personaA}
-                      onChange={(e) => setForm({ ...form, personaA: e.target.value })}
-                      className="px-4 sm:px-5 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl border border-border/50 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm placeholder:text-muted-foreground"
-                      required
-                    />
-                    <motion.input
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.25 }}
-                      type="text"
-                      placeholder="Second Persona"
-                      value={form.personaB}
-                      onChange={(e) => setForm({ ...form, personaB: e.target.value })}
-                      className="px-4 sm:px-5 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl border border-border/50 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm placeholder:text-muted-foreground"
-                      required
-                    />
-                  </div>
+                {/* Human → AI */}
+                <motion.button
+                  onClick={() => setDebateMode("human")}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className={`px-5 py-2 rounded-full text-sm font-semibold transition-all
+      ${debateMode === "human"
+                      ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md"
+                      : "text-muted-foreground hover:text-foreground"
+                    }`}
+                >
+                  Human → AI Debate
+                </motion.button>
 
-                  <motion.input
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    type="text"
-                    placeholder="Duration (MM:SS)"
-                    pattern="^([0-5]?[0-9]):([0-5][0-9])$"
-                    value={form.duration}
-                    onChange={(e) => {
-                      const value = e.target.value
-                      // Allow typing partial valid patterns like "0" or "01:"
-                      if (/^(\d{0,2}:?\d{0,2})$/.test(value)) {
-                        setForm({ ...form, duration: value })
-                      }
-                    }}
-                    className="w-full px-4 sm:px-5 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl border border-border/50 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm placeholder:text-muted-foreground"
-                    required
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Example: <span className="font-semibold">01:00</span> = 1 minute, <span className="font-semibold">02:30</span> = 2.5 minutes
-                  </p>
-
-
-                  <motion.button
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.35 }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    type="submit"
-                    disabled={creating}
-                    className="w-full py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-blue-500 via-sky-500 to-primary bg-size-200 hover:bg-pos-right text-white font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 text-sm sm:text-base"
-                  >
-                    {creating ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY }}
-                          className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
-                        />
-                        Creating...
-                      </span>
-                    ) : (
-                      <span className="flex items-center justify-center gap-2">
-                        <Rocket className="w-4 h-4" />
-                        Start Debate
-                      </span>
-                    )}
-                  </motion.button>
-                </form>
               </div>
             </motion.div>
 
-            {/* Debates Grid */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
-              <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-secondary to-accent flex items-center justify-center text-base sm:text-lg flex-shrink-0">
-                  <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                </span>
-                Recent Debates
-              </h2>
-
-              {loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                  {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div
-                      key={i}
-                      className="h-48 sm:h-64 rounded-lg sm:rounded-2xl bg-gradient-to-br from-muted to-muted/50 animate-pulse"
-                    />
-                  ))}
-                </div>
-              ) : recentDebates.length === 0 ? (
+            <AnimatePresence mode="wait">
+              {debateMode === "ai" ? (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-12 sm:py-16 px-4 sm:px-6 rounded-lg sm:rounded-2xl border-2 border-dashed border-border/30"
+                  key="ai-mode"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-                    <SparklesIcon className="w-6 h-6 sm:w-8 sm:h-8 text-primary/50" />
-                  </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    No debates created yet. Start one to begin!
-                  </p>
+                  {/* Create Debate Section */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="mb-8 sm:mb-12"
+                  >
+                    <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-900/60 dark:to-slate-900/30 rounded-2xl sm:rounded-3xl border border-border/50 backdrop-blur-xl p-6 sm:p-8 shadow-xl shadow-primary/5">
+                      <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                        <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-base sm:text-lg flex-shrink-0">
+                          <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                        </span>
+                        Start a New Debate
+                      </h2>
+
+                      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+                        <motion.input
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.15 }}
+                          type="text"
+                          placeholder="What would you like to debate about?"
+                          value={form.topic}
+                          onChange={(e) => setForm({ ...form, topic: e.target.value })}
+                          className="w-full px-4 sm:px-5 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl border border-border/50 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm placeholder:text-muted-foreground font-medium"
+                          required
+                        />
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                          <motion.input
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                            type="text"
+                            placeholder="First Persona"
+                            value={form.personaA}
+                            onChange={(e) => setForm({ ...form, personaA: e.target.value })}
+                            className="px-4 sm:px-5 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl border border-border/50 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm placeholder:text-muted-foreground"
+                            required
+                          />
+                          <motion.input
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.25 }}
+                            type="text"
+                            placeholder="Second Persona"
+                            value={form.personaB}
+                            onChange={(e) => setForm({ ...form, personaB: e.target.value })}
+                            className="px-4 sm:px-5 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl border border-border/50 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm placeholder:text-muted-foreground"
+                            required
+                          />
+                        </div>
+
+                        <motion.input
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 }}
+                          type="text"
+                          placeholder="Duration (MM:SS)"
+                          pattern="^([0-5]?[0-9]):([0-5][0-9])$"
+                          value={form.duration}
+                          onChange={(e) => {
+                            const value = e.target.value
+                            // Allow typing partial valid patterns like "0" or "01:"
+                            if (/^(\d{0,2}:?\d{0,2})$/.test(value)) {
+                              setForm({ ...form, duration: value })
+                            }
+                          }}
+                          className="w-full px-4 sm:px-5 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl border border-border/50 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm placeholder:text-muted-foreground"
+                          required
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Example: <span className="font-semibold">01:00</span> = 1 minute, <span className="font-semibold">02:30</span> = 2.5 minutes
+                        </p>
+
+
+                        <motion.button
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.35 }}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          type="submit"
+                          disabled={creating}
+                          className="w-full py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-blue-500 via-sky-500 to-primary bg-size-200 hover:bg-pos-right text-white font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 text-sm sm:text-base"
+                        >
+                          {creating ? (
+                            <span className="flex items-center justify-center gap-2">
+                              <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY }}
+                                className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                              />
+                              Creating...
+                            </span>
+                          ) : (
+                            <span className="flex items-center justify-center gap-2">
+                              <Rocket className="w-4 h-4" />
+                              Start Debate
+                            </span>
+                          )}
+                        </motion.button>
+                      </form>
+                    </div>
+                  </motion.div>
+
+                  {/* Debates Grid */}
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+                    <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                      <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-secondary to-accent flex items-center justify-center text-base sm:text-lg flex-shrink-0">
+                        <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                      </span>
+                      Recent Debates
+                    </h2>
+
+                    {loading ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                        {[1, 2, 3, 4, 5, 6].map((i) => (
+                          <div
+                            key={i}
+                            className="h-48 sm:h-64 rounded-lg sm:rounded-2xl bg-gradient-to-br from-muted to-muted/50 animate-pulse"
+                          />
+                        ))}
+                      </div>
+                    ) : recentDebates.length === 0 ? (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="text-center py-12 sm:py-16 px-4 sm:px-6 rounded-lg sm:rounded-2xl border-2 border-dashed border-border/30"
+                      >
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
+                          <SparklesIcon className="w-6 h-6 sm:w-8 sm:h-8 text-primary/50" />
+                        </div>
+                        <p className="text-xs sm:text-sm text-muted-foreground">
+                          No debates created yet. Start one to begin!
+                        </p>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+                      >
+                        <AnimatePresence>
+                          {recentDebates.map((debate, index) => (
+                            <motion.div
+                              key={debate.id}
+                              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                              transition={{ delay: index * 0.05 }}
+                              className="group relative"
+                            >
+                              <motion.div
+                                onClick={() => setSelectedDebate(debate)}
+                                whileHover={{ y: -8, scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="h-48 sm:h-64 rounded-lg sm:rounded-2xl bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 border border-border/50 backdrop-blur-xl p-4 sm:p-6 cursor-pointer transition-all shadow-lg hover:shadow-2xl hover:shadow-primary/10 flex flex-col justify-between overflow-hidden relative"
+                              >
+                                <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-3xl" />
+
+                                <div className="relative z-10">
+                                  <div className="flex items-start justify-between mb-2 sm:mb-3">
+                                    <span className="inline-block px-2.5 sm:px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-primary/20 to-accent/20 text-primary whitespace-nowrap">
+                                      {debate.duration}min
+                                    </span>
+                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <motion.button
+                                        whileHover={{ scale: 1.1 }}
+                                        onClick={async (e) => {
+                                          e.stopPropagation()
+                                          if (window.confirm("Delete this debate?")) {
+                                            try {
+                                              await deleteDebate(debate.id)
+                                              const updated = await fetchRecentDebates()
+                                              setRecentDebates(updated)
+                                              if (selectedDebate?.id === debate.id) {
+                                                setSelectedDebate(null)
+                                              }
+                                            } catch (err) {
+                                              console.error("Failed to delete debate:", err)
+                                              alert("Failed to delete debate.")
+                                            }
+                                          }
+                                        }}
+                                        className="p-2 rounded-lg bg-red-100/80 dark:bg-red-900/30 text-red-600 hover:bg-red-200 transition-all"
+                                        title="Delete"
+                                      >
+                                        <Trash2Icon className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+                                      </motion.button>
+                                    </div>
+                                  </div>
+
+                                  <h3 className="text-base sm:text-lg font-bold mb-1 sm:mb-2 line-clamp-2 text-foreground group-hover:text-primary transition-colors">
+                                    {debate.topic}
+                                  </h3>
+                                  <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
+                                    <span className="font-semibold text-primary">{debate.personaA}</span>
+                                    <span className="mx-1">vs</span>
+                                    <span className="font-semibold text-accent">{debate.personaB}</span>
+                                  </p>
+                                </div>
+
+                                <div className="relative z-10 pt-3 sm:pt-4 border-t border-border/30">
+                                  <p className="text-xs text-muted-foreground">
+                                    {new Date(debate.createdAt).toLocaleString()}
+                                  </p>
+                                </div>
+                              </motion.div>
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
+                      </motion.div>
+                    )}
+                  </motion.div>
                 </motion.div>
               ) : (
                 <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+                  key="human-mode"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="mb-8 sm:mb-12"
                 >
-                  <AnimatePresence>
-                    {recentDebates.map((debate, index) => (
-                      <motion.div
-                        key={debate.id}
-                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="group relative"
-                      >
-                        <motion.div
-                          onClick={() => setSelectedDebate(debate)}
-                          whileHover={{ y: -8, scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          className="h-48 sm:h-64 rounded-lg sm:rounded-2xl bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 border border-border/50 backdrop-blur-xl p-4 sm:p-6 cursor-pointer transition-all shadow-lg hover:shadow-2xl hover:shadow-primary/10 flex flex-col justify-between overflow-hidden relative"
-                        >
-                          <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-3xl" />
-
-                          <div className="relative z-10">
-                            <div className="flex items-start justify-between mb-2 sm:mb-3">
-                              <span className="inline-block px-2.5 sm:px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-primary/20 to-accent/20 text-primary whitespace-nowrap">
-                                {debate.duration}min
-                              </span>
-                              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <motion.button
-                                  whileHover={{ scale: 1.1 }}
-                                  onClick={async (e) => {
-                                    e.stopPropagation()
-                                    if (window.confirm("Delete this debate?")) {
-                                      try {
-                                        await deleteDebate(debate.id)
-                                        const updated = await fetchRecentDebates()
-                                        setRecentDebates(updated)
-                                        if (selectedDebate?.id === debate.id) {
-                                          setSelectedDebate(null)
-                                        }
-                                      } catch (err) {
-                                        console.error("Failed to delete debate:", err)
-                                        alert("Failed to delete debate.")
-                                      }
-                                    }
-                                  }}
-                                  className="p-2 rounded-lg bg-red-100/80 dark:bg-red-900/30 text-red-600 hover:bg-red-200 transition-all"
-                                  title="Delete"
-                                >
-                                  <Trash2Icon className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
-                                </motion.button>
-                              </div>
-                            </div>
-
-                            <h3 className="text-base sm:text-lg font-bold mb-1 sm:mb-2 line-clamp-2 text-foreground group-hover:text-primary transition-colors">
-                              {debate.topic}
-                            </h3>
-                            <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
-                              <span className="font-semibold text-primary">{debate.personaA}</span>
-                              <span className="mx-1">vs</span>
-                              <span className="font-semibold text-accent">{debate.personaB}</span>
-                            </p>
-                          </div>
-
-                          <div className="relative z-10 pt-3 sm:pt-4 border-t border-border/30">
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(debate.createdAt).toLocaleString()}
-                            </p>
-                          </div>
-                        </motion.div>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
+                  {/* Human → AI Debate Placeholder */}
+                  <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-900/60 dark:to-slate-900/30 rounded-2xl sm:rounded-3xl border border-border/50 backdrop-blur-xl p-6 sm:p-8 shadow-xl shadow-primary/5 min-h-[400px] flex items-center justify-center">
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.2 }}
+                      className="text-center max-w-md"
+                    >
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center">
+                        <MessageCircle className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500" />
+                      </div>
+                      <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                        Human → AI Debate
+                      </h2>
+                      <p className="text-sm sm:text-base text-muted-foreground">
+                        Engage in a real-time debate with AI. This feature will be available soon.
+                      </p>
+                    </motion.div>
+                  </div>
                 </motion.div>
               )}
-            </motion.div>
+            </AnimatePresence>
           </>
         )}
       </main>
@@ -754,7 +836,7 @@ export default function DashboardPage() {
                       <span className="text-xs font-semibold text-accent">{selectedDebate.personaB}</span>
                     </div>
                   </div>
-                  
+
                   {/* Debate Stats */}
                   <div className="grid grid-cols-3 gap-2 mb-3">
                     <div className="text-xs bg-primary/5 border border-primary/20 rounded-lg p-2">
@@ -776,7 +858,7 @@ export default function DashboardPage() {
                     <div className="w-full">
                       <div className="text-xs text-muted-foreground mb-1">Scroll Progress: {Math.round(scrollProgress)}%</div>
                       <div className="w-full h-2 bg-border rounded-full overflow-hidden">
-                        <motion.div 
+                        <motion.div
                           className="h-full bg-gradient-to-r from-primary via-accent to-secondary"
                           style={{ width: `${scrollProgress}%` }}
                           transition={{ type: "tween", duration: 0.2 }}
@@ -895,8 +977,8 @@ export default function DashboardPage() {
                             >
                               <div
                                 className={`max-w-sm p-4 rounded-2xl ${typing.speaker === selectedDebate.personaA
-                                    ? "bg-white dark:bg-slate-800 text-foreground"
-                                    : "bg-gradient-to-br from-primary to-accent text-white"
+                                  ? "bg-white dark:bg-slate-800 text-foreground"
+                                  : "bg-gradient-to-br from-primary to-accent text-white"
                                   } shadow-lg`}
                               >
                                 <div className="flex items-center gap-2">
@@ -930,8 +1012,8 @@ export default function DashboardPage() {
                             )}
                             <div
                               className={`max-w-xs sm:max-w-sm p-3 sm:p-4 rounded-lg sm:rounded-2xl ${message.speaker === selectedDebate.personaA
-                                  ? "bg-white dark:bg-slate-800 text-foreground rounded-tl-none border border-primary/20"
-                                  : "bg-gradient-to-br from-primary to-accent text-white rounded-tr-none shadow-lg"
+                                ? "bg-white dark:bg-slate-800 text-foreground rounded-tl-none border border-primary/20"
+                                : "bg-gradient-to-br from-primary to-accent text-white rounded-tr-none shadow-lg"
                                 }`}
                             >
                               <div className="flex items-center justify-between mb-1 sm:mb-2 pb-1 sm:pb-2 border-b border-current/10">
@@ -939,8 +1021,8 @@ export default function DashboardPage() {
                                 {message.timestamp && (
                                   <span
                                     className={`text-xs ml-2 ${message.speaker === selectedDebate.personaA
-                                        ? "text-muted-foreground"
-                                        : "text-white/60"
+                                      ? "text-muted-foreground"
+                                      : "text-white/60"
                                       }`}
                                   >
                                     {message.timestamp}
@@ -970,7 +1052,7 @@ export default function DashboardPage() {
                         <h3 className="text-sm sm:text-base font-bold text-foreground">Debate Summary</h3>
                       </div>
                       <p className="text-xs sm:text-sm leading-relaxed text-foreground/85 mb-4">{selectedDebate.summary}</p>
-                      
+
                       {/* Key Takeaways */}
                       {selectedDebate.debate_metrics?.key_themes && selectedDebate.debate_metrics.key_themes.length > 0 && (
                         <div className="mt-4 pt-4 border-t border-secondary/20">
@@ -991,7 +1073,7 @@ export default function DashboardPage() {
                           </div>
                         </div>
                       )}
-                      
+
                       {/* Phase Statistics */}
                       {selectedDebate.debate_metrics?.exchanges_per_phase && (
                         <div className="mt-4 pt-4 border-t border-secondary/20">
