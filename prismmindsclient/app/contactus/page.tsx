@@ -803,106 +803,106 @@ export default function ContactPage() {
       </section>
 
       <section className="max-w-7xl mx-auto px-6 py-24">
-  <div className="text-center mb-20">
-    <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-neutral-900">
-      Meet the <span className="text-purple-600">PrismMinds Team</span>
-    </h2>
+        <div className="text-center mb-20">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-neutral-900">
+            Meet the <span className="text-purple-600">PrismMinds Team</span>
+          </h2>
 
-    <p className="text-neutral-600 mt-3 max-w-2xl mx-auto text-lg">
-      A visionary team shaping intelligent, future-ready products.
-    </p>
-  </div>
+          <p className="text-neutral-600 mt-3 max-w-2xl mx-auto text-lg">
+            A visionary team shaping intelligent, future-ready products.
+          </p>
+        </div>
 
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-start">
 
-    {/* CO-FOUNDER */}
-    <div
-      className="group p-8 rounded-2xl bg-white border border-neutral-200 shadow-sm 
+          {/* CO-FOUNDER */}
+          <div
+            className="group p-8 rounded-2xl bg-white border border-neutral-200 shadow-sm 
                  hover:shadow-lg transition-all text-center"
-    >
-      {/* IMAGE WRAPPER */}
-      <div className="inline-block">
-        <img
-          src="teams/co-founder.jpg"
-          className="
+          >
+            {/* IMAGE WRAPPER */}
+            <div className="inline-block">
+              <img
+                src="teams/co-founder.jpg"
+                className="
             w-28 h-28 rounded-full object-cover mx-auto mb-5 border-4 border-neutral-300
             transition-all duration-500
             group-hover:border-[#F2C94C]
             group-hover:shadow-[0_0_28px_6px_rgba(242,201,76,0.45)]
           "
-        />
-      </div>
+              />
+            </div>
 
-      <h3 className="text-lg font-semibold text-neutral-900">Mr. Charan Ramagiri</h3>
-      <p className="text-neutral-500 text-sm mb-5">Co-Founder of PrismMinds</p>
+            <h3 className="text-lg font-semibold text-neutral-900">Mr. Charan Ramagiri</h3>
+            <p className="text-neutral-500 text-sm mb-5">Co-Founder of PrismMinds</p>
 
-      <div className="flex justify-center gap-5">
-        <a href="https://www.linkedin.com/in/charan-ramagiri/" target="_blank" className="hover:scale-110 transition">
-          <Linkedin className="w-6 h-6" style={{ color: "#0A66C2" }} />
-        </a>
-      </div>
-    </div>
+            <div className="flex justify-center gap-5">
+              <a href="https://www.linkedin.com/in/charan-ramagiri/" target="_blank" className="hover:scale-110 transition">
+                <Linkedin className="w-6 h-6" style={{ color: "#0A66C2" }} />
+              </a>
+            </div>
+          </div>
 
-    {/* FOUNDER */}
-    <div
-      className="group p-10 rounded-2xl bg-white border border-neutral-300 shadow-md 
+          {/* FOUNDER */}
+          <div
+            className="group p-10 rounded-2xl bg-white border border-neutral-300 shadow-md 
                  hover:shadow-2xl transition-all text-center"
-    >
-      <div className="inline-block">
-        <img
-          src="teams/founder.jpg"
-          className="
+          >
+            <div className="inline-block">
+              <img
+                src="teams/founder.jpg"
+                className="
             w-32 h-32 rounded-full object-cover mx-auto mb-6 border-4 border-neutral-300
             transition-all duration-500
             group-hover:border-[#F2C94C]
             group-hover:shadow-[0_0_35px_8px_rgba(242,201,76,0.55)]
           "
-        />
-      </div>
+              />
+            </div>
 
-      <h3 className="text-xl font-semibold text-neutral-900">Mr. Jayanth Devupalli</h3>
-      <p className="text-neutral-500 text-sm mb-6">Founder of PrismMinds</p>
+            <h3 className="text-xl font-semibold text-neutral-900">Mr. Jayanth Devupalli</h3>
+            <p className="text-neutral-500 text-sm mb-6">Founder of PrismMinds</p>
 
-      <div className="flex justify-center gap-5">
-        <a href="https://www.linkedin.com/in/devupallijayanth/" target="_blank" className="hover:scale-125 transition">
-          <Linkedin className="w-7 h-7" style={{ color: "#0A66C2" }} />
-        </a>
-      </div>
-    </div>
+            <div className="flex justify-center gap-5">
+              <a href="https://www.linkedin.com/in/devupallijayanth/" target="_blank" className="hover:scale-125 transition">
+                <Linkedin className="w-7 h-7" style={{ color: "#0A66C2" }} />
+              </a>
+            </div>
+          </div>
 
-    {/* CEO */}
-    <div
-      className="group p-8 rounded-2xl bg-white border border-neutral-200 shadow-sm 
+          {/* CEO */}
+          <div
+            className="group p-8 rounded-2xl bg-white border border-neutral-200 shadow-sm 
                  hover:shadow-lg transition-all text-center"
-    >
-      <div className="inline-block">
-        <img
-          src="teams/ceo.jpg"
-          className="
+          >
+            <div className="inline-block">
+              <img
+                src="teams/ceo.jpg"
+                className="
             w-28 h-28 rounded-full object-cover mx-auto mb-5 border-4 border-neutral-300
             transition-all duration-500
             group-hover:border-[#F2C94C]
             group-hover:shadow-[0_0_28px_6px_rgba(242,201,76,0.45)]
           "
-        />
-      </div>
+              />
+            </div>
 
-      <h3 className="text-lg font-semibold text-neutral-900">Mr. Praveen Kanneboina</h3>
-      <p className="text-neutral-500 text-sm mb-5">CEO of PrismMinds</p>
+            <h3 className="text-lg font-semibold text-neutral-900">Mr. Praveen Kanneboina</h3>
+            <p className="text-neutral-500 text-sm mb-5">CEO of PrismMinds</p>
 
-      <div className="flex justify-center gap-5">
-        <a
-          href="https://www.linkedin.com/in/praveen-kanneboina-384319301/"
-          target="_blank"
-          className="hover:scale-110 transition"
-        >
-          <Linkedin className="w-6 h-6" style={{ color: "#0A66C2" }} />
-        </a>
-      </div>
-    </div>
+            <div className="flex justify-center gap-5">
+              <a
+                href="https://www.linkedin.com/in/praveen-kanneboina-384319301/"
+                target="_blank"
+                className="hover:scale-110 transition"
+              >
+                <Linkedin className="w-6 h-6" style={{ color: "#0A66C2" }} />
+              </a>
+            </div>
+          </div>
 
-  </div>
-</section>
+        </div>
+      </section>
 
 
       <footer className="text-center py-8 text-neutral-500">
