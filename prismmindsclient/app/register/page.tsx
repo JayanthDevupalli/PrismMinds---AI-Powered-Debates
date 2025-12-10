@@ -136,7 +136,7 @@ export default function Register() {
             <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
               <span className="text-2xl font-bold text-white">P</span>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mt-4">Join PrismMinds</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mt-4">Join PrismMinds Now</h1>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
