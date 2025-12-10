@@ -162,3 +162,128 @@ export async function createDebate(data: any) {
     throw error;
   }
 }
+
+export async function createHumanDebate(topic: string) {
+  try {
+    const authHeaders = await getAuthHeader();
+    const headers = {
+      ...authHeaders,
+      "Content-Type": "application/json",
+    };
+
+    console.log("🚀 Creating human-to-AI debate with topic:", topic);
+    console.log("📡 Sending to:", `${API_URL}/create-human`);
+
+    const res = await fetch(`${API_URL}/create-human`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ topic }),
+    });
+
+    if (!res.ok) {
+      let body: any = null;
+      try {
+        body = await res.json();
+      } catch (_) {
+        body = await res.text().catch(() => null);
+      }
+      const msg = body?.error || body?.message || res.statusText || "Unknown error";
+      console.error("❌ Create human debate failed:", { status: res.status, body });
+      
+      const err: any = new Error(`Failed to create human debate (${res.status}): ${msg}`);
+      err.status = res.status;
+      err.body = body;
+      throw err;
+    }
+
+    const result = await res.json();
+    console.log("✅ Human debate created successfully:", result);
+    return result;
+  } catch (error) {
+    console.error("❌ Error in createHumanDebate:", error);
+    throw error;
+  }
+}
+
+export async function sendHumanMessage(debateId: string, message: string) {
+  try {
+    const authHeaders = await getAuthHeader();
+    const headers = {
+      ...authHeaders,
+      "Content-Type": "application/json",
+    };
+
+    console.log("💬 Sending human message:", message);
+    console.log("📡 Sending to:", `${API_URL}/${debateId}/message`);
+
+    const res = await fetch(`${API_URL}/${debateId}/message`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ message }),
+    });
+
+    if (!res.ok) {
+      let body: any = null;
+      try {
+        body = await res.json();
+      } catch (_) {
+        body = await res.text().catch(() => null);
+      }
+      const msg = body?.error || body?.message || res.statusText || "Unknown error";
+      console.error("❌ Send message failed:", { status: res.status, body });
+      
+      const err: any = new Error(`Failed to send message (${res.status}): ${msg}`);
+      err.status = res.status;
+      err.body = body;
+      throw err;
+    }
+
+    const result = await res.json();
+    console.log("✅ AI response received:", result);
+    return result;
+  } catch (error) {
+    console.error("❌ Error in sendHumanMessage:", error);
+    throw error;
+  }
+}
+
+export async function endHumanDebate(debateId: string) {
+  try {
+    const authHeaders = await getAuthHeader();
+    const headers = {
+      ...authHeaders,
+      "Content-Type": "application/json",
+    };
+
+    console.log("🛑 Ending human debate:", debateId);
+    console.log("📡 Sending to:", `${API_URL}/${debateId}/end`);
+
+    const res = await fetch(`${API_URL}/${debateId}/end`, {
+      method: "POST",
+      headers,
+    });
+
+    if (!res.ok) {
+      let body: any = null;
+      try {
+        body = await res.json();
+      } catch (_) {
+        body = await res.text().catch(() => null);
+      }
+      const msg = body?.error || body?.message || res.statusText || "Unknown error";
+      console.error("❌ End debate failed:", { status: res.status, body });
+      
+      const err: any = new Error(`Failed to end debate (${res.status}): ${msg}`);
+      err.status = res.status;
+      err.body = body;
+      throw err;
+    }
+
+    const result = await res.json();
+    console.log("✅ Debate ended successfully:", result);
+    return result;
+  } catch (error) {
+    console.error("❌ Error in endHumanDebate:", error);
+    throw error;
+  }
+}

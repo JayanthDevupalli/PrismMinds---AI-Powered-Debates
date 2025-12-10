@@ -4,7 +4,7 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
-import { fetchRecentDebates, createDebate, deleteDebate } from "@/lib/api"
+import { fetchRecentDebates, createDebate, createHumanDebate, deleteDebate } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline"
 import { SparklesIcon, Trash2Icon, X, History, Download, ScrollText, Sparkles, Rocket, BookOpen, Mic2, MessageCircle, Target, BarChart3 } from "lucide-react"
@@ -58,8 +58,9 @@ export default function DashboardPage() {
     topic: "",
     personaA: "",
     personaB: "",
-    duration: "5",
+    duration: "01:00",
   })
+  const [humanDebateTopic, setHumanDebateTopic] = useState("")
   const [creating, setCreating] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [statusMessage, setStatusMessage] = useState("")
@@ -246,6 +247,7 @@ export default function DashboardPage() {
         duration: form.duration,
       }
 
+
       setStatusMessage("Generating debate with the AI — this may take a few seconds...")
       const result = await createDebate(debateData)
 
@@ -273,6 +275,51 @@ export default function DashboardPage() {
       setStatusMessage("")
     }
   }
+
+  const handleHumanDebateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!humanDebateTopic.trim()) {
+      alert("Please enter a debate topic")
+      return
+    }
+
+    setCreating(true)
+    setGenerating(true)
+    setStatusMessage("Preparing human-to-AI debate...")
+
+    try {
+      setStatusMessage("Generating debate content with AI — this may take a few seconds...")
+      const result = await createHumanDebate(humanDebateTopic.trim())
+
+      const updated = await fetchRecentDebates()
+      setRecentDebates(updated)
+
+      const createdDebate = updated.find((d: Debate) => d.id === result.id) || updated[0]
+      if (!createdDebate) {
+        throw new Error("Couldn't retrieve the created debate from server")
+      }
+
+      router.push(`dashboard/debatehumanarea?id=${createdDebate.id}`)
+      setHumanDebateTopic("")
+    } catch (err: any) {
+      console.error("Human debate creation error:", err)
+      const errorMsg = err?.message || "Error creating human debate"
+      alert(errorMsg)
+    } finally {
+      setCreating(false)
+      setGenerating(false)
+      setStatusMessage("")
+    }
+  }
+
+  const suggestions = [
+    "Should AI replace human jobs?",
+    "Is privacy more important than security?",
+    "Does social media harm society?",
+    "Should governments regulate AI?",
+  ];
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-50 dark:from-background dark:via-background dark:to-slate-900/50">
@@ -775,25 +822,158 @@ export default function DashboardPage() {
                   transition={{ duration: 0.3 }}
                   className="mb-8 sm:mb-12"
                 >
-                  {/* Human → AI Debate Placeholder */}
-                  <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-900/60 dark:to-slate-900/30 rounded-2xl sm:rounded-3xl border border-border/50 backdrop-blur-xl p-6 sm:p-8 shadow-xl shadow-primary/5 min-h-[400px] flex items-center justify-center">
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.2 }}
-                      className="text-center max-w-md"
+                  {/* Human → AI Debate Form */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 18 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    className="mb-14"
+                  >
+                    <div
+                      className="
+      relative overflow-hidden
+      rounded-3xl
+      border border-white/15 dark:border-white/10
+      bg-gradient-to-br from-white/50 to-white/10
+      dark:from-slate-900/50 dark:to-slate-900/20
+      backdrop-blur-2xl
+      p-10 
+      shadow-[0_6px_28px_-6px_rgba(0,0,0,0.12)]
+      dark:shadow-[0_6px_32px_-4px_rgba(0,0,0,0.45)]
+    "
                     >
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center">
-                        <MessageCircle className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500" />
-                      </div>
-                      <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                      {/* Soft floating top highlight */}
+                      <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/35 dark:from-white/[0.06] to-transparent" />
+
+                      {/* Title */}
+                      <h2 className="text-3xl font-semibold mb-8 flex items-center gap-4 tracking-tight">
+                        <motion.span
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ duration: 0.4 }}
+                          className="
+          w-12 h-12 rounded-xl 
+          bg-gradient-to-br from-blue-500 to-cyan-500 
+          flex items-center justify-center 
+          shadow-lg shadow-blue-500/25
+        "
+                        >
+                          <MessageCircle className="w-6 h-6 text-white" />
+                        </motion.span>
+
                         Human → AI Debate
                       </h2>
-                      <p className="text-sm sm:text-base text-muted-foreground">
-                        Engage in a real-time debate with AI. This feature will be available soon.
-                      </p>
-                    </motion.div>
-                  </div>
+
+                      {/* FORM */}
+                      <form onSubmit={handleHumanDebateSubmit} className="space-y-6">
+
+                        {/* INPUT — CLEAN + PREMIUM + NO HOVER */}
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="Enter your debate topic..."
+                            value={humanDebateTopic}
+                            onChange={(e) => setHumanDebateTopic(e.target.value)}
+                            required
+                            className="
+            w-full px-5 py-4 
+            rounded-2xl
+            bg-white/80 dark:bg-slate-800/40 
+            border border-neutral-300/60 dark:border-neutral-700
+            text-base
+            placeholder:text-neutral-400
+            focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15
+            transition-all
+            shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.06)]
+          "
+                          />
+
+                          {/* Soft input glow when typing */}
+                          <motion.div
+                            animate={{
+                              opacity: humanDebateTopic ? 1 : 0,
+                              scale: humanDebateTopic ? 1 : 0.97,
+                            }}
+                            transition={{ duration: 0.35 }}
+                            className="
+            absolute inset-0 rounded-2xl 
+            bg-gradient-to-r from-blue-500/10 to-cyan-500/10 
+            blur-xl pointer-events-none
+          "
+                          />
+                        </div>
+
+                        {/* CAPSULE SUGGESTIONS */}
+                        <div className="flex flex-wrap gap-3">
+                          {suggestions.map((topic, i) => (
+                            <motion.button
+                              type="button"
+                              key={i}
+                              onClick={() => setHumanDebateTopic(topic)}
+                              whileHover={{ scale: 1.06, y: -2 }}
+                              whileTap={{ scale: 0.94 }}
+                              className="
+              px-4 py-1.5 rounded-full text-sm
+              bg-white/70 dark:bg-slate-800/50 
+              border border-neutral-300/40 dark:border-neutral-700/50 
+              backdrop-blur-xl
+              shadow-sm hover:shadow-md
+              hover:bg-white/90 dark:hover:bg-slate-700/50
+              transition-all
+              text-neutral-700 dark:text-neutral-300
+              font-medium
+              relative
+            "
+                            >
+                              {/* Subtle glow on hover */}
+                              <span className="
+              absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 
+              bg-gradient-to-r from-blue-500/10 to-cyan-500/10
+              blur-md transition-all
+            " />
+                              {topic}
+                            </motion.button>
+                          ))}
+                        </div>
+
+                        {/* SUBMIT BUTTON */}
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.96 }}
+                          type="submit"
+                          disabled={creating}
+                          className="
+          w-full py-4 rounded-xl 
+          bg-gradient-to-r from-blue-600 to-blue-500
+          hover:from-blue-700 hover:to-blue-600
+          text-white font-semibold tracking-tight
+          shadow-[0_10px_26px_-6px_rgba(0,0,0,0.2)]
+          hover:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.28)]
+          transition-all
+          disabled:opacity-50 disabled:cursor-not-allowed
+          text-lg
+        "
+                        >
+                          {creating ? (
+                            <span className="flex items-center justify-center gap-3">
+                              <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                className="w-5 h-5 border-2 border-white/70 border-t-transparent rounded-full"
+                              />
+                              Creating…
+                            </span>
+                          ) : (
+                            <span className="flex items-center justify-center gap-3">
+                              <Rocket className="w-5 h-5" />
+                              Start Debate
+                            </span>
+                          )}
+                        </motion.button>
+                      </form>
+                    </div>
+                  </motion.div>
+
                 </motion.div>
               )}
             </AnimatePresence>
