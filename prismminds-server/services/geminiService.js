@@ -174,7 +174,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai"
 
 // IMPORTANT: no hardcoded API key here.
 // Ensure GEMINI_API_KEY is set in your environment.
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "AIzaSyA_i1EHs51qH7BQLAgKKGVMJZ9552-1yoE")
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "AIzaSyAGQ4lxoFTC7nlGYIHoqC3u7UqT_kklSP0")
 
 // Mock debate generator for when API fails
 function generateMockDebate(topic, personaA, personaB, duration) {
