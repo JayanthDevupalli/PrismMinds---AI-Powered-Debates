@@ -36,32 +36,32 @@ type EmotionTone = "angry" | "calm" | "cool" | "excited" | "thoughtful" | "sarca
 
 function detectEmotion(text: string): EmotionTone {
   const lower = text.toLowerCase()
-  
+
   // Angry indicators
   if (/absolutely|ridiculous|completely wrong|nonsense|absurd|outrageous|unacceptable/i.test(lower)) {
     return "angry"
   }
-  
+
   // Excited indicators
   if (/incredible|amazing|brilliant|fantastic|wonderful|excellent|wonderful|thrilled/i.test(lower)) {
     return "excited"
   }
-  
+
   // Cool/confident indicators
   if (/clearly|obviously|undoubtedly|definitely|certainly|without question/i.test(lower)) {
     return "cool"
   }
-  
+
   // Calm/measured indicators
   if (/perhaps|maybe|consider|however|nonetheless|alternatively|perspective/i.test(lower)) {
     return "thoughtful"
   }
-  
+
   // Sarcastic indicators
   if (/right|sure|yeah|of course|naturally|supposedly/i.test(lower) && text.includes("?")) {
     return "sarcastic"
   }
-  
+
   return "neutral"
 }
 
@@ -116,22 +116,22 @@ async function speakTextSync(
     const emotionConfig = getEmotionVoiceConfig(emotion)
 
     const lower = speaker.toLowerCase()
-    
+
     // Persona A: Male voice (Pro Advocate) - confident, balanced
     if (lower.includes("pros") || lower.includes("support") || lower.includes("advocate")) {
-      const maleVoice = voices.find((v) => /male|daniel|mark|david|google uk english male/i.test(v.name)) || 
-                        voices.find((v) => v.name.includes("Google")) ||
-                        voices[0]
+      const maleVoice = voices.find((v) => /male|daniel|mark|david|google uk english male/i.test(v.name)) ||
+        voices.find((v) => v.name.includes("Google")) ||
+        voices[0]
       utter.voice = maleVoice
       utter.rate = emotionConfig.rate * 1.1
       utter.pitch = emotionConfig.pitch
-    } 
+    }
     // Persona B: Female voice (Skeptic) - analytical, questioning
     else if (lower.includes("cons") || lower.includes("against") || lower.includes("skeptic") || lower.includes("critic")) {
       const femaleVoice = voices.find((v) => /female|amy|victoria|zira|susan|google uk english female/i.test(v.name)) ||
-                          voices.find((v) => /english/i.test(v.lang) && v.name.includes("Female")) ||
-                          voices.find((v) => v.name.includes("Google")) ||
-                          voices[1] || voices[0]
+        voices.find((v) => /english/i.test(v.lang) && v.name.includes("Female")) ||
+        voices.find((v) => v.name.includes("Google")) ||
+        voices[1] || voices[0]
       utter.voice = femaleVoice
       utter.rate = emotionConfig.rate * 1.0
       utter.pitch = emotionConfig.pitch * 1.15
@@ -244,7 +244,7 @@ function DebateVisualizer({ debate, onPlayingChange }: { debate: Debate; onPlayi
   // Map emotions to visual feedback
   const getEmotionStyles = (emotion: EmotionTone, isActive: boolean) => {
     if (!isActive) return { shadow: "shadow-md", glow: "" }
-    
+
     switch (emotion) {
       case "angry":
         return { shadow: "shadow-lg", glow: "ring-2 ring-red-400" }
@@ -383,9 +383,8 @@ function DebateVisualizer({ debate, onPlayingChange }: { debate: Debate; onPlayi
                 : { opacity: [0.85, 1, 0.85] }
             }
             transition={{ duration: 1.4, repeat: Infinity }}
-            className={`w-24 h-24 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center text-white font-semibold text-lg shadow-md transition-all ${
-              getEmotionStyles(personaAEmotion, personaAIsSpeaking).glow
-            }`}
+            className={`w-24 h-24 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center text-white font-semibold text-lg shadow-md transition-all ${getEmotionStyles(personaAEmotion, personaAIsSpeaking).glow
+              }`}
           >
             {debate.personaA.slice(0, 2).toUpperCase()}
           </motion.div>
@@ -433,9 +432,8 @@ function DebateVisualizer({ debate, onPlayingChange }: { debate: Debate; onPlayi
                 : { opacity: [0.85, 1, 0.85] }
             }
             transition={{ duration: 1.4, repeat: Infinity }}
-            className={`w-24 h-24 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-semibold text-lg shadow-md transition-all ${
-              getEmotionStyles(personaBEmotion, personaBIsSpeaking).glow
-            }`}
+            className={`w-24 h-24 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-semibold text-lg shadow-md transition-all ${getEmotionStyles(personaBEmotion, personaBIsSpeaking).glow
+              }`}
           >
             {debate.personaB.slice(0, 2).toUpperCase()}
           </motion.div>
@@ -551,6 +549,8 @@ export default function DebateArea() {
   const routeParams = useParams()
   const router = useRouter()
   const [searchId, setSearchId] = useState<string | null>(null)
+  const [endingAnimation, setEndingAnimation] = useState(false)
+
 
   useEffect(() => {
     // read search param on client only
@@ -576,7 +576,7 @@ export default function DebateArea() {
 
     let mounted = true
     async function loadDebate() {
-      if(!debateId) return;
+      if (!debateId) return;
       try {
         const data = await fetchDebateById(debateId)
         if (!mounted) return
@@ -601,6 +601,49 @@ export default function DebateArea() {
     }
   }, [debateId])
 
+  if (endingAnimation) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-indigo-50 to-purple-50">
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 120 }}
+          className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-2xl"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-12 h-12 text-white"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M20 6L9 17l-5-5" />
+          </svg>
+        </motion.div>
+
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mt-6 text-xl font-semibold text-slate-700"
+        >
+          Closing debate…
+        </motion.p>
+
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="text-sm text-slate-500"
+        >
+          Redirecting to dashboard
+        </motion.p>
+      </div>
+    )
+  }
+
+
   if (loading)
     return (
       <div className="flex items-center justify-center h-screen text-slate-500">
@@ -610,8 +653,16 @@ export default function DebateArea() {
 
   if (!debate)
     return (
-      <div className="flex items-center justify-center h-screen text-red-500">
-        Debate not found.
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-sky-50 to-indigo-100">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+          className="w-14 h-14 border-4 border-sky-500 border-t-transparent rounded-full"
+        />
+
+        <p className="mt-4 text-slate-600 font-medium animate-pulse tracking-wide">
+          Loading debate…
+        </p>
       </div>
     )
 
@@ -659,12 +710,16 @@ export default function DebateArea() {
               </button>
 
               <button
-                onClick={() => router.push("/dashboard")}
+                onClick={() => {
+                  setEndingAnimation(true)
+                  setTimeout(() => router.push("/dashboard"), 1600)
+                }}
                 className="p-2 rounded-lg bg-white/80"
                 title="Close"
               >
                 <X className="w-4 h-4 text-slate-700" />
               </button>
+
             </div>
           </div>
 
