@@ -104,12 +104,17 @@ export default function Login() {
             className="text-center space-y-3"
           >
             <motion.div
-              className="w-14 h-14 mx-auto bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center text-2xl shadow-lg"
+              className="w-14 h-14 mx-auto rounded-xl flex items-center justify-center shadow-lg overflow-hidden bg-transparent"
               whileHover={{ scale: 1.1, rotate: 5 }}
               whileTap={{ scale: 0.95 }}
             >
-              🧠
+              <img
+                src="/mainlogo.png"  // ← replace with your actual logo file path
+                alt="PrismMinds Logo"
+                className="w-full h-full object-contain"
+              />
             </motion.div>
+
             <div className="space-y-1">
               <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
                 PrismMinds
@@ -117,6 +122,7 @@ export default function Login() {
               <p className="text-sm text-foreground/70">Sign in to your account</p>
             </div>
           </motion.div>
+
 
           {/* Form */}
           <motion.form

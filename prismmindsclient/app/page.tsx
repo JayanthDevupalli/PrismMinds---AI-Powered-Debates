@@ -79,16 +79,22 @@ export default function Home() {
 
       {/* Frosted Glass Navbar */}
       <nav className="fixed top-0 w-full z-50 bg-white/30 dark:bg-slate-900/40 backdrop-blur-lg border-b border-slate-200/30 dark:border-slate-700/50">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 py-3 md:py-4">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 py-5 md:py-5">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-gradient-to-tr from-purple-400 to-pink-400 rounded-xl flex items-center justify-center text-white font-bold shadow">
-                🧠
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow overflow-hidden bg-transparent">
+                <img
+                  src="/mainlogo.png"   // your actual logo file path
+                  alt="PrismMinds Logo"
+                  className="w-full h-full object-contain"
+                />
               </div>
-              <span className="text-lg sm:text-xl font-semibold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+
+              <span className="text-xl sm:text-xl font-semibold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                 PrismMindsAI
               </span>
             </div>
+
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-4">
@@ -364,7 +370,7 @@ export default function Home() {
               <h2 className="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent mb-4 leading-tight">
                 Dive into Our Blog
               </h2>
-              
+
               <p className="text-slate-700 dark:text-slate-200 text-lg sm:text-xl mb-10 max-w-2xl mx-auto">
                 Master debate design, craft powerful prompts, and unlock the full potential of AI-driven reasoning.
               </p>
@@ -377,8 +383,8 @@ export default function Home() {
                 className="flex flex-col sm:flex-row items-center justify-center gap-4"
               >
                 <Link href="/blogs">
-                  <Button 
-                    size="lg" 
+                  <Button
+                    size="lg"
                     className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow-lg hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all duration-300 hover:scale-105"
                   >
                     Explore Blogs
@@ -393,28 +399,28 @@ export default function Home() {
         </div>
       </section>
       {/* Contact Us Showcase */}
-<section className="py-20 px-6 sm:px-8">
-  <div className="max-w-4xl mx-auto text-center">
-    <h2 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">
-      Need Help or Want to Collaborate?
-    </h2>
+      <section className="py-20 px-6 sm:px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">
+            Need Help or Want to Collaborate?
+          </h2>
 
-    <p className="mt-4 text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-      Our team would love to hear from you — questions, ideas, or partnership opportunities.
-    </p>
+          <p className="mt-4 text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+            Our team would love to hear from you — questions, ideas, or partnership opportunities.
+          </p>
 
-    <div className="mt-8">
-      <Link href="/contactus">
-        <Button
-          size="lg"
-          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-xl hover:scale-105 transition-all duration-300"
-        >
-          Contact Us
-        </Button>
-      </Link>
-    </div>
-  </div>
-</section>
+          <div className="mt-8">
+            <Link href="/contactus">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-xl hover:scale-105 transition-all duration-300"
+              >
+                Contact Us
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
 
 
       {/* Footer */}

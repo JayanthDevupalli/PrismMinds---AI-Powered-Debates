@@ -89,41 +89,41 @@ export default function Register() {
         />
       </div> */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
-  {/* Soft base glow */}
-  <div className="absolute inset-0 bg-gradient-to-br from-sky-50 via-white to-purple-50" />
+        {/* Soft base glow */}
+        <div className="absolute inset-0 bg-gradient-to-br from-sky-50 via-white to-purple-50" />
 
-  {/* Aurora-style flowing light waves – pure 2025 magic */}
-  <motion.div
-    animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-    transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
-    className="absolute inset-0 opacity-40"
-    style={{
-      background: "linear-gradient(90deg, transparent 0%, #dbeafe 20%, #e0e7ff 40%, #f0abfc 60%, #fce7f3 80%, transparent 100%)",
-      backgroundSize: "300% 100%",
-      filter: "blur(80px)"
-    }}
-  />
+        {/* Aurora-style flowing light waves – pure 2025 magic */}
+        <motion.div
+          animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+          transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
+          className="absolute inset-0 opacity-40"
+          style={{
+            background: "linear-gradient(90deg, transparent 0%, #dbeafe 20%, #e0e7ff 40%, #f0abfc 60%, #fce7f3 80%, transparent 100%)",
+            backgroundSize: "300% 100%",
+            filter: "blur(80px)"
+          }}
+        />
 
-  {/* Floating pastel orbs with gentle movement */}
-  <motion.div
-    animate={{ y: [-60, 60, -60], x: [-40, 40, -40] }}
-    transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
-    className="absolute top-10 left-20 w-[420px] h-[420px] bg-gradient-to-br from-blue-200/50 via-purple-200/40 to-pink-200/30 rounded-full blur-3xl"
-  />
+        {/* Floating pastel orbs with gentle movement */}
+        <motion.div
+          animate={{ y: [-60, 60, -60], x: [-40, 40, -40] }}
+          transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-10 left-20 w-[420px] h-[420px] bg-gradient-to-br from-blue-200/50 via-purple-200/40 to-pink-200/30 rounded-full blur-3xl"
+        />
 
-  <motion.div
-    animate={{ y: [40, -80, 40], x: [60, -60, 60] }}
-    transition={{ duration: 38, repeat: Infinity, ease: "easeInOut" }}
-    className="absolute bottom-10 right-10 w-[380px] h-[380px] bg-gradient-to-tl from-cyan-200/40 via-indigo-200/30 to-purple-200/40 rounded-full blur-3xl"
-  />
+        <motion.div
+          animate={{ y: [40, -80, 40], x: [60, -60, 60] }}
+          transition={{ duration: 38, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-10 right-10 w-[380px] h-[380px] bg-gradient-to-tl from-cyan-200/40 via-indigo-200/30 to-purple-200/40 rounded-full blur-3xl"
+        />
 
-  {/* Center soft glow */}
-  <motion.div
-    animate={{ scale: [1, 1.2, 1] }}
-    transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-yellow-100/30 via-purple-100/20 to-transparent rounded-full blur-3xl opacity-60"
-  />
-</div>
+        {/* Center soft glow */}
+        <motion.div
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-yellow-100/30 via-purple-100/20 to-transparent rounded-full blur-3xl opacity-60"
+        />
+      </div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -133,11 +133,17 @@ export default function Register() {
       >
         <div className="bg-white/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/60 p-7">
           <div className="text-center mb-7">
-            <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
-              <span className="text-2xl font-bold text-white">P</span>
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto shadow-lg overflow-hidden bg-transparent">
+              <img
+                src="mainlogo.png"  // ← your real logo path
+                alt="PrismMinds Logo"
+                className="w-full h-full object-contain"
+              />
             </div>
+
             <h1 className="text-2xl font-bold text-gray-900 mt-4">Join PrismMinds Now</h1>
           </div>
+
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Name Field */}
