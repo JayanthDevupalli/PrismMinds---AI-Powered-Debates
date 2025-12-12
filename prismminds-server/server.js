@@ -1,26 +1,3 @@
-
-
-// import express from "express";
-// import cors from "cors";
-// import dotenv from "dotenv";
-// import { verifyFirebaseToken } from "./middleware/authMiddleware.js";
-// import testRoutes from "./routes/testRoutes.js"; // ✅ Make sure this import exists
-// import debateRoutes from "./routes/debateRoutes.js";
-// dotenv.config();
-
-// const app = express();
-// app.use(cors());
-// app.use(express.json());
-
-// // ✅ Register the test route
-// app.use("/api/test", testRoutes);
-// app.use("/api/debate", debateRoutes); // Example protected route
-// // Example protected route
-// app.get("/api/profile", verifyFirebaseToken, (req, res) => {
-//   res.json({ message: "User authenticated", user: req.user });
-// });
-
-// app.listen(5000, () => console.log("✅ Server running on port 5000"));
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";

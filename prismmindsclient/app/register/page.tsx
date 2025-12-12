@@ -70,24 +70,6 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center p-4 overflow-hidden relative">
-      {/* Magical animated background
-      <div className="absolute inset-0 -z-10">
-        <motion.div
-          animate={{ x: [0, 100, 0], y: [0, -100, 0], scale: [1, 1.2, 1] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute top-10 left-10 w-96 h-96 bg-gradient-to-r from-blue-300 to-purple-300 rounded-full blur-3xl opacity-40"
-        />
-        <motion.div
-          animate={{ x: [0, -80, 0], y: [0, 80, 0], scale: [1.1, 0.9, 1.1] }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-r from-pink-300 to-indigo-300 rounded-full blur-3xl opacity-40"
-        />
-        <motion.div
-          animate={{ scale: [1, 1.3, 1], rotate: [0, 180, 360] }}
-          transition={{ duration: 30, repeat: Infinity }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-cyan-200 to-purple-200 rounded-full blur-3xl opacity-30"
-        />
-      </div> */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         {/* Soft base glow */}
         <div className="absolute inset-0 bg-gradient-to-br from-sky-50 via-white to-purple-50" />
