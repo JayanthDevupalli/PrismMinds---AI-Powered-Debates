@@ -25,7 +25,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/api/test", testRoutes);
+// app.use("/api/test", testRoutes);
 app.use("/api/debate", debateRoutes);
 
 app.get("/", (req, res) => res.send("🔥 PrismMinds Server Running"));
@@ -37,7 +37,7 @@ app.get("/api/health", (req, res) => {
     timestamp: new Date().toISOString(),
     env: {
       hasGeminiKey: !!process.env.GEMINI_API_KEY,
-      nodeEnv: process.env.NODE_ENV || "development"
+      nodeEnv: process.env.NODE_ENV || "production"
     }
   });
 });
@@ -48,9 +48,9 @@ app.use((err, req, res, next) => {
   res.status(500).json({ 
     error: "Internal server error",
     message: err.message,
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack })
+    ...(process.env.NODE_ENV === "production" && { stack: err.stack })
   });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+// const PORT = process.env.PORT || 5000;
+// app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
