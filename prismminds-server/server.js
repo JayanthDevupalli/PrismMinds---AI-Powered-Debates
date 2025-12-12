@@ -6,12 +6,14 @@ import debateRoutes from "./routes/debateRoutes.js";
 
 dotenv.config();
 
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
 const app = express();
 
 // Enhanced CORS configuration
 app.use(cors({ 
   // origin: "http://localhost:3000",
-  origin: "https://prismminds.vercel.app",
+  origin: "https://prismminds.vercel.app/",
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -52,5 +54,5 @@ app.use((err, req, res, next) => {
   });
 });
 
-// const PORT = process.env.PORT || 5000;
-// app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
