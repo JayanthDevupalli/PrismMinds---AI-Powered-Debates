@@ -36,7 +36,7 @@ yarn-error.log*
 *~
 
 # Firebase service accounts and config
-**/serviceAccountKey.json
+# **/serviceAccountKey.json
 **/firebase-admin.json
 **/firebase-config.json
 
