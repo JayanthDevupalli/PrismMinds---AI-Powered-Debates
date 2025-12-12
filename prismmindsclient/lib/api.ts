@@ -1,7 +1,7 @@
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 // const API_URL = "http://localhost:5000/api/debate";
-const API_URL = "https://prismmindsdb.vercel.app/api/debate";
+const API_URL = "https://prismmindsdb.onrender.com/api/debate";
 
 async function getAuthHeader() {
   const auth = getAuth();
