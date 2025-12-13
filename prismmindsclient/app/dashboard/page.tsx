@@ -1034,43 +1034,75 @@ export default function DashboardPage() {
               className="w-full max-w-3xl max-h-[90vh] rounded-2xl sm:rounded-3xl bg-gradient-to-br from-white to-slate-50 dark:from-slate-900/95 dark:to-slate-900/90 border border-border/50 backdrop-blur-2xl shadow-2xl overflow-hidden flex flex-col"
             >
               {/* Modal Header */}
-              <div className="sticky top-0 z-10 bg-gradient-to-b from-white/95 to-white/80 dark:from-slate-900/95 dark:to-slate-900/80 backdrop-blur-xl border-b border-border/30 p-4 sm:p-6 flex justify-between items-start">
-                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex-1">
-                  <h2 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2 break-words">
+              <div className="sticky top-0 z-10 relative bg-gradient-to-b from-white/95 to-white/80 dark:from-slate-900/95 dark:to-slate-900/80 backdrop-blur-xl border-b border-border/30 p-4 sm:p-6">
+                {/* LEFT CONTENT */}
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="w-full"
+                >
+                  <h2 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2 break-words pr-16">
                     {selectedDebate.topic}
                   </h2>
+
                   <div className="flex flex-wrap items-center gap-2 mb-3">
                     <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-primary/20 text-primary text-xs font-bold">P1</span>
-                      <span className="text-xs font-semibold text-primary">{selectedDebate.personaA}</span>
+                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-primary/20 text-primary text-xs font-bold">
+                        P1
+                      </span>
+                      <span className="text-xs font-semibold text-primary">
+                        {selectedDebate.personaA}
+                      </span>
                     </div>
+
                     <span className="text-muted-foreground text-xs font-bold">vs</span>
+
                     <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-accent/20 text-accent text-xs font-bold">P2</span>
-                      <span className="text-xs font-semibold text-accent">{selectedDebate.personaB}</span>
+                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-accent/20 text-accent text-xs font-bold">
+                        P2
+                      </span>
+                      <span className="text-xs font-semibold text-accent">
+                        {selectedDebate.personaB}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Debate Stats */}
-                  <div className="grid grid-cols-3 gap-2 mb-3">
-                    <div className="text-xs bg-primary/5 border border-primary/20 rounded-lg p-2">
-                      <div className="text-muted-foreground text-xs">Duration</div>
-                      <div className="font-bold text-primary">{selectedDebate.duration}m</div>
+                  {/* STATS */}
+                  <div className="grid grid-cols-3 gap-2 mb-2">
+                    <div className="text-xs bg-primary/5 border border-primary/20 rounded-lg px-3 py-2">
+                      <div className="text-muted-foreground text-[15px]">Duration</div>
+                      <div className="font-bold text-primary text-[15px] my-1">
+                        {selectedDebate.duration}min
+                      </div>
                     </div>
-                    <div className="text-xs bg-accent/5 border border-accent/20 rounded-lg p-2">
-                      <div className="text-muted-foreground text-xs">Messages</div>
-                      <div className="font-bold text-accent">{selectedDebate.transcript?.length || 0}</div>
+
+                    <div className="text-xs bg-accent/5 border border-accent/20 rounded-lg px-3 py-2">
+                      <div className="text-muted-foreground text-[15px]">Messages</div>
+                      <div className="font-bold text-accent text-[15px] my-1">
+                        {selectedDebate.transcript?.length || 0}
+                      </div>
                     </div>
-                    <div className="text-xs bg-secondary/5 border border-secondary/20 rounded-lg p-2">
-                      <div className="text-muted-foreground text-xs">Date</div>
-                      <div className="font-bold text-secondary text-[11px]">{new Date(selectedDebate.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+
+                    <div className="text-xs bg-secondary/5 border border-secondary/20 rounded-lg px-3 py-3">
+                      <div className="text-muted-foreground text-[15px]">Date</div>
+                      <div className="font-bold text-secondary text-[15px]">
+                        {new Date(selectedDebate.createdAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Progress Bar */}
+                  {/* PROGRESS */}
                   {selectedDebate.transcript && selectedDebate.transcript.length > 0 && (
                     <div className="w-full">
-                      <div className="text-xs text-muted-foreground mb-1">Scroll Progress: {Math.round(scrollProgress)}%</div>
+                      <div className="flex justify-between text-xs text-muted-foreground mb-1 ">
+                        <span>Scroll Progress</span>
+                        <span>{Math.round(scrollProgress)}%</span>
+                      </div>
+
                       <div className="w-full h-2 bg-border rounded-full overflow-hidden">
                         <motion.div
                           className="h-full bg-gradient-to-r from-primary via-accent to-secondary"
@@ -1082,14 +1114,10 @@ export default function DashboardPage() {
                   )}
 
                   {generating && statusMessage && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-2 text-xs font-medium text-yellow-600 dark:text-yellow-400 flex items-center gap-2"
-                    >
+                    <motion.div className="mt-2 text-xs font-medium text-yellow-600 dark:text-yellow-400 flex items-center gap-2">
                       <motion.div
                         animate={{ rotate: 360 }}
-                        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+                        transition={{ duration: 2, repeat: Infinity }}
                         className="w-3 h-3 border-2 border-yellow-400 border-t-transparent rounded-full"
                       />
                       {statusMessage}
@@ -1097,7 +1125,8 @@ export default function DashboardPage() {
                   )}
                 </motion.div>
 
-                <div className="flex items-center gap-2 flex-shrink-0">
+                {/* ACTION BUTTONS (FLOATING) */}
+                <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-2">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -1105,7 +1134,6 @@ export default function DashboardPage() {
                       e.stopPropagation()
                       if (!selectedDebate) return
                       try {
-                        // Basic UX: show a small generating state
                         setStatusMessage("Preparing PDF...")
                         await downloadDebateTranscriptPDF(
                           selectedDebate.topic,
@@ -1116,28 +1144,28 @@ export default function DashboardPage() {
                           selectedDebate.summary,
                         )
                       } catch (err) {
-                        console.error('Failed to download PDF', err)
-                        showToast("Failed to generate PDF.", "error");
+                        console.error("Failed to download PDF", err)
+                        showToast("Failed to generate PDF.", "error")
                       } finally {
                         setStatusMessage("")
                       }
                     }}
-                    className="p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0"
-                    title="Download transcript as PDF"
+                    className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                   >
-                    <Download className="w-4 sm:w-5 h-4 sm:h-5 text-foreground/70" />
+                    <Download className="w-5 h-5 text-foreground/70" />
                   </motion.button>
 
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setSelectedDebate(null)}
-                    className="p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0"
+                    className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                   >
-                    <X className="w-4 sm:w-5 h-4 sm:h-5 text-foreground/60" />
+                    <X className="w-5 h-5 text-foreground/60" />
                   </motion.button>
                 </div>
               </div>
+
 
               {/* Modal Content */}
               <div ref={modalContentRef} className="modal-content flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border p-4 sm:p-6">

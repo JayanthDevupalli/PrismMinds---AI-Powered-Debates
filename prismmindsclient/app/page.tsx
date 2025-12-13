@@ -10,7 +10,9 @@ import {
   Zap,
   Users,
   FileText,
-  MessageSquare
+  User,
+  MessageSquare,
+  BookOpen,
 } from "lucide-react"
 
 export default function Home() {
@@ -42,6 +44,13 @@ export default function Home() {
       title: "Interactive UI",
       desc: "Animated avatars, live text flow, and adjustable debate duration for immersive exploration.",
     },
+
+    {
+      Icon: User,
+      title: "Human → AI Debating",
+      desc: "Engage directly with AI agents by presenting your own arguments and receiving structured, real-time counterpoints.",
+    }
+
   ]
 
   return (
@@ -98,9 +107,20 @@ export default function Home() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-4">
-              <Link href="/blogs" className="text-slate-700 dark:text-slate-200 hover:text-blue transition">
+              <Link
+                href="/blogs"
+                className="text-slate-700 text-[16px] dark:text-slate-200 hover:text-blue transition"
+              >
                 Blogs
               </Link>
+
+              <Link
+                href="/knowledgecenter"
+                className="text-slate-700 text-[16px] dark:text-slate-200 hover:text-blue transition"
+              >
+                Knowledge
+              </Link>
+
               <Link href="/login">
                 <Button
                   variant="ghost"
@@ -137,6 +157,14 @@ export default function Home() {
             className="md:hidden overflow-hidden"
           >
             <div className="py-4 space-y-4">
+              <Link href="/knowledgecenter" className="block">
+                <Button
+                  variant="ghost"
+                  className="w-full text-left px-4 py-3 text-slate-800 dark:text-slate-200 hover:text-white transition-all duration-200"
+                >
+                  Knowledge
+                </Button>
+              </Link>
               <Link href="/blogs" className="block">
                 <Button
                   variant="ghost"
@@ -343,15 +371,82 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Knowledge Center Intro */}
+      <section id="knowledge-intro" className="py-2 px-6 sm:px-8">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="relative rounded-3xl overflow-hidden p-8 sm:p-12 md:p-16 lg:p-20 shadow-xl text-center"
+          >
+            {/* Background layers */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-indigo-100/60 to-purple-100/70 dark:from-slate-900/70 dark:via-indigo-900/40 dark:to-purple-900/50" />
+            <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/30 dark:to-transparent" />
+
+            {/* Decorative blobs */}
+            <div className="absolute -top-16 -left-16 w-40 h-40 bg-indigo-300/30 rounded-full blur-3xl opacity-40" />
+            <div className="absolute -bottom-20 -right-20 w-44 h-44 bg-purple-300/30 rounded-full blur-3xl opacity-35" />
+
+            <div className="relative z-10 text-center">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 mb-4 rounded-full bg-gradient-to-r from-indigo-100/80 to-purple-100/80 border border-indigo-300/30 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-700/50">
+                <BookOpen className="w-4 h-4" />
+                <span className="text-sm font-semibold">
+                  Learn • Analyze • Improve
+                </span>
+              </div>
+
+              {/* Title */}
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-500 bg-clip-text text-transparent mb-4 leading-tight">
+                Knowledge Center
+              </h2>
+
+              {/* Description */}
+              <p className="text-slate-700 dark:text-slate-200 text-base sm:text-lg lg:text-xl max-w-2xl mx-auto mb-8">
+                Explore structured guides, debate frameworks, and curated learning
+                resources designed to sharpen reasoning and critical thinking.
+              </p>
+
+              {/* CTA */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.12, duration: 0.4 }}
+                className="flex flex-col sm:flex-row items-center justify-center gap-4"
+              >
+                <Link href="/knowledgecenter">
+                  <Button
+                    size="lg" /* Increased size for better touch targets on mobile */
+                    className="w-full sm:w-auto bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold shadow-md hover:shadow-[0_0_24px_rgba(99,102,241,0.45)] transition-all duration-300 hover:scale-105"
+                  >
+                    Explore Knowledge Center
+                  </Button>
+                </Link>
+
+                <Link
+                  href="/knowledgecenter"
+                  className="text-indigo-600 dark:text-indigo-300 hover:text-purple-600 dark:hover:text-purple-400 transition font-medium text-base"
+                >
+                  Browse resources →
+                </Link>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Blog CTA (attractive hero card) */}
-      <section id="blog-cta" className="py-20 px-6 sm:px-8">
+      <section id="blog-cta" className="py-12 sm:py-16 lg:py-20 px-6 sm:px-8">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="relative rounded-3xl overflow-hidden p-12 sm:p-16 text-center"
+            className="relative rounded-3xl overflow-hidden shadow-xl p-8 sm:p-12 md:p-14 lg:p-16 text-center"
           >
             {/* Background gradient layers - light theme */}
             <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-purple-100/60 to-pink-100/70 dark:from-slate-900/70 dark:via-purple-900/50 dark:to-pink-900/60" />
@@ -367,11 +462,11 @@ export default function Home() {
                 <span className="text-sm font-semibold">Weekly insights • Prompts • Patterns</span>
               </div>
 
-              <h2 className="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent mb-4 leading-tight">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent mb-4 leading-tight">
                 Dive into Our Blog
               </h2>
 
-              <p className="text-slate-700 dark:text-slate-200 text-lg sm:text-xl mb-10 max-w-2xl mx-auto">
+              <p className="text-slate-700 dark:text-slate-200 text-base sm:text-lg lg:text-xl mb-8 lg:mb-10 max-w-2xl mx-auto">
                 Master debate design, craft powerful prompts, and unlock the full potential of AI-driven reasoning.
               </p>
 
@@ -380,17 +475,20 @@ export default function Home() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2, duration: 0.5 }}
-                className="flex flex-col sm:flex-row items-center justify-center gap-4"
+                className="flex flex-col sm:flex-row items-center justify-center gap-4 lg:gap-5"
               >
                 <Link href="/blogs">
                   <Button
                     size="lg"
-                    className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow-lg hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all duration-300 hover:scale-105"
+                    className="w-full sm:w-auto bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow-lg hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all duration-300 hover:scale-105"
                   >
                     Explore Blogs
                   </Button>
                 </Link>
-                <Link href="/blogs" className="text-purple-600 dark:text-purple-300 hover:text-pink-600 dark:hover:text-pink-400 transition font-medium">
+                <Link
+                  href="/blogs"
+                  className="text-purple-600 dark:text-purple-300 hover:text-pink-600 dark:hover:text-pink-400 transition font-medium text-base"
+                >
                   Browse all articles →
                 </Link>
               </motion.div>
@@ -398,6 +496,8 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+
+
       {/* Contact Us Showcase */}
       <section className="py-20 px-6 sm:px-8">
         <div className="max-w-4xl mx-auto text-center">
