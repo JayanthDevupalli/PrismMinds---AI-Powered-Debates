@@ -24,7 +24,7 @@ export default function BlogDetailPage() {
       {/* Navigation */}
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link href="/blogs">
+          <Link href="/knowledgecenter/blogs">
             <Button variant="ghost" size="sm" className="gap-2 hover:bg-accent/10">
               <ArrowLeft className="w-4 h-4" />
               Back to Articles
@@ -157,7 +157,7 @@ export default function BlogDetailPage() {
             .map((relatedBlog) => (
               <Link
                 key={relatedBlog.id}
-                href={`/blogs/${relatedBlog.id}`}
+                href={`/knowledgecenter/blogs/${relatedBlog.id}`}
                 className="group bg-card rounded-xl overflow-hidden border border-border hover:border-accent/50 hover:shadow-lg hover:shadow-accent/10 transition-all duration-300"
               >
                 <div className="relative h-48 overflow-hidden">

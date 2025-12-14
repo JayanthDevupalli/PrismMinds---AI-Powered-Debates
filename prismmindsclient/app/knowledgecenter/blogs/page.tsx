@@ -27,7 +27,7 @@ export default function BlogsPage() {
         className="relative z-10 mb-8 px-6 pt-6"
       >
         <Link
-          href="/"
+          href="/knowledgecenter"
           className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors group"
         >
           <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
@@ -159,7 +159,7 @@ function ArticlesShell() {
           className="mb-16"
         >
           <Link
-            href={`/blogs/${featured.id}`}
+            href={`/knowledgecenter/blogs/${featured.id}`}
             className="group block rounded-2xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-500 glass border border-border/50 hover:border-primary/40"
           >
             <div
@@ -232,7 +232,7 @@ function ArticlesShell() {
             viewport={{ once: true }}
           >
             <Link
-              href={`/blogs/${blog.id}`}
+              href={`/knowledgecenter/blogs/${blog.id}`}
               className="group relative flex flex-col h-full rounded-xl overflow-hidden glass border border-border/50 hover:border-primary/40 transition-all duration-500 hover:shadow-xl hover:shadow-primary/20 glow-effect"
             >
               <div className="relative w-full h-52 overflow-hidden bg-muted/30">
