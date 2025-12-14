@@ -130,67 +130,84 @@ export default function KnowledgeCenter() {
                             Icon: BookOpen,
                             href: "/knowledgecenter/guides",
                             cta: "Explore Guides",
+                            status: "live",
                         },
                         {
                             title: "Videos",
                             desc: "Visual explanations of argument flow and persuasion strategies.",
                             Icon: Video,
-                            href: "/knowledge/videos",
-                            cta: "Explore Videos",
+                            href: "/knowledgecenter/videos",
+                            cta: "Watch Videos",
+                            status: "soon",
                         },
                         {
                             title: "Public Debates",
                             desc: "Analyze famous debates and understand winning argument patterns.",
                             Icon: Landmark,
-                            href: "/knowledge/debates",
-                            cta: "Explore Debates",
+                            href: "/knowledgecenter/publicdebates",
+                            cta: "View Debates",
+                            status: "soon",
                         },
-                    ]
-                        .map((item, idx) => (
+                    ].map((item, idx) => {
+                        const isSoon = item.status === "soon"
+
+                        return (
                             <motion.div
                                 key={idx}
-                                whileHover={{ y: -8 }}
+                                whileHover={!isSoon ? { y: -8 } : undefined}
                                 transition={{ type: "spring", stiffness: 220, damping: 18 }}
                                 className="
-                group relative rounded-3xl
-                border border-slate-200/70 dark:border-white/10
-                bg-white/70 dark:bg-slate-900/60
-                p-10 backdrop-blur-xl
-                shadow-[0_10px_40px_-18px_rgba(0,0,0,0.25)]
-              "
+            group relative rounded-3xl
+            border border-slate-200/70 dark:border-white/10
+            bg-white/70 dark:bg-slate-900/60
+            p-10 backdrop-blur-xl
+            shadow-[0_10px_40px_-18px_rgba(0,0,0,0.25)]
+          "
                             >
                                 {/* Icon */}
                                 <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl
-                              bg-gradient-to-br from-white to-slate-100
-                              dark:from-slate-800 dark:to-slate-900
-                              shadow-md">
+            bg-gradient-to-br from-white to-slate-100
+            dark:from-slate-800 dark:to-slate-900
+            shadow-md">
                                     <item.Icon className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
                                 </div>
 
                                 <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
                                     {item.title}
                                 </h3>
+
                                 <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                                     {item.desc}
                                 </p>
-                                <Link
-                                    href={item.href}
-                                    className="
-    mt-6 inline-flex items-center gap-2
-    text-sm font-semibold
-    text-indigo-600 dark:text-indigo-400
-    opacity-80 group-hover:opacity-100
-    transition
-  "
-                                >
-                                    {item.cta}
-                                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                                </Link>
 
+                                {/* Footer CTA */}
+                                {item.status === "live" ? (
+                                    <Link
+                                        href={item.href}
+                                        className="
+                mt-6 inline-flex items-center gap-2
+                text-sm font-semibold
+                text-indigo-600 dark:text-indigo-400
+                opacity-80 group-hover:opacity-100
+                transition
+              "
+                                    >
+                                        Explore {item.title}
+                                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                    </Link>
+                                ) : (
+                                    <div className="mt-6 flex items-center gap-2 text-sm font-semibold text-slate-400">
+                                        <span className="inline-flex items-center gap-2 text-green-500 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800">
+                                            Coming Soon
+                                        </span>
+                                    </div>
+                                )}
                             </motion.div>
-                        ))}
+                        )
+                    })}
                 </div>
             </section>
+
 
             {/* Blog CTA (attractive hero card) */}
             <section id="blog-cta" className="py-12 sm:py-16 lg:py-20 px-6 sm:px-8">
