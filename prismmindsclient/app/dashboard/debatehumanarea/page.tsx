@@ -405,16 +405,18 @@ export default function DebateArenaPage() {
         )
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50">
+        <div className={`min-h-screen transition-colors duration-1000 ease-in-out
+            ${humanSpeaking ? "bg-indigo-50/40" : (streamingAi || aiThinking) ? "bg-purple-50/40" : "bg-white"}
+        `}>
             {/* Header */}
             <header className="fixed top-0 inset-x-0 z-50 bg-white/90 backdrop-blur-lg border-b border-slate-200 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-                    <div>
-                        <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-3 md:gap-0">
+                    <div className="text-center md:text-left">
+                        <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                             PrismMinds - HuAI
                         </h1>
-                        <p className="text-sm text-slate-600 mt-1 flex items-center gap-2">
-                            <Zap className="w-4 h-4 text-yellow-500 animate-pulse" />
+                        <p className="text-xs md:text-sm text-slate-700 font-medium mt-1 flex items-center justify-center md:justify-start gap-2">
+                            <Zap className="w-3 h-3 md:w-4 md:h-4 text-yellow-500 animate-pulse" />
                             {debate.topic}
                         </p>
                     </div>
@@ -457,219 +459,307 @@ export default function DebateArenaPage() {
                     </div>
                 )}
 
-                {/* Avatars + Live Bubbles */}
-                <div className="grid md:grid-cols-2 gap-8 mt-8">
+                {/* Avatars + Live Bubbles (Focused Grid) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8 mt-4 md:mt-12 items-start h-auto md:h-[400px]">
                     {/* Human */}
+                    {/* Human - Premium Orbital */}
                     <motion.div
-                        initial={{ opacity: 0, x: -50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="flex flex-col items-center"
+                        className="flex flex-col items-center transition-all duration-700 ease-in-out"
+                        animate={{
+                            scale: humanSpeaking ? 1.05 : 0.95,
+                            opacity: humanSpeaking ? 1 : 0.8,
+                        }}
                     >
-                        <div className="relative">
-                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white shadow-xl mb-4">
-                                <User className="w-12 h-12" />
-                            </div>
-                            {humanSpeaking && (
-                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex gap-1">
-                                    <motion.div
-                                        className="w-1 bg-white rounded-full"
-                                        animate={{ height: [4, 12, 4] }}
-                                        transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut" }}
-                                    />
-                                    <motion.div
-                                        className="w-1 bg-white rounded-full"
-                                        animate={{ height: [8, 4, 8] }}
-                                        transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut", delay: 0.1 }}
-                                    />
-                                    <motion.div
-                                        className="w-1 bg-white rounded-full"
-                                        animate={{ height: [4, 12, 4] }}
-                                        transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
-                                    />
-                                </div>
-                            )}
-                        </div>
-                        <p className="font-semibold text-lg mb-6 text-slate-700">You</p>
+                        <div className="relative w-32 h-32 flex items-center justify-center perspective-[1000px] group mb-6">
 
-                        <div className={`w-full max-w-md p-5 rounded-2xl bg-white shadow-md border transition-all duration-300
-              ${humanSpeaking ? "ring-2 ring-indigo-400 shadow-indigo-400/20 scale-102" : "ring-0"}
+                            {/* PULSE WAVE (Radar Ping) */}
+                            {humanSpeaking && (
+                                <>
+                                    <motion.div
+                                        className="absolute inset-0 rounded-full border border-indigo-400/30 bg-indigo-400/10"
+                                        initial={{ scale: 1, opacity: 0.8 }}
+                                        animate={{ scale: 2.2, opacity: 0 }}
+                                        transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                                    />
+                                    <motion.div
+                                        className="absolute inset-0 rounded-full border border-indigo-400/20"
+                                        initial={{ scale: 1, opacity: 0.6 }}
+                                        animate={{ scale: 1.8, opacity: 0 }}
+                                        transition={{ duration: 2, delay: 0.6, repeat: Infinity, ease: "easeOut" }}
+                                    />
+                                </>
+                            )}
+
+                            {/* ORBITAL RING 1 (Outer) */}
+                            <motion.div
+                                className="absolute inset-[-12px] rounded-full border border-indigo-200/40 border-dashed"
+                                animate={humanSpeaking ? { rotate: 360, scale: 1.05 } : { rotate: 360, scale: 1 }}
+                                transition={{
+                                    rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+                                    scale: { duration: 1.5, repeat: Infinity, repeatType: "reverse" }
+                                }}
+                            />
+
+                            {/* ORBITAL RING 2 (Gyro) */}
+                            <motion.div
+                                className="absolute inset-[-6px] rounded-full border border-blue-400/30"
+                                style={{ rotateX: 60 }}
+                                animate={{ rotateZ: 360 }}
+                                transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+                            />
+
+                            {/* CORE - Human Avatar Image/Icon */}
+                            <motion.div
+                                className="
+                               relative w-24 h-24 rounded-full
+                               flex items-center justify-center
+                               bg-gradient-to-br from-indigo-500 to-blue-600
+                               text-white shadow-[0_10px_30px_rgba(79,70,229,0.4)]
+                               z-20 overflow-hidden
+                             "
+                                animate={humanSpeaking ? { scale: [1, 1.05, 1] } : { scale: 1 }}
+                                transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+                            >
+                                <User className="w-10 h-10 relative z-10" />
+                                {/* Gloss */}
+                                <div className="absolute top-0 left-0 w-full h-1/2 bg-white/10 blur-sm transform -skew-y-12" />
+                            </motion.div>
+                        </div>
+
+                        <p className="font-bold text-lg mb-4 text-black tracking-wide uppercase text-xs">You (Human)</p>
+
+                        <div className={`w-full max-w-[90vw] md:max-w-md p-5 md:p-6 rounded-3xl bg-white shadow-xl border border-indigo-100 transition-all duration-300 relative
+              ${humanSpeaking ? "ring-2 ring-indigo-400/50 shadow-indigo-400/20 translate-y-[-4px]" : ""}
             `}>
-                            <p className="text-base leading-relaxed min-h-[4rem]">
-                                {humanSpeaking ? currentHumanText || "Listening..." : latestHuman?.message || "Your turn to speak..."}
+                            {/* Speech triangular tip */}
+                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-white border-t border-l border-indigo-100 transform rotate-45 z-0"></div>
+
+                            <p className="text-xl leading-relaxed text-black relative z-10 font-bold">
+                                {humanSpeaking ? (
+                                    <span className="text-indigo-700 animate-pulse">{currentHumanText || "Listening..."}</span>
+                                ) : (
+                                    latestHuman?.message || "Your turn to speak..."
+                                )}
                             </p>
                         </div>
                     </motion.div>
 
-                    {/* AI */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="flex flex-col items-center"
-                    >
-                        <div className="relative">
-                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white shadow-xl mb-4">
-                                <Bot className="w-12 h-12" />
-                            </div>
-                            {streamingAi && (
-                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex gap-1">
-                                    <motion.div
-                                        className="w-1 bg-white rounded-full"
-                                        animate={{ height: [4, 12, 4] }}
-                                        transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut" }}
-                                    />
-                                    <motion.div
-                                        className="w-1 bg-white rounded-full"
-                                        animate={{ height: [8, 4, 8] }}
-                                        transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut", delay: 0.1 }}
-                                    />
-                                    <motion.div
-                                        className="w-1 bg-white rounded-full"
-                                        animate={{ height: [4, 12, 4] }}
-                                        transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
-                                    />
-                                </div>
-                            )}
-                        </div>
-                        <p className="font-semibold text-lg mb-6 text-slate-700">AI Debater</p>
 
-                        <div className={`w-full max-w-md p-5 rounded-2xl bg-white shadow-md border transition-all duration-300
+                    {/* AI */}
+                    {/* AI - Premium Orbital */}
+                    <motion.div
+                        className="flex flex-col items-center transition-all duration-700 ease-in-out"
+                        animate={{
+                            scale: (streamingAi || aiThinking) ? 1.05 : 0.95,
+                            opacity: (streamingAi || aiThinking) ? 1 : 0.8,
+                        }}
+                    >
+                        <div className="relative w-32 h-32 flex items-center justify-center perspective-[1000px] group mb-6">
+
+                            {/* PULSE WAVE (Radar Ping) */}
+                            {(streamingAi || aiThinking) && (
+                                <>
+                                    <motion.div
+                                        className="absolute inset-0 rounded-full border border-purple-400/30 bg-purple-400/10"
+                                        initial={{ scale: 1, opacity: 0.8 }}
+                                        animate={{ scale: 2.2, opacity: 0 }}
+                                        transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                                    />
+                                    <motion.div
+                                        className="absolute inset-0 rounded-full border border-purple-400/20"
+                                        initial={{ scale: 1, opacity: 0.6 }}
+                                        animate={{ scale: 1.8, opacity: 0 }}
+                                        transition={{ duration: 2, delay: 0.6, repeat: Infinity, ease: "easeOut" }}
+                                    />
+                                </>
+                            )}
+
+                            {/* ORBITAL RING 1 (Outer) */}
+                            <motion.div
+                                className="absolute inset-[-12px] rounded-full border border-purple-200/40 border-dashed"
+                                animate={(streamingAi || aiThinking) ? { rotate: -360, scale: 1.05 } : { rotate: -360, scale: 1 }}
+                                transition={{
+                                    rotate: { duration: 25, repeat: Infinity, ease: "linear" },
+                                    scale: { duration: 1.5, repeat: Infinity, repeatType: "reverse" }
+                                }}
+                            />
+
+                            {/* ORBITAL RING 2 (Gyro) */}
+                            <motion.div
+                                className="absolute inset-[-6px] rounded-full border border-fuchsia-400/30"
+                                style={{ rotateY: 60 }}
+                                animate={{ rotateZ: 360 }}
+                                transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+                            />
+
+                            {/* CORE - AI Avatar */}
+                            <motion.div
+                                className="
+                               relative w-24 h-24 rounded-full
+                               flex items-center justify-center
+                               bg-gradient-to-br from-purple-600 to-pink-600
+                               text-white shadow-[0_10px_30px_rgba(147,51,234,0.4)]
+                               z-20 overflow-hidden
+                             "
+                                animate={(streamingAi || aiThinking) ? { scale: [1, 1.05, 1] } : { scale: 1 }}
+                                transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+                            >
+                                <Bot className="w-10 h-10 relative z-10" />
+                                {/* Gloss */}
+                                <div className="absolute top-0 left-0 w-full h-1/2 bg-white/20 blur-sm transform -skew-y-12" />
+                            </motion.div>
+                        </div>
+
+                        <p className="font-bold text-lg mb-4 text-black tracking-wide uppercase text-xs">AI Debater</p>
+
+                        <div className={`w-full max-w-[90vw] md:max-w-md p-5 md:p-6 rounded-3xl bg-white shadow-xl border border-purple-100 transition-all duration-300 relative
               ${streamingAi || aiThinking
-                                ? "ring-2 ring-purple-500 shadow-purple-500/30 animate-pulse scale-102"
-                                : "ring-0"}
+                                ? "ring-2 ring-purple-500/50 shadow-purple-500/30 translate-y-[-4px]"
+                                : ""}
             `}>
-                            <p className="text-base leading-relaxed min-h-[4rem]">
+                            {/* Speech triangular tip */}
+                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-white border-t border-l border-purple-100 transform rotate-45 z-0"></div>
+
+                            <p className="text-xl leading-relaxed text-black relative z-10 font-bold">
                                 {aiThinking ? (
-                                    <span className="text-purple-600">Thinking<span className="animate-pulse">...</span></span>
+                                    <span className="text-purple-700 font-bold animate-pulse flex items-center gap-2">
+                                        Thinking <Loader2 className="w-4 h-4 animate-spin" />
+                                    </span>
                                 ) : streamingAi ? (
-                                    <span className="text-gray-800">{liveAiText || " ▏"}</span>
+                                    <span className="text-black">{liveAiText || " ▏"}</span>
                                 ) : (
                                     latestAi?.message || openingAi?.message || "Ready to debate"
                                 )}
                             </p>
                         </div>
                     </motion.div>
+
                 </div>
 
-                {/* Controls */}
-                {debateStarted && (
-                    <div className="flex justify-center gap-6 mt-12">
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => isListening ? stopListening() : startListening()}
-                            disabled={sending}
-                            className={`px-8 py-3 rounded-xl font-semibold text-white flex items-center gap-3 shadow-md transition-all
-                ${isListening
-                                    ? "bg-red-600 hover:bg-red-700 shadow-red-400/30"
-                                    : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:shadow-purple-400/30"
-                                } disabled:opacity-50`}
-                        >
-                            {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                            {isListening ? "Stop Speaking" : "Speak Now"}
-                        </motion.button>
+                {/* Floating Controls Bar */}
+                {
+                    debateStarted && (
+                        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-fit">
+                            <motion.div
+                                initial={{ y: 50, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                className="flex items-center justify-between gap-2 md:gap-4 p-2 pl-3 pr-2 bg-white/90 backdrop-blur-xl border border-slate-200/60 shadow-2xl rounded-full"
+                            >
+                                <div className="flex items-center gap-3 mr-2">
+                                    {/* Recording Indicator */}
+                                    {isListening && (
+                                        <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-600 rounded-full text-xs font-semibold animate-pulse border border-red-100">
+                                            <div className="w-2 h-2 rounded-full bg-red-500" />
+                                            Recording
+                                        </div>
+                                    )}
+                                </div>
 
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={handleEnd}
-                            className="px-8 py-3 rounded-xl bg-white border border-slate-300 font-semibold flex items-center gap-3 shadow-md hover:shadow-lg transition"
-                        >
-                            <Square className="w-5 h-5" />
-                            End Debate
-                        </motion.button>
-                    </div>
-                )}
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => isListening ? stopListening() : startListening()}
+                                    disabled={sending}
+                                    className={`
+                                  h-12 px-6 rounded-full font-semibold text-white flex items-center gap-2 shadow-lg transition-all
+                                  ${isListening
+                                            ? "bg-red-500 hover:bg-red-600 shadow-red-500/20"
+                                            : "bg-black hover:bg-slate-800 shadow-slate-900/20"
+                                        } disabled:opacity-50
+                                `}
+                                >
+                                    {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                                    {isListening ? "Stop" : "Speak"}
+                                </motion.button>
+
+                                <div className="w-[1px] h-8 bg-slate-200 mx-1"></div>
+
+                                <motion.button
+                                    whileHover={{ scale: 1.05, rotate: 90 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={handleEnd}
+                                    className="p-3 rounded-full bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors"
+                                    title="End Debate"
+                                >
+                                    <Square className="w-4 h-4 fill-current" />
+                                </motion.button>
+                            </motion.div>
+                        </div>
+                    )
+                }
 
                 {/* Transcript */}
-                {/* Transcript */}
-                {debateStarted && debate.transcript && debate.transcript.length > 0 && (
-                    <div className="mt-24">
-                        <h2 className="text-2xl font-bold text-center mb-8 text-slate-800 tracking-tight">
-                            Live Transcript
-                        </h2>
+                {
+                    debateStarted && debate.transcript && debate.transcript.length > 0 && (
+                        <div className="mt-24 max-w-4xl mx-auto">
+                            <h2 className="text-2xl font-bold text-center mb-8 text-black tracking-tight">
+                                Live Transcript
+                            </h2>
 
-                        <div
-                            ref={transcriptRef}
-                            className="
-        max-h-[420px]
+                            <div
+                                ref={transcriptRef}
+                                className="
+        max-h-[500px]
         overflow-y-auto
-        bg-white/30 
-        backdrop-blur-xl
+        bg-slate-50
         rounded-2xl
-        p-6 
-        space-y-6
-        border border-white/40 
-        shadow-xl 
-        shadow-purple-300/10
+        p-4 md:p-6 space-y-4 md:space-y-6
+        border border-slate-200
         relative
+        scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-transparent
+        shadow-inner
       "
-                        >
-                            <AnimatePresence>
-                                {debate.transcript.map((m, i) => {
-                                    const isUser = m.speaker === "You"
+                            >
+                                <AnimatePresence>
+                                    {debate.transcript.map((m, i) => {
+                                        const isUser = m.speaker === "You"
 
-                                    return (
-                                        <motion.div
-                                            key={i}
-                                            initial={{ opacity: 0, y: 20, scale: 0.98 }}
-                                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                                            transition={{ type: "spring", stiffness: 120, delay: i * 0.035 }}
-                                            className={`relative flex ${isUser ? "justify-start" : "justify-end"}`}
-                                        >
-                                            <div
-                                                className={`
-                  max-w-xl p-4 px-5 rounded-2xl shadow-md
-                  transition-all duration-300 hover:scale-[1.015]
-                  border backdrop-blur 
-                  ${isUser
-                                                        ? "bg-indigo-50/70 border-indigo-200/70 shadow-indigo-300/20"
-                                                        : "bg-purple-50/70 border-purple-200/70 shadow-purple-300/20"
-                                                    }
-                `}
+                                        return (
+                                            <motion.div
+                                                key={i}
+                                                initial={{ opacity: 0, x: isUser ? -20 : 20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ duration: 0.3, delay: i * 0.05 }}
+                                                className={`flex items-start gap-4 ${isUser ? "flex-row" : "flex-row-reverse"}`}
                                             >
-                                                {/* Accent pill */}
+                                                {/* Avatar Icon */}
+                                                <div className={`mt-1 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center shadow-sm border ${isUser ? "bg-indigo-100 border-indigo-200 text-indigo-700" : "bg-purple-100 border-purple-200 text-purple-700"}`}>
+                                                    {isUser ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
+                                                </div>
+
+                                                {/* Bubble */}
                                                 <div
                                                     className={`
-                    absolute top-0 h-full w-[4px] rounded-full 
-                    ${isUser ? "bg-indigo-400/90" : "bg-purple-500/90"}
-                  `}
-                                                    style={{ left: isUser ? "-10px" : "auto", right: isUser ? "auto" : "-10px" }}
-                                                />
-
-                                                <p className="font-semibold text-sm text-slate-600 mb-1">
-                                                    {m.speaker}
-                                                </p>
-
-                                                <p
-                                                    className="
-                    text-[15px] 
-                    leading-relaxed 
-                    tracking-wide 
-                    text-slate-800
-                  "
+                  max-w-[80%] p-5 rounded-2xl shadow-sm border
+                  ${isUser
+                                                            ? "bg-white border-indigo-100 rounded-tl-none"
+                                                            : "bg-white border-purple-100 rounded-tr-none"
+                                                        }
+                `}
                                                 >
-                                                    {m.message}
-                                                </p>
+                                                    <div className="flex justify-between items-center mb-2">
+                                                        <p className={`font-bold text-xs uppercase tracking-wider ${isUser ? "text-indigo-700" : "text-purple-700"}`} >
+                                                            {m.speaker}
+                                                        </p>
+                                                        <p className="text-[10px] text-slate-400 font-medium">
+                                                            {m.timestamp || "Just now"}
+                                                        </p>
+                                                    </div>
 
-                                                {/* Floating timestamp */}
-                                                {m.timestamp && (
-                                                    <p className="text-[11px] text-slate-500 mt-1 opacity-80">
-                                                        {m.timestamp}
+                                                    <p className="text-base leading-relaxed text-black font-semibold">
+                                                        {m.message}
                                                     </p>
-                                                )}
-                                            </div>
-                                        </motion.div>
-                                    )
-                                })}
-                            </AnimatePresence>
-
-                            {/* Soft bottom fade for scroll area */}
-                            <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white/70 to-transparent"></div>
+                                                </div>
+                                            </motion.div>
+                                        )
+                                    })}
+                                </AnimatePresence>
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )
+                }
 
-            </main>
-        </div>
+            </main >
+        </div >
     )
 }

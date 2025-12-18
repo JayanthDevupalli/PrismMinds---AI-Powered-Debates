@@ -1,7 +1,6 @@
-
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { motion } from "framer-motion"
 
 interface DebateTimerProps {
@@ -10,9 +9,17 @@ interface DebateTimerProps {
   onComplete?: () => void
 }
 
-export function DebateTimer({ duration, running = false, onComplete }: DebateTimerProps) {
-  const [remaining, setRemaining] = useState<number>(0)
-  const [total, setTotal] = useState<number>(0)
+const RADIUS = 90
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS
+
+export function DebateTimer({
+  duration,
+  running = false,
+  onComplete,
+}: DebateTimerProps) {
+  const [remaining, setRemaining] = useState(0)
+  const [total, setTotal] = useState(0)
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   const parseDuration = (value?: string) => {
     if (!value) return 0
@@ -30,50 +37,82 @@ export function DebateTimer({ duration, running = false, onComplete }: DebateTim
 
   useEffect(() => {
     if (!running || total <= 0) return
-    const interval = setInterval(() => {
-      setRemaining((r) => {
-        if (r <= 1) {
-          clearInterval(interval)
+
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+    }
+
+    intervalRef.current = setInterval(() => {
+      setRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(intervalRef.current!)
+          intervalRef.current = null
           onComplete?.()
           return 0
         }
-        return r - 1
+        return prev - 1
       })
     }, 1000)
-    return () => clearInterval(interval)
-  }, [running, total])
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
+    }
+  }, [running, total, onComplete])
+
+  const progress = useMemo(() => {
+    if (total === 0) return 0
+    return remaining / total
+  }, [remaining, total])
+
+  const strokeOffset = useMemo(
+    () => CIRCUMFERENCE * (1 - progress),
+    [progress]
+  )
 
   const formatTime = (s: number) => {
-    const m = Math.floor((s % 3600) / 60)
+    const m = Math.floor(s / 60)
     const sec = s % 60
     return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
   }
 
-  const progress = useMemo(() => (total > 0 ? (remaining / total) * 100 : 0), [remaining, total])
+  const isEnding = progress <= 0.2 && remaining > 0
 
   return (
     <div className="flex flex-col items-center justify-center w-full">
       <div className="relative w-56 h-56 flex items-center justify-center">
-        {/* SVG Circle */}
-        <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet">
-          {/* Background circle */}
-          <circle cx="100" cy="100" r="90" stroke="rgba(15,23,42,0.08)" strokeWidth="8" fill="none" />
-          {/* Animated progress circle */}
+        <svg
+          className="absolute inset-0 w-full h-full -rotate-90"
+          viewBox="0 0 200 200"
+        >
+          {/* Track */}
+          <circle
+            cx="100"
+            cy="100"
+            r={RADIUS}
+            stroke="rgba(15,23,42,0.08)"
+            strokeWidth="8"
+            fill="none"
+          />
+
+          {/* Progress */}
           <motion.circle
             cx="100"
             cy="100"
-            r="90"
-            stroke="url(#timerGradient)"
+            r={RADIUS}
+            fill="none"
             strokeWidth="8"
             strokeLinecap="round"
-            fill="none"
-            strokeDasharray={2 * Math.PI * 90}
-            strokeDashoffset={2 * Math.PI * 90 * (1 - progress / 100)}
-            animate={{ strokeDashoffset: 2 * Math.PI * 90 * (1 - progress / 100) }}
-            transition={{ duration: 0.5, ease: "linear" }}
+            stroke="url(#timerGradient)"
+            strokeDasharray={CIRCUMFERENCE}
+            animate={{ strokeDashoffset: strokeOffset }}
+            transition={{ duration: 0.6, ease: "linear" }}
           />
+
           <defs>
-            <linearGradient id="timerGradient" x1="0" x2="1" y1="0" y2="1">
+            <linearGradient id="timerGradient" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stopColor="#38bdf8" />
               <stop offset="50%" stopColor="#6366f1" />
               <stop offset="100%" stopColor="#f59e0b" />
@@ -81,18 +120,23 @@ export function DebateTimer({ duration, running = false, onComplete }: DebateTim
           </defs>
         </svg>
 
-        {/* Timer Text */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+        {/* Center */}
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center z-10"
+          aria-live="polite"
+        >
           <motion.div
             key={remaining}
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.2 }}
+            className={isEnding ? "animate-pulse" : ""}
           >
-            <div className="text-4xl font-mono font-bold text-slate-800 dark:text-slate-100">
+            <div className="text-4xl font-mono font-bold text-slate-800 dark:text-slate-100 text-center">
               {formatTime(remaining)}
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400 uppercase mt-2 tracking-widest text-center">
+
+            <div className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 mt-2 text-center">
               {remaining > 0 ? "Remaining" : "Finished"}
             </div>
           </motion.div>
@@ -101,4 +145,3 @@ export function DebateTimer({ duration, running = false, onComplete }: DebateTim
     </div>
   )
 }
-

@@ -33,8 +33,7 @@ export async function fetchRecentDebates(limit = 100) {
   try {
     const headers = await getAuthHeader();
     console.log("🔍 Fetching recent debates from:", `${API_URL}/recent?limit=${limit}`);
-
-    const res = await fetch(`${API_URL}/recent?limit=${limit}`, { 
+    const res = await fetch(`${API_URL}/recent?limit=${limit}`, {
       headers,
       method: 'GET'
     });
@@ -148,7 +147,7 @@ export async function createDebate(data: any) {
       }
       const msg = body?.error || body?.message || res.statusText || "Unknown error";
       console.error("❌ Create debate failed:", { status: res.status, body });
-      
+
       const err: any = new Error(`Failed to create debate (${res.status}): ${msg}`);
       err.status = res.status;
       err.body = body;
@@ -190,7 +189,6 @@ export async function createHumanDebate(topic: string) {
       }
       const msg = body?.error || body?.message || res.statusText || "Unknown error";
       console.error("❌ Create human debate failed:", { status: res.status, body });
-      
       const err: any = new Error(`Failed to create human debate (${res.status}): ${msg}`);
       err.status = res.status;
       err.body = body;
@@ -232,7 +230,7 @@ export async function sendHumanMessage(debateId: string, message: string) {
       }
       const msg = body?.error || body?.message || res.statusText || "Unknown error";
       console.error("❌ Send message failed:", { status: res.status, body });
-      
+
       const err: any = new Error(`Failed to send message (${res.status}): ${msg}`);
       err.status = res.status;
       err.body = body;
@@ -273,7 +271,7 @@ export async function endHumanDebate(debateId: string) {
       }
       const msg = body?.error || body?.message || res.statusText || "Unknown error";
       console.error("❌ End debate failed:", { status: res.status, body });
-      
+
       const err: any = new Error(`Failed to end debate (${res.status}): ${msg}`);
       err.status = res.status;
       err.body = body;

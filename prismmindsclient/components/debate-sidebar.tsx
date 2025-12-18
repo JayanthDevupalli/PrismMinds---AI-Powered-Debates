@@ -13,84 +13,148 @@ interface DebateSidebarProps {
   onTimerComplete?: () => void
 }
 
-export function DebateSidebar({ topic, personaA, personaB, duration, running = false, onTimerComplete }: DebateSidebarProps) {
+export function DebateSidebar({
+  topic,
+  personaA,
+  personaB,
+  duration,
+  running = false,
+  onTimerComplete,
+}: DebateSidebarProps) {
   return (
     <motion.aside
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
       className="
-        fixed               /* ✅ keeps sidebar fixed */
+        fixed
         top-0 left-0
-        h-screen            /* ✅ full viewport height */
-        w-80                /* ✅ fixed width */
+        h-screen
+        w-80
         bg-gradient-to-b from-slate-50 to-white
         dark:from-slate-900 dark:to-slate-950
         border-r border-border/40
         flex flex-col
         p-6
         space-y-8
-        z-30                /* ✅ keep it above content */
+        z-30
         shadow-md
         overflow-hidden
-        hidden md:flex      /* ✅ visible only on md+ screens */
+        hidden md:flex
       "
     >
-      {/* Timer Section */}
-      <div className="space-y-4">
-        <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-          ⏱️ Debate Timer
-        </h3>
-        <div className="flex justify-center">
-          <DebateTimer duration={duration} running={running} onComplete={onTimerComplete} />
-        </div>
+      {/* Program Header */}
+      <div className="space-y-0.5">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          Program
+        </p>
+        <h2 className="text-sm font-semibold text-foreground">
+          Live Debate Session
+        </h2>
       </div>
 
-      <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      {/* Timer */}
+      <motion.section
+        initial={{ opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+        className="space-y-3"
+      >
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
+            On Air
+          </span>
 
-      {/* Debate Info Section */}
-      <div className="space-y-4">
-        <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-          📋 Debate Info
-        </h3>
+          {running && (
+            <div className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+              <span className="text-[10px] font-semibold text-red-600 dark:text-red-400">
+                LIVE
+              </span>
+            </div>
+          )}
+        </div>
 
-        {/* Topic */}
-        <motion.div
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className="space-y-2"
-        >
-          <label className="text-xs font-semibold text-muted-foreground">Topic</label>
-          <p className="text-sm font-medium text-foreground leading-snug break-words">{topic}</p>
-        </motion.div>
+        <div className="flex justify-center">
+          <DebateTimer
+            duration={duration}
+            running={running}
+            onComplete={onTimerComplete}
+          />
+        </div>
+      </motion.section>
 
+      <div className="h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
+
+      {/* Topic */}
+      <motion.section
+        initial={{ opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="space-y-2"
+      >
+        <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          Topic
+        </p>
+        <p className="text-sm font-semibold leading-snug text-foreground">
+          {topic}
+        </p>
+      </motion.section>
+
+      <div className="h-px bg-border/40" />
+
+      {/* Personas */}
+      <div className="space-y-6">
         {/* Persona A */}
         <motion.div
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="space-y-2 p-3 rounded-lg bg-primary/10 border border-primary/20"
+          className="space-y-2"
         >
-          <label className="text-xs font-semibold text-primary flex items-center gap-2">
-            <Mic2 className="w-3.5 h-3.5" />
-            Persona A
-          </label>
-          <p className="text-sm font-medium text-foreground">{personaA}</p>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] uppercase tracking-widest font-semibold text-primary">
+              Persona A
+            </span>
+            <span className="text-[10px] text-muted-foreground">
+              Ready
+            </span>
+          </div>
+
+          <div className="flex items-start gap-2">
+            <Mic2 className="w-4 h-4 text-primary mt-0.5" />
+            <p className="text-sm font-medium text-foreground leading-snug">
+              {personaA}
+            </p>
+          </div>
+
+          <div className="h-px bg-primary/20" />
         </motion.div>
 
         {/* Persona B */}
         <motion.div
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="space-y-2 p-3 rounded-lg bg-accent/10 border border-accent/20"
+          className="space-y-2"
         >
-          <label className="text-xs font-semibold text-accent flex items-center gap-2">
-            <Mic2 className="w-3.5 h-3.5" />
-            Persona B
-          </label>
-          <p className="text-sm font-medium text-foreground">{personaB}</p>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] uppercase tracking-widest font-semibold text-accent">
+              Persona B
+            </span>
+            <span className="text-[10px] text-muted-foreground">
+              Ready
+            </span>
+          </div>
+
+          <div className="flex items-start gap-2">
+            <Mic2 className="w-4 h-4 text-accent mt-0.5" />
+            <p className="text-sm font-medium text-foreground leading-snug">
+              {personaB}
+            </p>
+          </div>
+
+          <div className="h-px bg-accent/20" />
         </motion.div>
       </div>
     </motion.aside>

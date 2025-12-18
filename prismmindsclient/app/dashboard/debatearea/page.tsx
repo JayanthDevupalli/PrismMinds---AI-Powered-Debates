@@ -393,77 +393,108 @@ function DebateVisualizer({ debate, onPlayingChange }: { debate: Debate; onPlayi
             />
 
             {/* MAIN AVATAR */}
-            <motion.div
-              className="
-      relative w-24 h-24 rounded-full
-      flex items-center justify-center
-      text-white font-semibold text-lg shadow-xl
-      overflow-visible
-    "
-              style={{
-                background: "radial-gradient(circle at 35% 35%, #a7d0ff, #3b82f6)",
-              }}
-              animate={
-                personaAIsSpeaking
-                  ? { scale: [1, 1.06, 1], rotate: [0, 1.2, -1.2, 0] }
-                  : { scale: 1, rotate: 0 }
-              }
-              transition={{ duration: 3, repeat: Infinity }}
-            >
+            {/* MAIN AVATAR COMPONENT - ADVANCED ORBITAL DESIGN */}
+            {/* Added 'perspective' for 3D gyro effects */}
+            <div className="relative w-32 h-32 flex items-center justify-center perspective-[1000px] group">
 
-              {/* --- INNER DEPTH PULSE --- */}
+              {/* PULSE WAVE (Radar Ping) - Behind everything */}
+              {personaAIsSpeaking && (
+                <>
+                  <motion.div
+                    className="absolute inset-0 rounded-full border border-sky-400/30 bg-sky-400/10"
+                    initial={{ scale: 1, opacity: 0.8 }}
+                    animate={{ scale: 2.2, opacity: 0 }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                  />
+                  <motion.div
+                    className="absolute inset-0 rounded-full border border-sky-400/20"
+                    initial={{ scale: 1, opacity: 0.6 }}
+                    animate={{ scale: 1.8, opacity: 0 }}
+                    transition={{ duration: 2, delay: 0.6, repeat: Infinity, ease: "easeOut" }}
+                  />
+                </>
+              )}
+
+              {/* ORBITAL RING 1 (Flat Outer - Dashed) */}
               <motion.div
-                className="absolute inset-0 rounded-full"
-                animate={{
-                  scale: personaAIsSpeaking ? [1, 1.04, 1] : 1,
-                  opacity: personaAIsSpeaking ? [0.14, 0.24, 0.14] : 0.14,
-                }}
-                transition={{ duration: 2.1, repeat: Infinity }}
-                style={{
-                  background:
-                    "radial-gradient(circle, rgba(255,255,255,0.3), rgba(0,0,0,0.05) 70%)",
+                className="absolute inset-[-15px] rounded-full border-2 border-sky-200/30 border-dashed"
+                animate={personaAIsSpeaking ? { rotate: 360, scale: 1.05 } : { rotate: 360, scale: 1 }}
+                transition={{
+                  rotate: { duration: 25, repeat: Infinity, ease: "linear" },
+                  scale: { duration: 1.5, repeat: Infinity, repeatType: "reverse" }
                 }}
               />
 
-              {/* --- ROTATING LIGHT SWEEP --- */}
+              {/* ORBITAL RING 2 (Gyro Tilted) */}
+              <motion.div
+                className="absolute inset-[-8px] rounded-full border border-indigo-400/40"
+                style={{ rotateX: 70 }} // Permanent 3D Tilt
+                animate={{ rotateZ: 360 }} // Spin on its axis
+                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+              />
+
+              {/* ORBITAL RING 3 (Opposite Gyro) */}
+              <motion.div
+                className="absolute inset-[-8px] rounded-full border border-cyan-400/40"
+                style={{ rotateY: 70 }} // Permanent 3D Tilt
+                animate={{ rotateZ: -360 }} // Spin on its axis
+                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+              />
+
+              {/* ORBITAL RING 4 (Eccentric/Wobbly) */}
+              <motion.div
+                className="absolute inset-[-2px] rounded-full border-2 border-sky-300/20"
+                style={{ borderRadius: "40% 60% 70% 30% / 40% 50% 60% 50%" }}
+                animate={{ rotate: -360 }}
+                transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+              />
+
+              {/* ACTIVE GLOW CORE */}
               {personaAIsSpeaking && (
                 <motion.div
-                  className="absolute inset-0 rounded-full"
-                  animate={{ rotate: [0, 360] }}
-                  transition={{ duration: 3.2, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-2 rounded-full bg-sky-400/30 blur-xl"
+                  animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                />
+              )}
+
+              {/* CORE SPHERE */}
+              <motion.div
+                className="
+                  relative w-24 h-24 rounded-full
+                  flex items-center justify-center
+                  text-white font-bold text-xl shadow-[0_0_30px_rgba(2,132,199,0.5)]
+                  z-20 overflow-hidden
+                "
+                style={{
+                  background: "radial-gradient(circle at 30% 30%, #e0f2fe, #38bdf8, #0369a1)",
+                }}
+                animate={
+                  personaAIsSpeaking
+                    ? { scale: [1, 1.05, 1] }
+                    : { scale: 1 }
+                }
+                transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+              >
+                {/* Internal "Energy" Texture */}
+                <motion.div
+                  className="absolute inset-0 opacity-30 mix-blend-overlay"
                   style={{
-                    background:
-                      "linear-gradient(120deg, transparent, rgba(255,255,255,0.55), transparent)",
+                    backgroundImage: "radial-gradient(circle, #fff 2px, transparent 2px)",
+                    backgroundSize: "12px 12px"
                   }}
+                  animate={{ rotate: 360, scale: [1, 1.2, 1] }}
+                  transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
                 />
-              )}
 
-              {/* --- RIM LIGHT --- */}
-              <div
-                className="absolute inset-0 rounded-full"
-                style={{
-                  boxShadow:
-                    "0 0 18px rgba(255,255,255,0.18) inset, 0 0 4px rgba(0,0,0,0.15) inset",
-                }}
-              />
+                {/* GLASSY HIGHLIGHT */}
+                <div className="absolute top-2 left-3 w-8 h-4 bg-white/60 rounded-full blur-[2px] transform -rotate-12" />
 
-              {/* INITIALS */}
-              <span className="relative z-10 tracking-wide drop-shadow-[0_2px_3px_rgba(0,0,0,0.35)]">
-                {debate.personaA.slice(0, 2).toUpperCase()}
-              </span>
-
-              {/* MOUTH PULSE */}
-              {personaAIsSpeaking && (
-                <motion.div
-                  animate={{ scaleY: [1, 1.25, 1] }}
-                  transition={{ duration: 0.38, repeat: Infinity }}
-                  className="
-          absolute bottom-5 left-1/2 -translate-x-1/2
-          w-5 h-1 bg-white/90 rounded-full shadow-md
-        "
-                />
-              )}
-            </motion.div>
+                <span className="relative z-10 drop-shadow-lg text-2xl tracking-widest">
+                  {debate.personaA.slice(0, 2).toUpperCase()}
+                </span>
+              </motion.div>
+            </div>
           </div>
 
 
@@ -520,76 +551,107 @@ function DebateVisualizer({ debate, onPlayingChange }: { debate: Debate; onPlayi
             />
 
             {/* MAIN AVATAR */}
-            <motion.div
-              className="
-      relative w-24 h-24 rounded-full
-      flex items-center justify-center
-      text-white font-semibold text-lg shadow-xl
-      overflow-visible
-    "
-              style={{
-                background: "radial-gradient(circle at 35% 35%, #fdba74, #f97316)",
-              }}
-              animate={
-                personaBIsSpeaking
-                  ? { scale: [1, 1.07, 1], rotate: [0, 1.6, -1.6, 0] }
-                  : { scale: 1, rotate: 0 }
-              }
-              transition={{ duration: 3.2, repeat: Infinity }}
-            >
+            {/* MAIN AVATAR COMPONENT - ADVANCED ORBITAL DESIGN */}
+            <div className="relative w-32 h-32 flex items-center justify-center perspective-[1000px] group">
 
-              {/* --- INNER CORE DEPTH PULSE --- */}
+              {/* PULSE WAVE (Radar Ping) */}
+              {personaBIsSpeaking && (
+                <>
+                  <motion.div
+                    className="absolute inset-0 rounded-full border border-orange-400/30 bg-orange-400/10"
+                    initial={{ scale: 1, opacity: 0.8 }}
+                    animate={{ scale: 2.2, opacity: 0 }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                  />
+                  <motion.div
+                    className="absolute inset-0 rounded-full border border-orange-400/20"
+                    initial={{ scale: 1, opacity: 0.6 }}
+                    animate={{ scale: 1.8, opacity: 0 }}
+                    transition={{ duration: 2, delay: 0.6, repeat: Infinity, ease: "easeOut" }}
+                  />
+                </>
+              )}
+
+              {/* ORBITAL RING 1 (Slow Outer - Dashed) */}
               <motion.div
-                className="absolute inset-0 rounded-full"
-                animate={{
-                  scale: personaBIsSpeaking ? [1, 1.06, 1] : 1,
-                  opacity: personaBIsSpeaking ? [0.4, 0.55, 0.4] : 0.35,
-                }}
-                transition={{ duration: 2.4, repeat: Infinity }}
-                style={{
-                  background:
-                    "radial-gradient(circle, rgba(255,255,255,0.35), transparent 70%)",
+                className="absolute inset-[-15px] rounded-full border-2 border-orange-200/30 border-dashed"
+                animate={personaBIsSpeaking ? { rotate: -360, scale: 1.05 } : { rotate: -360, scale: 1 }}
+                transition={{
+                  rotate: { duration: 25, repeat: Infinity, ease: "linear" },
+                  scale: { duration: 1.5, repeat: Infinity, repeatType: "reverse" }
                 }}
               />
 
-              {/* --- OUTER LIGHT FIELD ROTATION --- */}
+              {/* ORBITAL RING 2 (Gyro Tilted) */}
               <motion.div
-                className="absolute inset-0 rounded-full pointer-events-none"
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
-                style={{
-                  background:
-                    "conic-gradient(from 0deg, transparent 0deg, rgba(255,255,255,0.25) 40deg, transparent 80deg)",
-                  maskImage:
-                    "radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)",
-                }}
+                className="absolute inset-[-8px] rounded-full border border-amber-400/40"
+                style={{ rotateX: 70 }}
+                animate={{ rotateZ: -360 }}
+                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
               />
 
-              {/* --- RIM LIGHT --- */}
-              <div
-                className="absolute inset-0 rounded-full"
-                style={{
-                  boxShadow: "0 0 22px rgba(255,255,255,0.25) inset",
-                }}
+              {/* ORBITAL RING 3 (Opposite Gyro) */}
+              <motion.div
+                className="absolute inset-[-8px] rounded-full border border-red-400/40"
+                style={{ rotateY: 70 }}
+                animate={{ rotateZ: 360 }}
+                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
               />
 
-              {/* INITIALS */}
-              <span className="relative z-10 tracking-wide">
-                {debate.personaB.slice(0, 2).toUpperCase()}
-              </span>
+              {/* ORBITAL RING 4 (Eccentric) */}
+              <motion.div
+                className="absolute inset-[-2px] rounded-full border-2 border-orange-300/20"
+                style={{ borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%" }}
+                animate={{ rotate: 360 }}
+                transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+              />
 
-              {/* MOUTH */}
+              {/* ACTIVE GLOW CORE */}
               {personaBIsSpeaking && (
                 <motion.div
-                  animate={{ scaleY: [1, 1.35, 1] }}
-                  transition={{ duration: 0.38, repeat: Infinity }}
-                  className="
-          absolute bottom-5 left-1/2 -translate-x-1/2
-          w-5 h-1 bg-white/90 rounded-full
-        "
+                  className="absolute inset-2 rounded-full bg-orange-400/30 blur-xl"
+                  animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
                 />
               )}
-            </motion.div>
+
+              {/* CORE SPHERE */}
+              <motion.div
+                className="
+                  relative w-24 h-24 rounded-full
+                  flex items-center justify-center
+                  text-white font-bold text-xl shadow-[0_0_30px_rgba(249,115,22,0.5)]
+                  z-20 overflow-hidden
+                "
+                style={{
+                  background: "radial-gradient(circle at 30% 30%, #ffedd5, #fb923c, #c2410c)",
+                }}
+                animate={
+                  personaBIsSpeaking
+                    ? { scale: [1, 1.05, 1] }
+                    : { scale: 1 }
+                }
+                transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+              >
+                {/* Internal Energy Texture */}
+                <motion.div
+                  className="absolute inset-0 opacity-30 mix-blend-overlay"
+                  style={{
+                    backgroundImage: "radial-gradient(circle, #fff 2px, transparent 2px)",
+                    backgroundSize: "12px 12px"
+                  }}
+                  animate={{ rotate: -360, scale: [1, 1.2, 1] }}
+                  transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+                />
+
+                {/* GLASSY HIGHLIGHT */}
+                <div className="absolute top-2 left-3 w-8 h-4 bg-white/60 rounded-full blur-[2px] transform -rotate-12" />
+
+                <span className="relative z-10 drop-shadow-lg text-2xl tracking-widest">
+                  {debate.personaB.slice(0, 2).toUpperCase()}
+                </span>
+              </motion.div>
+            </div>
           </div>
 
 

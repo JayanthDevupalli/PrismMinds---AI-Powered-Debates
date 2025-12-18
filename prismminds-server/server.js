@@ -11,7 +11,7 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const app = express();
 
 // Enhanced CORS configuration
-app.use(cors({ 
+app.use(cors({
   // origin: "http://localhost:3000",
   origin: "https://prismminds.vercel.app",
   credentials: true,
@@ -42,8 +42,8 @@ app.get("/", (req, res) => res.send("🔥 PrismMinds Server Running"));
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
-  res.json({ 
-    status: "ok", 
+  res.json({
+    status: "ok",
     timestamp: new Date().toISOString(),
     env: {
       hasGeminiKey: !!process.env.GEMINI_API_KEY,
@@ -55,7 +55,7 @@ app.get("/api/health", (req, res) => {
 // Global error handler
 app.use((err, req, res, next) => {
   console.error("💥 Unhandled error:", err);
-  res.status(500).json({ 
+  res.status(500).json({
     error: "Internal server error",
     message: err.message,
     ...(process.env.NODE_ENV === "production" && { stack: err.stack })
