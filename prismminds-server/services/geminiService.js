@@ -2,16 +2,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai"
 
 // IMPORTANT: no hardcoded API key here.
 // Ensure GEMINI_API_KEY is set in your environment.
-// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "AIzaSyDutn1OFENfYdgwFwIbtwNV2wOsYMXxIMw")
+// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "AIzaSyALYWiABGHCCXOVNee54E5yiwYUJ052QUE")
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-// Mock debate generator for when API fails
-function generateMockDebate(topic, personaA, personaB, duration) {
-  console.log("⚠️ Using mock debate generator (Gemini API unavailable)")
-  const transcript = debates.default
-  const moderator_summary = `This ${duration}-minute debate on "${topic}" featured compelling arguments from both ${personaA} and ${personaB}. ${personaA} advocated for decisive action, emphasizing opportunities and historical precedents, while ${personaB} urged caution, highlighting potential risks and the need for careful implementation. The discussion concluded with both parties finding common ground on a pilot program approach, demonstrating the value of constructive dialogue in addressing complex issues.`
-
-  return { transcript, moderator_summary }
-}
 
 export async function startDebate(topic, personaA, personaB, duration) {
   try {
@@ -22,8 +14,7 @@ export async function startDebate(topic, personaA, personaB, duration) {
 
     // Check if API key exists
     if (!process.env.GEMINI_API_KEY) {
-      console.warn("⚠️ No GEMINI_API_KEY found, using mock debate")
-      return generateMockDebate(topic, personaA, personaB, duration)
+      throw new Error("Gemini API key not configured. Please set GEMINI_API_KEY environment variable.")
     }
 
     // Try different model names
@@ -53,9 +44,7 @@ export async function startDebate(topic, personaA, personaB, duration) {
     }
 
     if (!model) {
-      console.warn("⚠️ All Gemini models failed, using mock debate")
-      console.warn("💡 Get a valid API key from: https://makersuite.google.com/app/apikey")
-      return generateMockDebate(topic, personaA, personaB, duration)
+      throw new Error("All Gemini models failed. Please check your API key and try again.")
     }
 
     // Calculate number of exchanges based on duration
@@ -168,13 +157,12 @@ Return ONLY valid JSON (no markdown, no code fences) in this shape:
           parsed.moderator_summary || parsed.summary || "Debate completed successfully.",
       }
     } catch (e) {
-      console.error("❌ Failed to parse JSON, using mock debate")
-      return generateMockDebate(topic, personaA, personaB, duration)
+      console.error("❌ Failed to parse JSON response from Gemini API")
+      throw new Error("Invalid response from AI service. Please try again.")
     }
   } catch (error) {
     console.error("💥 Debate creation error:", error.message)
-    console.warn("⚠️ Falling back to mock debate")
-    return generateMockDebate(topic, personaA, personaB, duration)
+    throw new Error(`Failed to generate debate: ${error.message}`)
   }
 }
 
@@ -186,11 +174,7 @@ export async function generateAIResponse(topic, conversationHistory) {
 
     // Check if API key exists
     if (!process.env.GEMINI_API_KEY) {
-      console.warn("⚠️ No GEMINI_API_KEY found, using mock response")
-      return {
-        message:
-          "I get where you're coming from, and it's an interesting angle. Can you say a bit more about why you see it that way?",
-      }
+      throw new Error("Gemini API key not configured. Please set GEMINI_API_KEY environment variable.")
     }
 
     // Try different model names
@@ -310,11 +294,7 @@ Just reply with raw spoken text — short, strong, natural, ready to be spoken a
     }
   } catch (error) {
     console.error("💥 AI response generation error:", error.message)
-    console.warn("⚠️ Falling back to default response")
-    return {
-      message:
-        "I get where you're coming from, and it's an interesting angle. Can you say a bit more about why you see it that way?",
-    }
+    throw new Error(`Failed to generate AI response: ${error.message}`)
   }
 }
 
@@ -461,17 +441,6 @@ Return ONLY valid JSON in this exact format (no markdown, no code blocks):
     }
   } catch (error) {
     console.error("💥 Human debate creation error:", error.message)
-    console.warn("⚠️ Falling back to default human debate")
-    return {
-      transcript: [
-        {
-          speaker: "AI Debater",
-          message: `Hey, I'm glad you picked "${topic}". It's a genuinely interesting topic, and I'm curious how you see it — what's your take?`,
-          phase: "opening",
-          timestamp: "0:00",
-        },
-      ],
-      moderator_summary: `A human-to-AI debate has been initiated on the topic: "${topic}". The AI debater has provided an opening statement to begin the conversation.`,
-    }
+    throw new Error(`Failed to start human debate: ${error.message}`)
   }
 }
