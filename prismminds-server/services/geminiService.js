@@ -2,7 +2,6 @@ import { GoogleGenerativeAI } from "@google/generative-ai"
 
 // IMPORTANT: no hardcoded API key here.
 // Ensure GEMINI_API_KEY is set in your environment.
-// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "AIzaSyCVKn4uQKWqvLmj11fiVWivD54GoAqam80")
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
 
 export async function startDebate(topic, personaA, personaB, duration) {
@@ -19,6 +18,7 @@ export async function startDebate(topic, personaA, personaB, duration) {
 
     // Try different model names
     const modelNames = [
+      "gemini-3-flash",
       "gemini-2.5-flash",
     ]
 

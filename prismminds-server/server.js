@@ -38,7 +38,7 @@ app.use((req, res, next) => {
 // app.use("/api/test", testRoutes);
 app.use("/api/debate", debateRoutes);
 
-app.get("/", (req, res) => res.send("🔥 PrismMinds Server Running"));
+app.get("/", (req, res) => res.send("PrismMinds Server is on AIR Jayanth, Rock the show!"));
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
