@@ -21,566 +21,500 @@ export async function downloadDebateTranscriptPDF(
     return
   }
 
-  // Build inner HTML content for the iframe with modern design
-  let innerHtml = `
-    <!doctype html>
-    <html>
-      <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <style>
-          /* Modern professional PDF styling */
-          html,body{margin:0;padding:0;background:#ffffff;color:#0f172a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",system-ui,sans-serif;line-height:1.6}
-          .container{padding:40px 60px;width:760px;box-sizing:border-box;position:relative;z-index:1}
-          
-          /* Typography */
-          h1{font-size:32px;margin:0 0 16px;color:#0f172a;font-weight:700;line-height:1.2;letter-spacing:-0.025em}
-          h2{font-size:18px;margin:0 0 12px;color:#1e293b;font-weight:600}
-          p{margin:0 0 12px;color:#475569;font-size:14px}
-          
-          /* Layout elements */
-          hr{border:0;height:1px;background:#e2e8f0;margin:28px 0}
-          
-          /* Header section */
-          .header{
-            display:flex;
-            align-items:flex-start;
-            justify-content:space-between;
-            margin-bottom:40px;
-            padding-bottom:24px;
-            border-bottom:2px solid #e2e8f0;
-          }
-          .branding{display:flex;align-items:center;gap:12px}
-          .logo{width:40px;height:40px}
-          .brand-info .name{
-            font-size:24px;
-            font-weight:700;
-            background:linear-gradient(135deg,#4f46e5 0%,#06b6d4 100%);
-            -webkit-background-clip:text;
-            -webkit-text-fill-color:transparent;
-            background-clip:text;
-            margin-bottom:2px
-          }
-          .brand-info .tagline{
-            font-size:11px;
-            color:#64748b;
-            font-weight:500
-          }
-          .metadata{text-align:right;font-size:12px;color:#64748b}
-          .metadata .date{display:flex;align-items:center;gap:6px;margin-bottom:4px}
-          
-          /* Topic & personas section */
-          .debate-header{margin-bottom:32px}
-          .topic-title{
-            font-size:28px;
-            font-weight:700;
-            color:#0f172a;
-            margin-bottom:18px;
-            line-height:1.25
-          }
-          .personas{
-            display:flex;
-            gap:16px;
-            margin-bottom:14px
-          }
-          .persona{
-            flex:1;
-            padding:14px 16px;
-            background:linear-gradient(135deg,rgba(79,70,229,0.08) 0%,rgba(79,70,229,0.04) 100%);
-            border-radius:10px;
-            border:1px solid #e2e8f0
-          }
-          .persona.b{
-            background:linear-gradient(135deg,rgba(6,182,212,0.08) 0%,rgba(6,182,212,0.04) 100%)
-          }
-          .persona-label{
-            font-size:11px;
-            font-weight:600;
-            color:#64748b;
-            text-transform:uppercase;
-            letter-spacing:0.05em;
-            margin-bottom:4px
-          }
-          .persona-name{
-            font-size:15px;
-            font-weight:700;
-            color:#0f172a
-          }
-          .debate-stats{
-            font-size:12px;
-            color:#64748b;
-            margin-top:12px;
-            display:flex;
-            gap:20px
-          }
-          .stat{display:flex;align-items:center;gap:6px}
-          
-          /* Phase dividers */
-          .phase{
-            margin:32px 0 20px;
-            text-align:center;
-            font-weight:700;
-            color:#0f172a;
-            font-size:12px;
-            text-transform:uppercase;
-            letter-spacing:0.08em;
-            position:relative;
-            display:flex;
-            align-items:center;
-            gap:12px
-          }
-          .phase:before, .phase:after {
-            content:'';
-            flex:1;
-            height:1px;
-            background:#cbd5e1
-          }
-          .phase-badge{
-            background:#f1f5f9;
-            padding:6px 12px;
-            border-radius:20px;
-            color:#475569
-          }
-          
-          /* Message styling */
-          .msg{
-            margin-bottom:18px;
-            padding:18px 20px;
-            background:#f8fafc;
-            border-radius:10px;
-            border-left:4px solid #4f46e5;
-            transition:background 0.2s
-          }
-          .msg.persona-b{border-left-color:#06b6d4}
-          .speaker{
-            font-weight:700;
-            font-size:13px;
-            margin-bottom:8px;
-            color:#0f172a;
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-          }
-          .speaker-badge{
-            font-size:10px;
-            padding:4px 8px;
-            border-radius:4px;
-            background:#e0e7ff;
-            color:#4f46e5
-          }
-          .msg.persona-b .speaker-badge{
-            background:#e0f2fe;
-            color:#06b6d4
-          }
-          .body{
-            font-size:14px;
-            line-height:1.7;
-            color:#334155;
-            margin:0;
-            white-space:pre-wrap;
-            word-break:break-word
-          }
-          .timestamp{
-            font-size:11px;
-            color:#94a3b8;
-            margin-top:10px;
-            padding-top:8px;
-            border-top:1px solid #e2e8f0
-          }
-          
-          /* Summary section */
-          .summary{
-            margin-top:32px;
-            padding:24px;
-            background:linear-gradient(135deg,#f0f9ff 0%,#f0f4f8 100%);
-            border-radius:12px;
-            border:1px solid #bae6fd;
-            break-inside:avoid
-          }
-          .summary h2{
-            color:#0c4a6e;
-            font-size:14px;
-            margin:0 0 14px;
-            display:flex;
-            align-items:center;
-            gap:8px;
-            font-weight:700;
-            text-transform:uppercase;
-            letter-spacing:0.05em
-          }
-          .summary-content{
-            font-size:14px;
-            line-height:1.8;
-            color:#334155
-          }
-          
-          /* Footer */
-          .footer{
-            margin-top:40px;
-            padding-top:20px;
-            border-top:1px solid #e2e8f0;
-            text-align:center;
-            font-size:10px;
-            color:#94a3b8
-          }
-          
-          /* Watermark */
-          .watermark{
-            position:fixed;
-            top:45%;
-            left:50%;
-            transform:translate(-50%,-50%) rotate(-45deg);
-            font-size:120px;
-            font-weight:700;
-            color:rgba(15,23,42,0.03);
-            white-space:nowrap;
-            pointer-events:none;
-            z-index:0
-          }
-        </style>
-      </head>
-      <body>
-        <div class="watermark">PrismMinds</div>
-
-        <div class="container">
-          <!-- Header -->
-          <div class="header">
-            <div class="branding">
-              <svg class="logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L2 19H22L12 2Z" stroke="url(#grad)" stroke-width="2" stroke-linejoin="round"/>
-                <circle cx="12" cy="14" r="3" fill="#4f46e5"/>
-                <defs>
-                  <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#4f46e5;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              <div class="brand-info">
-                <div class="name">PrismMinds</div>
-                <div class="tagline">AI-POWERED DEBATES</div>
-              </div>
-            </div>
-            <div class="metadata">
-              <div class="date">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/>
-                  <line x1="8" y1="2" x2="8" y2="6"/>
-                  <line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-                ${new Date(createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-              </div>
-              <div style="font-size:10px;color:#a0aec0">Report Document</div>
-            </div>
-          </div>
-
-          <!-- Debate title & personas -->
-          <div class="debate-header">
-            <div class="topic-title">${escapeHtml(topic)}</div>
-            <div class="personas">
-              <div class="persona">
-                <div class="persona-label">Pro Advocate</div>
-                <div class="persona-name">${escapeHtml(personaA)}</div>
-              </div>
-              <div class="persona b">
-                <div class="persona-label">Skeptic</div>
-                <div class="persona-name">${escapeHtml(personaB)}</div>
-              </div>
-            </div>
-            <div class="debate-stats">
-              <div class="stat">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
-                <span>${transcript.length} exchanges</span>
-              </div>
-              <div class="stat">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
-                </svg>
-                <span>Generated ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}</span>
-              </div>
-            </div>
-          </div>
-          <hr />
-  `
-
-  let currentPhase = ""
-  transcript.forEach((msg) => {
-    if (msg.phase && msg.phase !== currentPhase) {
-      currentPhase = msg.phase
-      const phaseEmoji = msg.phase === "opening" ? "🎤" : msg.phase === "discussion" ? "💬" : "🎯"
-      const phaseLabel = msg.phase.charAt(0).toUpperCase() + msg.phase.slice(1)
-      innerHtml += `<div class="phase"><span class="phase-badge">${phaseEmoji} ${phaseLabel}</span></div>`
-    }
-
-    const isPersonaB = msg.speaker === personaB
-    const msgClass = isPersonaB ? "msg persona-b" : "msg"
-    const badgeClass = isPersonaB ? "speaker-badge" : "speaker-badge"
-    const persona = isPersonaB ? "Skeptic" : "Advocate"
-    
-    innerHtml += `
-      <div class="${msgClass}">
-        <div class="speaker">
-          <span>${escapeHtml(msg.speaker)}</span>
-          <span class="${badgeClass}">${persona}</span>
-        </div>
-        <div class="body">${escapeHtml(msg.message)}</div>
-        ${msg.timestamp ? `<div class="timestamp">⏱ ${escapeHtml(msg.timestamp)}</div>` : ""}
-      </div>
-    `
-  })
-
-    if (summary) {
-      innerHtml += `
-        <div class="summary">
-          <h2>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
-            </svg>
-            Key Insights
-          </h2>
-          <div class="summary-content">${escapeHtml(summary)}</div>
-        </div>
-      `
-    }
-
-    innerHtml += `
-      <div class="footer">
-        <p style="margin:0">This document was automatically generated by PrismMinds | AI-Powered Debates</p>
-        <p style="margin:4px 0 0">For more information, visit <strong>prismminds.app</strong></p>
-      </div>
-    </div></body></html>`
-
-  // Create an iframe and write the minimal HTML into it
+  // Create an iframe to render the HTML
+  // We use fixed positioning off-screen but visible opacity to ensure html2canvas captures it correctly
   const iframe = document.createElement("iframe")
-  iframe.style.position = "absolute"
-  iframe.style.left = "-9999px"
-  iframe.style.width = "800px"
-  iframe.style.height = "auto"
-  iframe.setAttribute("aria-hidden", "true")
+  Object.assign(iframe.style, {
+    position: "fixed",
+    left: "-9999px",
+    top: "0",
+    width: "794px", // A4 width at ~96 DPI
+    height: "auto",
+    minHeight: "1123px", // A4 height
+    zIndex: "-9999",
+    opacity: "1", // Must be visible for some browsers/html2canvas
+    pointerEvents: "none",
+    border: "none",
+    background: "#ffffff",
+    visibility: "visible"
+  })
   document.body.appendChild(iframe)
 
   try {
     const doc = iframe.contentDocument || iframe.contentWindow?.document
     if (!doc) throw new Error("Could not access iframe document")
+
+    // Build the inner HTML
+    const innerHtml = getPDFTemplate(topic, personaA, personaB, transcript, createdAt, summary)
+
     doc.open()
     doc.write(innerHtml)
     doc.close()
 
-    // Wait a tick for fonts/images to settle
-    await new Promise((res) => setTimeout(res, 150))
+    // Wait for content to load
+    await new Promise((resolve) => setTimeout(resolve, 1500))
 
-    // Use html2canvas on the iframe's body to avoid global page styles
-    let canvas: HTMLCanvasElement | null = null
-    try {
-      canvas = await html2canvas(doc.body as HTMLElement, {
-        backgroundColor: "#ffffff",
-        useCORS: true,
-        logging: false,
-        scale: 2,
-      })
-    } catch (err) {
-      console.error("html2canvas failed, falling back to text PDF:", err)
+    if (doc.fonts && doc.fonts.ready) {
+      await doc.fonts.ready.catch(e => console.warn("Font loading error", e));
     }
 
-    // If html2canvas failed (e.g., due to parsing unsupported CSS), fall back
-    // to a simple text-based PDF generated directly with jsPDF.
-    if (!canvas) {
-      try {
-        const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" })
-        const margin = 12
-        const pageWidth = 210 - margin * 2
-        const lineHeight = 5.5
-        let cursorY = 15
-
-        // Gradient header background simulation
-        pdf.setFillColor(79, 70, 229)
-        pdf.rect(0, 0, 210, 28, "F")
-
-        // Company name (in white)
-        pdf.setFontSize(22)
-        pdf.setTextColor(255, 255, 255)
-        pdf.setFont("Helvetica", "bold")
-        pdf.text("PrismMinds", margin, 12)
-        
-        // Tagline
-        pdf.setFontSize(9)
-        pdf.setTextColor(255, 255, 255)
-        pdf.setFont("Helvetica", "normal")
-        pdf.text("AI-POWERED DEBATES", margin, 18)
-        
-        // Date on right
-        pdf.setFontSize(9)
-        pdf.setTextColor(255, 255, 255)
-        pdf.text(
-          `Generated: ${new Date(createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}`,
-          pageWidth + margin,
-          18,
-          { align: 'right' }
-        )
-
-        cursorY = 35
-
-        // Topic as main title
-        pdf.setFontSize(18)
-        pdf.setTextColor(15, 23, 42)
-        pdf.setFont("Helvetica", "bold")
-        const topicLines = pdf.splitTextToSize(topic, pageWidth) as string[]
-        topicLines.forEach((line: string) => {
-          pdf.text(line, margin, cursorY)
-          cursorY += lineHeight + 1
-        })
-
-        // Personas
-        pdf.setFontSize(11)
-        pdf.setTextColor(31, 41, 55)
-        pdf.setFont("Helvetica", "bold")
-        pdf.text(`${personaA}  vs  ${personaB}`, margin, cursorY)
-        cursorY += lineHeight + 2
-
-        // Date and stats
-        pdf.setFontSize(10)
-        pdf.setTextColor(71, 85, 105)
-        pdf.setFont("Helvetica", "normal")
-        pdf.text(`Date: ${new Date(createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`, margin, cursorY)
-        cursorY += lineHeight
-        pdf.text(`Exchanges: ${transcript.length}`, margin, cursorY)
-        cursorY += lineHeight + 3
-
-        // Horizontal line
-        pdf.setDrawColor(226, 232, 240)
-        pdf.setLineWidth(0.5)
-        pdf.line(margin, cursorY, pageWidth + margin, cursorY)
-        cursorY += 5
-
-        const addWrappedText = (text: string, isBold = false, isPhase = false) => {
-          if (isPhase) {
-            pdf.setFontSize(10)
-            pdf.setTextColor(15, 23, 42)
-            pdf.setFont("Helvetica", "bold")
-            pdf.setFillColor(241, 245, 249)
-            pdf.rect(margin - 1, cursorY - 3, pageWidth + 2, lineHeight + 2, "F")
-          } else {
-            pdf.setFontSize(10)
-            pdf.setTextColor(isBold ? 15 : 71, isBold ? 23 : 85, isBold ? 42 : 105)
-            pdf.setFont("Helvetica", isBold ? "bold" : "normal")
-          }
-
-          const split: string[] = pdf.splitTextToSize(text, pageWidth) as string[]
-          split.forEach((line: string) => {
-            if (cursorY > 280) {
-              pdf.addPage()
-              cursorY = 15
-            }
-            pdf.text(line, margin, cursorY)
-            cursorY += lineHeight
-          })
+    // Capture with html2canvas
+    const canvas = await html2canvas(doc.body as HTMLElement, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      windowWidth: 794,
+      logging: false, // disable noise
+      onclone: (clonedDoc) => {
+        const body = clonedDoc.body;
+        if (body) {
+          body.style.background = "#ffffff";
+          // Force show everything
+          body.style.display = "block";
         }
-
-        transcript.forEach((msg) => {
-          if (msg.phase && msg.phase !== currentPhase) {
-            currentPhase = msg.phase
-            const phaseLabel = msg.phase.charAt(0).toUpperCase() + msg.phase.slice(1)
-            addWrappedText(`\n${phaseLabel}\n`, false, true)
-            cursorY += 2
-          }
-
-          const persona = msg.speaker === personaB ? "Skeptic" : "Advocate"
-          addWrappedText(`${msg.speaker} (${persona}):`, true)
-          addWrappedText(msg.message, false)
-          if (msg.timestamp) {
-            pdf.setFontSize(8)
-            pdf.setTextColor(148, 163, 184)
-            pdf.text(`⏱ ${msg.timestamp}`, margin, cursorY)
-            cursorY += lineHeight
-          }
-          cursorY += 2
-        })
-
-        if (summary) {
-          cursorY += 2
-          pdf.addPage()
-          cursorY = 15
-
-          // Summary header
-          pdf.setFontSize(12)
-          pdf.setTextColor(15, 23, 42)
-          pdf.setFont("Helvetica", "bold")
-          pdf.text("Key Insights", margin, cursorY)
-          cursorY += lineHeight + 2
-
-          // Summary content
-          const summaryLines = pdf.splitTextToSize(summary, pageWidth) as string[]
-          pdf.setFontSize(10)
-          pdf.setTextColor(71, 85, 105)
-          pdf.setFont("Helvetica", "normal")
-          summaryLines.forEach((line: string) => {
-            if (cursorY > 280) {
-              pdf.addPage()
-              cursorY = 15
-            }
-            pdf.text(line, margin, cursorY)
-            cursorY += lineHeight
-          })
-        }
-
-        const filename = `${topic.substring(0, 50).replace(/[^a-z0-9]/gi, "_")}_debate.pdf`
-        pdf.save(filename)
-        return
-      } catch (err) {
-        console.error("Fallback PDF generation also failed:", err)
-        throw err
       }
+    })
+
+    if (!canvas || canvas.width === 0 || canvas.height === 0) {
+      throw new Error("Canvas generation failed or returned empty")
     }
 
-    // Create PDF from canvas
+    // Prepare PDF
     const pdf = new jsPDF({
       orientation: "portrait",
       unit: "mm",
-      format: "a4",
+      format: "a4"
     })
 
-    const imgWidth = 210 - 20 // A4 width minus margins
+    const imgWidth = 210 // A4 width in mm
+    const pageHeight = 297 // A4 height in mm
+
+    // Calculate the height of the image in the PDF
     const imgHeight = (canvas.height * imgWidth) / canvas.width
-    let heightLeft = imgHeight
-    let position = 10 // Top margin
-
-    // Add image to PDF, creating new pages as needed
     const imgData = canvas.toDataURL("image/png")
-    pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight)
-    heightLeft -= 277 // A4 height
 
-    while (heightLeft >= 0) {
-      position = heightLeft - imgHeight + 10
+    let heightLeft = imgHeight
+    let position = 0
+
+    // Add first page
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
+    heightLeft -= pageHeight
+
+    // Add potential extra pages
+    while (heightLeft > 0) {
+      position -= pageHeight
       pdf.addPage()
-      pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight)
-      heightLeft -= 277
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
+      heightLeft -= pageHeight
     }
 
-    // Download the PDF
-    const filename = `${topic.substring(0, 50).replace(/[^a-z0-9]/gi, "_")}_debate.pdf`
+    // Generate filename and save
+    const safeTopic = topic.substring(0, 30).trim().replace(/[^a-z0-9]/gi, "_") || "debate"
+    const filename = `${safeTopic}_transcript.pdf`
+
     pdf.save(filename)
-  } finally {
-    // Clean up iframe if it was appended
+
+  } catch (err) {
+    console.warn("Advanced PDF generation failed, switching to high-fidelity fallback:", err)
     try {
-      if (iframe && iframe.parentNode) {
-        iframe.parentNode.removeChild(iframe)
-      }
-    } catch (e) {
-      // ignore cleanup errors
+      generateVisualFallbackPDF(topic, personaA, personaB, transcript, createdAt, summary)
+    } catch (fallbackErr) {
+      console.error("Fallback PDF generation also failed:", fallbackErr)
+      alert("Failed to generate PDF. Please try again.")
+    }
+  } finally {
+    // Cleanup
+    if (iframe.parentNode) {
+      iframe.parentNode.removeChild(iframe)
     }
   }
 }
 
-function escapeHtml(text: string): string {
-  const map: Record<string, string> = {
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;",
+function getPDFTemplate(
+  topic: string,
+  personaA: string,
+  personaB: string,
+  transcript: DebateMessage[],
+  createdAt: string,
+  summary?: string,
+) {
+  let transcriptHtml = ''
+  let currentPhase = ""
+
+  transcript.forEach((msg) => {
+    if (msg.phase && msg.phase !== currentPhase) {
+      currentPhase = msg.phase
+      const phaseName = msg.phase.charAt(0).toUpperCase() + msg.phase.slice(1)
+      transcriptHtml += `
+        <div class="phase-divider">
+           <div class="phase-line"></div>
+           <div class="phase-label">${phaseName}</div>
+           <div class="phase-line"></div>
+        </div>
+      `
+    }
+
+    const isPersonaB = msg.speaker === personaB
+    const sideClass = isPersonaB ? "is-b" : "is-a"
+
+    transcriptHtml += `
+      <div class="message-block ${sideClass}">
+         <div class="speaker-line">
+            <span class="speaker-name">${escapeHtml(msg.speaker)}</span>
+            ${msg.timestamp ? `<span class="msg-time">${msg.timestamp}</span>` : ''}
+         </div>
+         <div class="message-content">${escapeHtml(msg.message)}</div>
+      </div>
+    `
+  })
+
+  return `
+    <!doctype html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Debate Transcript</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700;800&display=swap');
+
+          :root {
+            --primary: #4f46e5;
+            --accent: #06b6d4;
+            --text-main: #111827;
+            --text-muted: #4b5563;
+            --text-light: #9ca3af;
+            --bg-page: #ffffff;
+            --bg-subtle: #f9fafb;
+            --border: #e5e7eb;
+          }
+
+          body {
+            margin: 0;
+            padding: 48px 56px;
+            background: #ffffff;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            width: 794px; /* Fixed width for consistent capture */
+            box-sizing: border-box;
+          }
+
+          /* --- Header Section --- */
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+          }
+
+          .brand-col { display: flex; flex-direction: column; }
+          .brand-logo {
+            font-size: 20px; font-weight: 800; color: var(--primary);
+            text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;
+          }
+          .brand-tag { font-size: 10px; font-weight: 600; color: var(--text-light); letter-spacing: 0.1em; text-transform: uppercase; }
+
+          .meta-col { text-align: right; }
+          .meta-date { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+
+          /* --- Cover / Title Section --- */
+          .cover-section { margin-bottom: 48px; }
+          .topic-label { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+          .topic-title { font-family: 'Crimson Pro', serif; font-size: 32px; line-height: 1.25; font-weight: 600; color: var(--text-main); margin: 0 0 32px 0; }
+
+          /* --- Participants -- */
+          .participants {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+            margin-bottom: 40px; padding: 24px; background: var(--bg-subtle);
+            border-radius: 12px; border: 1px solid var(--border);
+          }
+          .participant-card { display: flex; flex-direction: column; gap: 4px; }
+          .role-badge {
+             display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase;
+             padding: 4px 8px; border-radius: 4px; width: fit-content; margin-bottom: 6px;
+          }
+          .role-pro { background: #e0e7ff; color: var(--primary); }
+          .role-con { background: #cffafe; color: var(--accent); }
+          
+          .participant-name { font-size: 15px; font-weight: 700; color: var(--text-main); }
+          .participant-desc { font-size: 12px; color: var(--text-muted); }
+
+          /* --- Summary Section --- */
+          .summary-box { padding: 0 0 32px 0; margin-bottom: 32px; border-bottom: 1px solid var(--border); }
+          .section-heading { font-size: 14px; font-weight: 700; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; }
+          .summary-text { font-family: 'Crimson Pro', serif; font-size: 16px; line-height: 1.6; color: var(--text-muted); font-style: italic; }
+
+          /* --- Transcript --- */
+          .phase-divider { display: flex; align-items: center; gap: 16px; margin: 40px 0 24px; }
+          .phase-line { flex: 1; height: 1px; background: var(--border); }
+          .phase-label { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+
+          .message-block { margin-bottom: 24px; position: relative; padding-left: 16px; border-left: 3px solid transparent; }
+          .is-a { border-left-color: var(--primary); }
+          .is-b { border-left-color: var(--accent); }
+
+          .speaker-line { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+          .speaker-name { font-size: 13px; font-weight: 700; color: var(--text-main); }
+          .msg-time { font-size: 10px; color: var(--text-light); }
+          
+          .message-content { font-family: 'Crimson Pro', serif; font-size: 15px; line-height: 1.6; color: #374151; white-space: pre-wrap; }
+
+          .footer { margin-top: 60px; padding-top: 16px; border-top: 1px solid var(--border); text-align: center; font-size: 10px; color: var(--text-light); }
+        </style>
+      </head>
+      <body>
+          <!-- Header -->
+          <div class="header">
+            <div class="brand-col">
+              <div class="brand-logo">
+                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 19H22L12 2Z" fill="currentColor"/></svg>
+                 PrismMinds
+              </div>
+              <div class="brand-tag">Intelligent Debate Archive</div>
+            </div>
+            <div class="meta-col">
+              <div class="meta-date">${new Date(createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+            </div>
+          </div>
+
+          <!-- Title -->
+          <div class="cover-section">
+             <div class="topic-label">Debate Topic</div>
+             <div class="topic-title">${escapeHtml(topic)}</div>
+
+             <div class="participants">
+                <div class="participant-card">
+                   <div class="role-badge role-pro">Proponent</div>
+                   <div class="participant-name">${escapeHtml(personaA)}</div>
+                </div>
+                <div class="participant-card">
+                   <div class="role-badge role-con">Opponent</div>
+                   <div class="participant-name">${escapeHtml(personaB)}</div>
+                </div>
+             </div>
+          </div>
+
+          ${summary ? `
+            <div class="summary-box">
+               <div class="section-heading"> Executive Summary </div>
+               <div class="summary-text">${escapeHtml(summary)}</div>
+            </div>
+          ` : ''}
+
+          <!-- Transcript -->
+          <div class="section-heading"> Debate Transcript </div>
+          ${transcriptHtml}
+
+          <div class="footer">
+             Generated by PrismMinds AI • prismminds.app
+          </div>
+      </body>
+    </html>
+  `
+}
+
+// Visual Fallback logic that mimics the premium design manually via jsPDF commands
+function generateVisualFallbackPDF(
+  topic: string,
+  personaA: string,
+  personaB: string,
+  transcript: DebateMessage[],
+  createdAt: string,
+  summary?: string
+) {
+  const pdf = new jsPDF()
+  const pageWidth = 210
+  const margin = 20
+  const contentWidth = pageWidth - (margin * 2)
+  let y = 20
+
+  // Colors
+  const colPrimary = [79, 70, 229] // #4f46e5
+  const colAccent = [6, 182, 212] // #06b6d4
+  const colTextMain = [17, 24, 39] // #111827
+  const colTextMuted = [75, 85, 99] // #4b5563
+
+  // Helper: check page break
+  const checkPage = (heightNeeded: number) => {
+    if (y + heightNeeded > 280) {
+      pdf.addPage()
+      y = 20
+    }
   }
-  return text.replace(/[&<>"']/g, (m) => map[m])
+
+  // Header line
+  pdf.setDrawColor(colPrimary[0], colPrimary[1], colPrimary[2])
+  pdf.setLineWidth(1)
+  pdf.line(margin, y + 12, pageWidth - margin, y + 12)
+
+  // Brand
+  pdf.setFontSize(16)
+  pdf.setTextColor(colPrimary[0], colPrimary[1], colPrimary[2])
+  pdf.setFont("helvetica", "bold")
+  pdf.text("PRISMMINDS", margin, y + 6)
+
+  // Tagline
+  pdf.setFontSize(8)
+  pdf.setTextColor(156, 163, 175)
+  pdf.setFont("helvetica", "bold")
+  pdf.text("INTELLIGENT DEBATE ARCHIVE", margin, y + 10)
+
+  // Date
+  pdf.setFontSize(10)
+  pdf.setTextColor(colTextMuted[0], colTextMuted[1], colTextMuted[2])
+  pdf.setFont("helvetica", "normal")
+  const dateStr = new Date(createdAt).toLocaleDateString()
+  pdf.text(dateStr, pageWidth - margin - pdf.getStringUnitWidth(dateStr) * 4, y + 8)
+
+  y += 28
+
+  // Topic Label
+  pdf.setFontSize(9)
+  pdf.setTextColor(colAccent[0], colAccent[1], colAccent[2])
+  pdf.setFont("helvetica", "bold")
+  pdf.text("DEBATE TOPIC", margin, y)
+  y += 6
+
+  // Topic Title
+  pdf.setFontSize(20)
+  pdf.setTextColor(colTextMain[0], colTextMain[1], colTextMain[2])
+  pdf.setFont("times", "bold")
+  const topicLines = pdf.splitTextToSize(topic, contentWidth)
+  pdf.text(topicLines, margin, y)
+  y += (topicLines.length * 8) + 12
+
+  // Participants Box (simulated with rect)
+  const boxHeight = 24
+  pdf.setFillColor(249, 250, 251) // #f9fafb
+  pdf.setDrawColor(229, 231, 235) // #e5e7eb
+  pdf.roundedRect(margin, y, contentWidth, boxHeight, 3, 3, "FD")
+
+  // Pro
+  const colWidth = contentWidth / 2
+  let py = y + 8
+  pdf.setFontSize(8)
+  pdf.setTextColor(colPrimary[0], colPrimary[1], colPrimary[2])
+  pdf.setFont("helvetica", "bold")
+  pdf.text("PROPONENT", margin + 6, py)
+
+  pdf.setFontSize(12)
+  pdf.setTextColor(colTextMain[0], colTextMain[1], colTextMain[2])
+  pdf.setFont("helvetica", "bold")
+  pdf.text(personaA, margin + 6, py + 6)
+
+  // Con
+  pdf.setFontSize(8)
+  pdf.setTextColor(colAccent[0], colAccent[1], colAccent[2])
+  pdf.text("OPPONENT", margin + colWidth + 6, py)
+
+  pdf.setFontSize(12)
+  pdf.setTextColor(colTextMain[0], colTextMain[1], colTextMain[2])
+  pdf.text(personaB, margin + colWidth + 6, py + 6)
+
+  y += boxHeight + 20
+
+  // Summary
+  if (summary) {
+    checkPage(40)
+    pdf.setFontSize(10)
+    pdf.setTextColor(colTextMain[0], colTextMain[1], colTextMain[2])
+    pdf.setFont("helvetica", "bold")
+    pdf.text("EXECUTIVE SUMMARY", margin, y)
+    y += 6
+
+    pdf.setFontSize(11)
+    pdf.setFont("times", "italic")
+    pdf.setTextColor(colTextMuted[0], colTextMuted[1], colTextMuted[2])
+    const sumLines = pdf.splitTextToSize(summary, contentWidth)
+    pdf.text(sumLines, margin, y)
+    y += (sumLines.length * 6) + 16
+
+    pdf.setDrawColor(229, 231, 235)
+    pdf.line(margin, y - 8, pageWidth - margin, y - 8)
+  }
+
+  // Heading
+  checkPage(20)
+  pdf.setFontSize(11)
+  pdf.setFont("helvetica", "bold")
+  pdf.setTextColor(colTextMain[0], colTextMain[1], colTextMain[2])
+  pdf.text("Full Transcript", margin, y)
+  y += 10
+
+  // Transcript Loop
+  let currentPhase = ""
+
+  transcript.forEach(msg => {
+    // Phase header
+    if (msg.phase && msg.phase !== currentPhase) {
+      checkPage(15)
+      currentPhase = msg.phase
+      y += 4
+
+      pdf.setDrawColor(209, 213, 219) // thin gray line
+      pdf.line(margin, y, pageWidth - margin, y)
+
+      // Label in middle
+      const phaseLabel = msg.phase.toUpperCase()
+      pdf.setFillColor(255, 255, 255)
+      const labelW = pdf.getStringUnitWidth(phaseLabel) * 4 // approx
+      pdf.rect((pageWidth / 2) - (labelW / 2) - 4, y - 2, labelW + 8, 4, "F")
+
+      pdf.setFontSize(8)
+      pdf.setTextColor(156, 163, 175)
+      pdf.setFont("helvetica", "bold")
+      pdf.text(phaseLabel, pageWidth / 2, y + 1, { align: 'center' })
+
+      y += 12
+    }
+
+    // Message Block
+    // Estimate height
+    pdf.setFont("times", "roman")
+    pdf.setFontSize(11)
+    const msgLines = pdf.splitTextToSize(msg.message, contentWidth - 8) // indent slightly
+    const heightNeeded = (msgLines.length * 6) + 12
+    checkPage(heightNeeded)
+
+    // Side bar
+    const isB = msg.speaker === personaB
+    pdf.setDrawColor(isB ? colAccent[0] : colPrimary[0], isB ? colAccent[1] : colPrimary[1], isB ? colAccent[2] : colPrimary[2])
+    pdf.setLineWidth(1)
+    pdf.line(margin, y, margin, y + heightNeeded - 4)
+
+    // Speaker Name
+    pdf.setFont("helvetica", "bold")
+    pdf.setFontSize(10)
+    pdf.setTextColor(colTextMain[0], colTextMain[1], colTextMain[2])
+    pdf.text(msg.speaker, margin + 4, y + 3)
+
+    // Time
+    if (msg.timestamp) {
+      pdf.setFont("helvetica", "normal")
+      pdf.setFontSize(8)
+      pdf.setTextColor(156, 163, 175)
+      pdf.text(msg.timestamp, pageWidth - margin, y + 3, { align: 'right' })
+    }
+
+    // Text
+    pdf.setFont("times", "roman")
+    pdf.setFontSize(11)
+    pdf.setTextColor(55, 65, 81)
+    pdf.text(msgLines, margin + 4, y + 9)
+
+    y += heightNeeded
+  })
+
+  const filename = `${topic.substring(0, 30).trim().replace(/[^a-z0-9]/gi, "_")}_Transcript.pdf`
+  pdf.save(filename)
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;")
 }

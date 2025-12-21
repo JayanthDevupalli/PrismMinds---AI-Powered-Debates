@@ -119,6 +119,13 @@ router.delete("/:id", verifyFirebaseToken, async (req, res) => {
     }
 
     await debateRef.delete();
+    await db
+      .collection("debates")
+      .doc(uid)
+      .collection("favorites")
+      .doc(debateId)
+      .delete();
+
     console.log(`Deleted debate ${debateId} for user ${uid}`);
     res.json({ success: true });
   } catch (err) {
