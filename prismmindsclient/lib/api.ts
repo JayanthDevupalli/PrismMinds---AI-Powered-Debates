@@ -286,3 +286,78 @@ export async function endHumanDebate(debateId: string) {
     throw error;
   }
 }
+
+// Favorites API functions - using Backend
+export async function fetchFavorites() {
+  try {
+    const headers = await getAuthHeader();
+    console.log("🔍 Fetching user favorites from backend");
+
+    const res = await fetch(`${API_URL}/favorites/all`, {
+      method: "GET",
+      headers,
+    });
+
+    if (!res.ok) {
+      console.error("❌ Failed to fetch favorites:", res.status, res.statusText);
+      // Fallback to empty array if backend fails, or throw
+      return [];
+    }
+
+    const favorites = await res.json();
+    console.log("✅ Fetched favorites:", favorites);
+    return favorites;
+  } catch (error) {
+    console.error("❌ Error in fetchFavorites:", error);
+    throw error;
+  }
+}
+
+export async function addFavorite(debateId: string) {
+  try {
+    const headers = await getAuthHeader();
+    const payload = { debateId };
+
+    console.log("❤️ Adding favorite to backend:", debateId);
+
+    const res = await fetch(`${API_URL}/favorite`, {
+      method: "POST",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const msg = await res.text();
+      throw new Error(`Failed to add favorite: ${msg}`);
+    }
+
+    console.log("✅ Favorite added successfully");
+    return true;
+  } catch (error) {
+    console.error("❌ Error in addFavorite:", error);
+    throw error;
+  }
+}
+
+export async function removeFavorite(debateId: string) {
+  try {
+    const headers = await getAuthHeader();
+    console.log("💔 Removing favorite from backend:", debateId);
+
+    const res = await fetch(`${API_URL}/favorite/${debateId}`, {
+      method: "DELETE",
+      headers,
+    });
+
+    if (!res.ok) {
+      const msg = await res.text();
+      throw new Error(`Failed to remove favorite: ${msg}`);
+    }
+
+    console.log("✅ Favorite removed successfully");
+    return true;
+  } catch (error) {
+    console.error("❌ Error in removeFavorite:", error);
+    throw error;
+  }
+}

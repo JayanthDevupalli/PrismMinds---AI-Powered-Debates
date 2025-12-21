@@ -4,10 +4,10 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
-import { fetchRecentDebates, createDebate, createHumanDebate, deleteDebate } from "@/lib/api"
+import { fetchRecentDebates, createDebate, createHumanDebate, deleteDebate, fetchFavorites, addFavorite, removeFavorite } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline"
-import { SparklesIcon, Trash2Icon, X, History, Download, ScrollText, Sparkles, Rocket, BookOpen, Mic2, MessageCircle, Target, BarChart3, Globe } from "lucide-react"
+import { SparklesIcon, Trash2Icon, X, History, Download, ScrollText, Sparkles, Rocket, BookOpen, Mic2, MessageCircle, Target, BarChart3, Globe, Heart } from "lucide-react"
 import { downloadDebateTranscriptPDF } from "@/lib/pdf-generator"
 
 type DebateMessage = {
@@ -53,7 +53,7 @@ export default function DashboardPage() {
   const [recentDebates, setRecentDebates] = useState<Debate[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedDebate, setSelectedDebate] = useState<Debate | null>(null)
-  const [currentView, setCurrentView] = useState<"main" | "transcripts">("main")
+  const [currentView, setCurrentView] = useState<"main" | "transcripts" | "favorites">("main")
   const [searchQuery, setSearchQuery] = useState("")
   const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE)
   const [transcriptIndex, setTranscriptIndex] = useState(0)
@@ -61,6 +61,7 @@ export default function DashboardPage() {
   const transcriptEndRef = useRef<HTMLDivElement>(null)
   const modalContentRef = useRef<HTMLDivElement>(null)
   const [debateMode, setDebateMode] = useState<"ai" | "human">("ai");
+  const [favorites, setFavorites] = useState<Debate[]>([])
 
   const [form, setForm] = useState({
     topic: "",
@@ -73,6 +74,13 @@ export default function DashboardPage() {
   const [generating, setGenerating] = useState(false)
   const [statusMessage, setStatusMessage] = useState("")
   const [typing, setTyping] = useState<{ speaker?: string } | null>(null)
+  const [greeting, setGreeting] = useState("Good Morning")
+
+  useEffect(() => {
+    const hour = new Date().getHours()
+    const msg = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening"
+    setGreeting(msg)
+  }, [])
 
   const filteredDebates = recentDebates.filter(
     (debate) =>
@@ -126,6 +134,25 @@ export default function DashboardPage() {
   }, [selectedDebate])
 
   const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms))
+
+  const toggleFavorite = async (debate: Debate) => {
+    const isCurrentlyFavorite = favorites.some(f => f.id === debate.id)
+
+    try {
+      if (isCurrentlyFavorite) {
+        await removeFavorite(debate.id)
+        setFavorites(prev => prev.filter(f => f.id !== debate.id))
+        showToast('Favorite removed', 'success')
+      } else {
+        await addFavorite(debate.id)
+        setFavorites(prev => [debate, ...prev])
+        showToast('Favorite added', 'success')
+      }
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error)
+      showToast('Failed to update favorite', 'error')
+    }
+  }
 
   async function revealTranscript(fullTranscript: DebateMessage[] | undefined, durationMin: number | string) {
     if (!fullTranscript || fullTranscript.length === 0) return
@@ -235,6 +262,11 @@ export default function DashboardPage() {
         .then(setRecentDebates)
         .catch(console.error)
         .finally(() => setLoading(false))
+
+      // Load user favorites from localStorage
+      fetchFavorites()
+        .then(favs => setFavorites(favs))
+        .catch(console.error)
     }
   }, [user])
 
@@ -351,11 +383,7 @@ export default function DashboardPage() {
               PrismMinds AI
             </p>
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-              {(() => {
-                const hour = new Date().getHours();
-                const greeting = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening";
-                return `${greeting}, ${user?.displayName?.split(" ")[0] || "Debater"}`;
-              })()}
+              {`${greeting}, ${user?.displayName?.split(" ")[0] || "Debater"}`}
             </h1>
           </motion.div>
           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-end">
@@ -384,6 +412,30 @@ export default function DashboardPage() {
               <History className="w-4 h-4 flex-shrink-0" />
               <span className="hidden sm:inline">Transcripts</span>
             </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={async () => {
+                // Open favorites view
+                setLoading(true)
+                try {
+                  // We've already fetched favorites in useEffect, but we can refresh them here if needed
+                  // or just switch view. Since favorites are independent now, we don't need to fetch recent debates.
+                  const favs = await fetchFavorites()
+                  setFavorites(favs)
+                } catch (err) {
+                  console.error('Failed to refresh favorites:', err)
+                } finally {
+                  setLoading(false)
+                  setCurrentView("favorites")
+                }
+              }}
+              className="flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-red-500/20 to-pink-500/20 hover:from-red-500/30 hover:to-pink-500/30 border border-border/50 transition-all text-xs sm:text-sm font-medium text-foreground"
+              title="View favorite debates"
+            >
+              <Heart className="w-4 h-4 flex-shrink-0" />
+              <span className="hidden sm:inline">Favorites</span>
+            </motion.button>
             {currentView === "transcripts" && (
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -402,6 +454,27 @@ export default function DashboardPage() {
                   }
                 }}
                 className="flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 hover:from-blue-100 hover:to-cyan-100 border border-blue-200/50 dark:border-blue-800/50 transition-all text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400"
+              >
+                ← Back
+              </motion.button>
+            )}
+            {currentView === "favorites" && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={async () => {
+                  try {
+                    setLoading(true)
+                    const recent = await fetchRecentDebates(2)
+                    setRecentDebates(recent)
+                  } catch (err) {
+                    console.error('Failed to load recent debates:', err)
+                  } finally {
+                    setLoading(false)
+                    setCurrentView("main")
+                  }
+                }}
+                className="flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 hover:from-red-100 hover:to-pink-100 border border-red-200/50 dark:border-red-800/50 transition-all text-xs sm:text-sm font-medium text-red-600 dark:text-red-400"
               >
                 ← Back
               </motion.button>
@@ -541,7 +614,7 @@ export default function DashboardPage() {
                               <span className="font-semibold text-accent">{debate.personaB}</span>
                             </p>
                             <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                              <span className="text-xs text-muted-foreground whitespace-nowrap" suppressHydrationWarning>
                                 📅 {new Date(debate.createdAt).toLocaleDateString()}
                               </span>
                               <span className="text-xs bg-gradient-to-r from-primary/20 to-accent/20 text-primary font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
@@ -554,6 +627,19 @@ export default function DashboardPage() {
                             <motion.button
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.95 }}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                toggleFavorite(debate)
+                              }}
+                              className={`p-2 rounded-lg transition-colors shadow-sm ${favorites.some(f => f.id === debate.id) ? 'bg-red-100 text-red-500 hover:bg-red-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                              title={favorites.some(f => f.id === debate.id) ? "Remove from favorites" : "Add to favorites"}
+                            >
+                              <Heart className={`w-4 h-4 ${favorites.some(f => f.id === debate.id) ? 'fill-current' : ''}`} />
+                            </motion.button>
+
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.95 }}
                               onClick={async (e) => {
                                 e.stopPropagation()
                                 if (window.confirm("Delete this transcript?")) {
@@ -562,6 +648,7 @@ export default function DashboardPage() {
                                     // Refresh logic
                                     const all = await fetchRecentDebates(100)
                                     setRecentDebates(all)
+                                    setFavorites(prev => prev.filter(f => f.id !== debate.id))
                                   } catch (err) {
                                     console.error("Failed to delete", err)
                                     showToast("Failed to delete", "error")
@@ -592,8 +679,127 @@ export default function DashboardPage() {
         )
         }
 
+        {currentView === "favorites" && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-6 sm:space-y-8"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center justify-between"
+            >
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-2 flex items-center gap-3">
+                  <Heart className="w-8 h-8 text-red-500" />
+                  Favorite Debates
+                </h2>
+                <p className="text-muted-foreground">Your bookmarked debates for quick access</p>
+              </div>
+            </motion.div>
+
+            {favorites.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-12"
+              >
+                <Heart className="w-16 h-16 text-red-200 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No favorites yet</h3>
+                <p className="text-muted-foreground">Click the heart icon on any debate to add it to favorites</p>
+              </motion.div>
+            ) : (
+              <motion.div
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+                layout
+              >
+                <AnimatePresence mode="popLayout">
+                  {favorites.map((debate, idx) => (
+                    <motion.div
+                      key={debate.id}
+                      layout
+                      initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 25,
+                        delay: idx * 0.08
+                      }}
+                      className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 hover:shadow-lg hover:border-red-500/30 transition-all cursor-pointer group"
+                      onClick={() => setSelectedDebate(debate)}
+                    >
+                      <div className="flex items-start justify-between gap-2 sm:gap-3">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm sm:text-base font-bold text-foreground transition-colors mb-1 line-clamp-2 group-hover:text-primary">
+                            {debate.topic}
+                          </h3>
+                          <p className="text-xs text-muted-foreground mb-2 break-words">
+                            <span className="font-semibold text-primary">{debate.personaA}</span>
+                            <span className="mx-1">vs</span>
+                            <span className="font-semibold text-accent">{debate.personaB}</span>
+                          </p>
+                          <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                            <span className="text-xs text-muted-foreground whitespace-nowrap" suppressHydrationWarning>
+                              📅 {new Date(debate.createdAt).toLocaleDateString()}
+                            </span>
+                            <span className="text-xs bg-gradient-to-r from-primary/20 to-accent/20 text-primary font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
+                              ⏱️ {debate.duration}min
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              toggleFavorite(debate)
+                            }}
+                            className="p-2 rounded-lg bg-red-100 text-red-500 hover:bg-red-200 transition-colors shadow-sm"
+                            title="Remove from favorites"
+                          >
+                            <Heart className="w-4 h-4 fill-current" />
+                          </motion.button>
+
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={async (e) => {
+                              e.stopPropagation()
+                              if (window.confirm("Delete this debate?")) {
+                                try {
+                                  await deleteDebate(debate.id)
+                                  setFavorites(prev => prev.filter(f => f.id !== debate.id))
+                                  const all = await fetchRecentDebates(100)
+                                  setRecentDebates(all)
+                                } catch (err) {
+                                  console.error("Failed to delete", err)
+                                  showToast("Failed to delete", "error")
+                                }
+                              }
+                            }}
+                            className="p-2 rounded-lg bg-red-100 text-red-500 hover:bg-red-200 transition-colors shadow-sm"
+                            title="Delete Debate"
+                          >
+                            <Trash2Icon className="w-4 h-4" />
+                          </motion.button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
         {
-          currentView !== "transcripts" && (
+          currentView !== "transcripts" && currentView !== "favorites" && (
             <>
               {/* Debate Mode Selector */}
               <motion.div
@@ -814,6 +1020,17 @@ export default function DashboardPage() {
                                       <div className="flex gap-1 opacity-100 transition-opacity">
                                         <motion.button
                                           whileHover={{ scale: 1.1 }}
+                                          onClick={(e) => {
+                                            e.stopPropagation()
+                                            toggleFavorite(debate)
+                                          }}
+                                          className={`p-2 rounded-lg transition-all opacity-100 ${favorites.some(f => f.id === debate.id) ? 'bg-red-100/80 dark:bg-red-900/30 text-red-600 hover:bg-red-200' : 'bg-gray-100/80 dark:bg-gray-900/30 text-gray-600 hover:bg-gray-200'}`}
+                                          title={favorites.some(f => f.id === debate.id) ? "Remove from favorites" : "Add to favorites"}
+                                        >
+                                          <Heart className={`w-3.5 sm:w-4 h-3.5 sm:h-4 ${favorites.some(f => f.id === debate.id) ? 'fill-current' : ''}`} />
+                                        </motion.button>
+                                        <motion.button
+                                          whileHover={{ scale: 1.1 }}
                                           onClick={async (e) => {
                                             e.stopPropagation()
                                             if (window.confirm("Delete this debate?")) {
@@ -821,6 +1038,7 @@ export default function DashboardPage() {
                                                 await deleteDebate(debate.id)
                                                 const updated = await fetchRecentDebates()
                                                 setRecentDebates(updated)
+                                                setFavorites(prev => prev.filter(f => f.id !== debate.id))
                                                 if (selectedDebate?.id === debate.id) {
                                                   setSelectedDebate(null)
                                                 }
@@ -850,7 +1068,7 @@ export default function DashboardPage() {
                                   </div>
 
                                   <div className="relative z-10 pt-3 sm:pt-4 border-t border-border/30">
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-xs text-muted-foreground" suppressHydrationWarning>
                                       {new Date(debate.createdAt).toLocaleString()}
                                     </p>
                                   </div>

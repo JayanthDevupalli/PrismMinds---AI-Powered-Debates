@@ -77,6 +77,7 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 }
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -84,24 +85,34 @@
 
 :root {
   /* MODERN INDIGO-TEAL-CORAL theme — Tech-forward, vibrant, professional */
-  --background: #F8FAFC; /* crisp clean white */
-  --foreground: #0F172A; /* deep slate for text */
-  --card: #FFFFFF; /* pure white cards */
+  --background: #F8FAFC;
+  /* crisp clean white */
+  --foreground: #0F172A;
+  /* deep slate for text */
+  --card: #FFFFFF;
+  /* pure white cards */
   --card-foreground: #0F172A;
   --popover: #FFFFFF;
   --popover-foreground: #0F172A;
-  --primary: #4F46E5; /* vibrant indigo */
+  --primary: #4F46E5;
+  /* vibrant indigo */
   --primary-foreground: #FFFFFF;
-  --secondary: #06B6D4; /* bright teal */
+  --secondary: #06B6D4;
+  /* bright teal */
   --secondary-foreground: #FFFFFF;
-  --muted: #F1F5F9; /* very soft gray */
-  --muted-foreground: #64748B; /* slate gray text */
-  --accent: #F97316; /* warm orange accent */
+  --muted: #F1F5F9;
+  /* very soft gray */
+  --muted-foreground: #64748B;
+  /* slate gray text */
+  --accent: #F97316;
+  /* warm orange accent */
   --accent-foreground: #FFFFFF;
   --destructive: #EF4444;
-  --border: #E2E8F0; /* light border */
+  --border: #E2E8F0;
+  /* light border */
   --input: #F1F5F9;
-  --ring: #818CF8; /* indigo ring */
+  --ring: #818CF8;
+  /* indigo ring */
   --chart-1: #4F46E5;
   --chart-2: #06B6D4;
   --chart-3: #F97316;
@@ -119,18 +130,24 @@
 }
 
 .dark {
-  --background: #0F172A; /* deep slate */
-  --foreground: #F1F5F9; /* light text */
-  --card: #1E293B; /* dark card */
+  --background: #0F172A;
+  /* deep slate */
+  --foreground: #F1F5F9;
+  /* light text */
+  --card: #1E293B;
+  /* dark card */
   --card-foreground: #F1F5F9;
   --popover: #1E293B;
   --popover-foreground: #F1F5F9;
-  --primary: #818CF8; /* lighter indigo for dark mode */
+  --primary: #818CF8;
+  /* lighter indigo for dark mode */
   --primary-foreground: #0F172A;
   --secondary: #06B6D4;
   --secondary-foreground: #0F172A;
-  --muted: #334155; /* dark muted */
-  --muted-foreground: #CBD5E1; /* light muted text */
+  --muted: #334155;
+  /* dark muted */
+  --muted-foreground: #CBD5E1;
+  /* light muted text */
   --accent: #F97316;
   --accent-foreground: #FFFFFF;
   --destructive: #EF4444;
@@ -197,6 +214,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -207,6 +225,7 @@
       opacity: 0;
       transform: translateX(-20px);
     }
+
     to {
       opacity: 1;
       transform: translateX(0);
@@ -218,6 +237,7 @@
       opacity: 0;
       transform: translateX(20px);
     }
+
     to {
       opacity: 1;
       transform: translateX(0);
@@ -229,6 +249,7 @@
       opacity: 0;
       transform: scale(0.95);
     }
+
     to {
       opacity: 1;
       transform: scale(1);
@@ -239,6 +260,7 @@
     0% {
       background-position: -1000px 0;
     }
+
     100% {
       background-position: 1000px 0;
     }
@@ -281,7 +303,7 @@
   .blog-image-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0));
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0));
     pointer-events: none;
   }
 
@@ -308,6 +330,7 @@
     font-size: 0.85rem;
   }
 }
+
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -346,6 +369,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -368,6 +392,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);

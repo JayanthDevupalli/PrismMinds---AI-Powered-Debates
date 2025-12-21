@@ -6,12 +6,12 @@ import { startDebate, startHumanDebate, generateAIResponse } from "../services/g
 
 const router = express.Router();
 
-// 🔹 Create a new debate
+// Create a new debate
 router.post("/create", verifyFirebaseToken, async (req, res) => {
   try {
     const { topic, personaA, personaB, duration } = req.body;
     const uid = req.user.uid;
-    console.log("Creating debate for user:", uid);  
+    console.log("Creating debate for user:", uid);
 
     const debateData = await startDebate(topic, personaA, personaB, duration);
 
@@ -276,5 +276,92 @@ router.post("/:id/end", verifyFirebaseToken, async (req, res) => {
   }
 });
 
+
+
+//  Get user favorites
+router.get("/favorites/all", verifyFirebaseToken, async (req, res) => {
+  try {
+    const uid = req.user.uid;
+    const snapshot = await db
+      .collection("debates")
+      .doc(uid)
+      .collection("favorites")
+      .orderBy("createdAt", "desc")
+      .get();
+
+    const favorites = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    res.json(favorites);
+  } catch (err) {
+    console.error("Fetch favorites error:", err);
+    res.status(500).json({ error: "Failed to fetch favorites" });
+  }
+});
+
+// 🔹 Add a debate to favorites
+router.post("/favorite", verifyFirebaseToken, async (req, res) => {
+  try {
+    const uid = req.user.uid;
+    const { debateId } = req.body;
+
+    if (!debateId) {
+      return res.status(400).json({ error: "Debate ID required" });
+    }
+
+    // 1. Fetch the debate from userDebates
+    const debateRef = db
+      .collection("debates")
+      .doc(uid)
+      .collection("userDebates")
+      .doc(debateId);
+
+    const docSnap = await debateRef.get();
+
+    if (!docSnap.exists) {
+      return res.status(404).json({ error: "Debate not found" });
+    }
+
+    const debateData = docSnap.data();
+
+    // 2. Add to favorites collection
+    await db
+      .collection("debates")
+      .doc(uid)
+      .collection("favorites")
+      .doc(debateId)
+      .set({
+        ...debateData,
+        favoritedAt: new Date().toISOString()
+      });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Add favorite error:", err);
+    res.status(500).json({ error: "Failed to add favorite" });
+  }
+});
+
+// 🔹 Remove a debate from favorites
+router.delete("/favorite/:id", verifyFirebaseToken, async (req, res) => {
+  try {
+    const uid = req.user.uid;
+    const debateId = req.params.id;
+
+    if (!debateId) {
+      return res.status(400).json({ error: "Debate ID required" });
+    }
+
+    await db
+      .collection("debates")
+      .doc(uid)
+      .collection("favorites")
+      .doc(debateId)
+      .delete();
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Remove favorite error:", err);
+    res.status(500).json({ error: "Failed to remove favorite" });
+  }
+});
 
 export default router;
