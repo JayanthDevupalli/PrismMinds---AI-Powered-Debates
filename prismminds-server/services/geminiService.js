@@ -18,7 +18,6 @@ export async function startDebate(topic, personaA, personaB, duration) {
 
     // Try different model names
     const modelNames = [
-      "gemini-3-flash",
       "gemini-2.5-flash",
     ]
 
