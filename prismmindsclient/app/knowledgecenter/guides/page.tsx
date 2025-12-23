@@ -217,7 +217,7 @@ export default function GuidesPage() {
 
                                 {/* CTA */}
                                 <Link
-                                    href={`/guides/${guide.slug}`}
+                                    href={`/knowledgecenter/guides/${guide.slug}`}
                                     className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-purple-600 dark:hover:text-purple-400 transition group/link"
                                 >
                                     Read guide

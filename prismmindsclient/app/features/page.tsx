@@ -265,6 +265,76 @@ export default function FeaturesPage() {
 
 
 
+
+      {/* Dashboard & Tools Section */}
+      <motion.section
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+        className="max-w-6xl mx-auto mb-28"
+      >
+        <h2 className="text-3xl font-semibold text-center mb-14 bg-gradient-to-r from-rose-500 via-indigo-500 to-teal-500 bg-clip-text text-transparent">
+          Dashboard Power Tools
+        </h2>
+
+        <div className="grid md:grid-cols-2 gap-8">
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="p-8 rounded-2xl bg-white/60 dark:bg-gray-900/50 border border-indigo-100 dark:border-indigo-900/30 shadow-lg backdrop-blur-xl"
+          >
+            <div className="flex items-center gap-4 mb-6">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg">
+                <MessageSquareMore size={24} />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">
+                Human vs. AI Mode
+              </h3>
+            </div>
+            <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
+              Step into the arena yourself. Challenge an AI persona directly in real-time debates to test your arguments against an infinitely knowledgeable opponent.
+            </p>
+            <ul className="space-y-2 text-sm text-gray-500 dark:text-gray-400">
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-teal-500" />
+                Real-time counter-arguments
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-teal-500" />
+                Personalized feedback loop
+              </li>
+            </ul>
+          </motion.div>
+
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="p-8 rounded-2xl bg-white/60 dark:bg-gray-900/50 border border-teal-100 dark:border-teal-900/30 shadow-lg backdrop-blur-xl"
+          >
+            <div className="flex items-center gap-4 mb-6">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-teal-400 to-emerald-600 text-white shadow-lg">
+                <BookOpen size={24} />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">
+                Library & Export
+              </h3>
+            </div>
+            <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
+              Your intellectual journey, organized. Save your favorite debates, search through history, and export professional PDF transcripts for offline study.
+            </p>
+            <ul className="space-y-2 text-sm text-gray-500 dark:text-gray-400">
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                One-click PDF download
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                Favorites & Smart Search
+              </li>
+            </ul>
+          </motion.div>
+        </div>
+      </motion.section>
+
       {/* FAQ Accordion */}
       <motion.section
         initial={{ opacity: 0, y: 40 }}
