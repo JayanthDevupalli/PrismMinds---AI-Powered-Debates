@@ -18,6 +18,51 @@ import {
 export default function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
+  const cardColors = [
+    {
+      bg: "from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20",
+      accent: "from-blue-400 to-indigo-500",
+      iconBg: "bg-blue-500",
+      iconColor: "text-white",
+      border: "border-blue-200 dark:border-blue-800"
+    },
+    {
+      bg: "from-purple-50 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20",
+      accent: "from-purple-400 to-pink-500",
+      iconBg: "bg-purple-500",
+      iconColor: "text-white",
+      border: "border-purple-200 dark:border-purple-800"
+    },
+    {
+      bg: "from-emerald-50 to-teal-100 dark:from-emerald-900/20 dark:to-teal-900/20",
+      accent: "from-emerald-400 to-teal-500",
+      iconBg: "bg-emerald-500",
+      iconColor: "text-white",
+      border: "border-emerald-200 dark:border-emerald-800"
+    },
+    {
+      bg: "from-orange-50 to-red-100 dark:from-orange-900/20 dark:to-red-900/20",
+      accent: "from-orange-400 to-red-500",
+      iconBg: "bg-orange-500",
+      iconColor: "text-white",
+      border: "border-orange-200 dark:border-orange-800"
+    },
+    {
+      bg: "from-cyan-50 to-blue-100 dark:from-cyan-900/20 dark:to-blue-900/20",
+      accent: "from-cyan-400 to-blue-500",
+      iconBg: "bg-cyan-500",
+      iconColor: "text-white",
+      border: "border-cyan-200 dark:border-cyan-800"
+    },
+    {
+      bg: "from-rose-50 to-pink-100 dark:from-rose-900/20 dark:to-pink-900/20",
+      accent: "from-rose-400 to-pink-500",
+      iconBg: "bg-rose-500",
+      iconColor: "text-white",
+      border: "border-rose-200 dark:border-rose-800"
+    }
+  ]
+
   const features = [
     {
       Icon: Brain,
@@ -44,13 +89,11 @@ export default function Home() {
       title: "Interactive UI",
       desc: "Animated avatars, live text flow, and adjustable debate duration for immersive exploration.",
     },
-
     {
       Icon: User,
       title: "Human → AI Debating",
       desc: "Engage directly with AI agents by presenting your own arguments and receiving structured, real-time counterpoints.",
     }
-
   ]
 
   return (
@@ -63,7 +106,6 @@ export default function Home() {
         <div className="absolute left-[-16%] top-[-16%] w-[900px] h-[900px] rounded-full bg-gradient-to-tr from-[#9f7aea] to-[#fb7185] opacity-70 blur-[28px] transform -rotate-12 mix-blend-screen"></div>
         <div className="absolute right-[-10%] bottom-[-10%] w-[760px] h-[760px] rounded-full bg-gradient-to-tr from-[#34d399] to-[#60a5fa] opacity-55 blur-[32px] mix-blend-screen"></div>
 
-        {/* Color overlay vignette to ground the composition */}
         <div className="absolute inset-0 pointer-events-none -z-0">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/4 dark:to-black/30 mix-blend-multiply"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/6 to-transparent mix-blend-overlay"></div>
@@ -327,39 +369,49 @@ export default function Home() {
       {/* Features Section */}
       <section id="features" className="pb-24 px-6 sm:px-8">
         <div className="max-w-6xl mx-auto text-center mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold">Why Choose PrismMinds?</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            Why Choose PrismMinds?
+          </h2>
           <p className="text-slate-600 dark:text-slate-300 mt-3">
             Built to make complex debates insightful, balanced, and beautifully interactive.
           </p>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {features.map((f, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.06 * i }}
-              viewport={{ once: true }}
-              whileHover={{ scale: 1.04, y: -6 }}
-              className="relative overflow-hidden p-6 rounded-3xl bg-gradient-to-br from-white/80 to-white/60 dark:from-slate-900/60 dark:to-slate-900/40 border border-transparent shadow-lg hover:shadow-2xl transform transition-all duration-300"
-            >
-              {/* decorative accent */}
-              <div className="pointer-events-none absolute -right-6 -top-6 w-40 h-40 rounded-full bg-gradient-to-tr from-purple-300 to-pink-300 opacity-30 blur-3xl" />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {features.map((f, i) => {
+            const colorScheme = cardColors[i % cardColors.length]
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * i }}
+                viewport={{ once: true }}
+                whileHover={{ scale: 1.05, y: -4 }}
+                className={`relative overflow-hidden p-6 rounded-2xl bg-gradient-to-br ${colorScheme.bg} ${colorScheme.border} border-2 shadow-lg hover:shadow-2xl transform transition-all duration-300 group`}
+              >
+                {/* Colorful accent corner */}
+                <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl ${colorScheme.accent} opacity-10 rounded-bl-full`} />
 
-              <div className="relative z-10 flex items-start gap-4">
-                <div className="p-1 rounded-lg bg-gradient-to-tr from-sky-400 to-pink-400">
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-white/90 dark:bg-slate-800/70 text-sky-600">
-                    <f.Icon className="w-6 h-6" />
+                {/* Icon at top center */}
+                <div className="flex flex-col items-center text-center mb-4">
+                  <div className={`p-3 rounded-xl ${colorScheme.iconBg} ${colorScheme.iconColor} shadow-lg mb-3 group-hover:scale-110 transition-transform duration-300`}>
+                    <f.Icon className="w-7 h-7" />
                   </div>
+
+                  <h4 className="text-lg font-bold mb-2 text-slate-900 dark:text-slate-100 group-hover:scale-105 transition-transform duration-300">
+                    {f.title}
+                  </h4>
+
+                  <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                    {f.desc}
+                  </p>
                 </div>
 
-                <div className="flex-1">
-                  <h4 className="text-lg font-semibold mb-1 text-slate-900 dark:text-slate-100">{f.title}</h4>
-                  <p className="text-sm text-slate-600 dark:text-slate-300">{f.desc}</p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+                {/* Bottom accent bar */}
+                <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${colorScheme.accent} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center`} />
+              </motion.div>
+            )
+          })}
         </div>
       </section>
 
