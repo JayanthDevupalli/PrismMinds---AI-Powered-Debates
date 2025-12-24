@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 import { fetchRecentDebates, createDebate, createHumanDebate, deleteDebate, fetchFavorites, addFavorite, removeFavorite } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline"
-import { SparklesIcon, Trash2Icon, X, History, Download, ScrollText, Sparkles, Rocket, BookOpen, Mic2, MessageCircle, Target, BarChart3, Globe, Heart } from "lucide-react"
+import { SparklesIcon, Trash2Icon, X, History, Download, ScrollText, Sparkles, Rocket, BookOpen, Mic2, MessageCircle, Target, BarChart3, Globe, Heart, ArrowRight, Loader2 } from "lucide-react"
 import { downloadDebateTranscriptPDF } from "@/lib/pdf-generator"
 
 type DebateMessage = {
@@ -26,6 +26,7 @@ type Debate = {
   transcript?: DebateMessage[]
   summary?: string
   createdAt: string
+  debateType?: string
   debate_metrics?: {
     total_duration: string
     exchanges_per_phase: {
@@ -1287,78 +1288,63 @@ export default function DashboardPage() {
                 className="w-full max-w-4xl max-h-[90vh] rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col"
               >
                 {/* Modal Header */}
-                <div className="sticky top-0 z-10 relative bg-gradient-to-b from-white/95 to-white/80 dark:from-slate-900/95 dark:to-slate-900/80 backdrop-blur-xl border-b border-border/30 p-4 sm:p-6">
+                <div className="sticky top-0 z-10 relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border-b border-black/5 dark:border-white/5 p-4 sm:p-6 transition-all duration-300">
                   {/* LEFT CONTENT */}
                   <motion.div
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     className="w-full"
                   >
-                    <h2 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2 break-words pr-16">
-                      {selectedDebate.topic}
-                    </h2>
+                    <div className="pt-10 sm:pt-0 sm:pr-0"> {/* Space for absolute buttons on mobile */}
+                      <h2 className="text-lg sm:text-2xl font-semibold text-slate-900 dark:text-white mb-2 leading-tight tracking-tight">
+                        {selectedDebate.topic}
+                      </h2>
 
-                    <div className="flex flex-wrap items-center gap-2 mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-primary/20 text-primary text-xs font-bold">
-                          P1
-                        </span>
-                        <span className="text-xs font-semibold text-primary">
-                          {selectedDebate.personaA}
-                        </span>
-                      </div>
-
-                      <span className="text-muted-foreground text-xs font-bold">vs</span>
-
-                      <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-accent/20 text-accent text-xs font-bold">
-                          P2
-                        </span>
-                        <span className="text-xs font-semibold text-accent">
-                          {selectedDebate.personaB}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* STATS */}
-                    <div className="grid grid-cols-3 gap-2 mb-2">
-                      <div className="text-xs bg-primary/5 border border-primary/20 rounded-lg px-3 py-2">
-                        <div className="text-muted-foreground text-[15px]">Duration</div>
-                        <div className="font-bold text-primary text-[15px] my-1">
-                          {selectedDebate.duration}min
+                      <div className="flex flex-wrap items-center gap-2 mb-4">
+                        <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-indigo-50/50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20">
+                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+                          <span className="text-[11px] sm:text-xs font-semibold text-indigo-600 dark:text-indigo-300 truncate max-w-[100px] sm:max-w-none">
+                            {selectedDebate.personaA}
+                          </span>
                         </div>
-                      </div>
 
-                      <div className="text-xs bg-accent/5 border border-accent/20 rounded-lg px-3 py-2">
-                        <div className="text-muted-foreground text-[15px]">Messages</div>
-                        <div className="font-bold text-accent text-[15px] my-1">
-                          {selectedDebate.transcript?.length || 0}
-                        </div>
-                      </div>
+                        <span className="text-slate-300 dark:text-slate-600 text-[10px] font-medium">VS</span>
 
-                      <div className="text-xs bg-secondary/5 border border-secondary/20 rounded-lg px-3 py-3">
-                        <div className="text-muted-foreground text-[15px]">Date</div>
-                        <div className="font-bold text-secondary text-[15px]">
-                          {new Date(selectedDebate.createdAt).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
+                        <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-pink-50/50 dark:bg-pink-500/10 border border-pink-100 dark:border-pink-500/20">
+                          <span className="w-1.5 h-1.5 rounded-full bg-pink-500"></span>
+                          <span className="text-[11px] sm:text-xs font-semibold text-pink-600 dark:text-pink-300 truncate max-w-[100px] sm:max-w-none">
+                            {selectedDebate.personaB}
+                          </span>
                         </div>
                       </div>
                     </div>
 
-                    {/* PROGRESS */}
+                    {/* STATS - Clear & Aligned */}
+                    <div className="flex items-center gap-6 sm:gap-8 mb-4 sm:mb-6 pt-2">
+                      <div className="flex flex-col">
+                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Duration</span>
+                        <span className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 leading-none">{selectedDebate.duration}m</span>
+                      </div>
+                      <div className="w-px h-10 bg-slate-200 dark:bg-slate-700"></div>
+                      <div className="flex flex-col">
+                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Exchanges</span>
+                        <span className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 leading-none">{selectedDebate.transcript?.length || 0}</span>
+                      </div>
+                      <div className="w-px h-10 bg-slate-200 dark:bg-slate-700"></div>
+                      <div className="flex flex-col">
+                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Date</span>
+                        <span className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 leading-none">
+                          {new Date(selectedDebate.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* PROGRESS - Detailed & Slim */}
                     {selectedDebate.transcript && selectedDebate.transcript.length > 0 && (
-                      <div className="w-full">
-                        <div className="flex justify-between text-xs text-muted-foreground mb-1 ">
-                          <span>Scroll Progress</span>
-                          <span>{Math.round(scrollProgress)}%</span>
-                        </div>
-
-                        <div className="w-full h-2 bg-border rounded-full overflow-hidden">
+                      <div className="w-full mt-3 group">
+                        <div className="w-full h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                           <motion.div
-                            className="h-full bg-gradient-to-r from-primary via-accent to-secondary"
+                            className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-80 group-hover:opacity-100 transition-opacity"
                             style={{ width: `${scrollProgress}%` }}
                             transition={{ type: "tween", duration: 0.2 }}
                           />
@@ -1367,19 +1353,33 @@ export default function DashboardPage() {
                     )}
 
                     {generating && statusMessage && (
-                      <motion.div className="mt-2 text-xs font-medium text-yellow-600 dark:text-yellow-400 flex items-center gap-2">
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                          className="w-3 h-3 border-2 border-yellow-400 border-t-transparent rounded-full"
-                        />
+                      <motion.div className="mt-2 text-[10px] font-medium text-indigo-500 flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/10 px-2 py-1 rounded-md w-fit">
+                        <Loader2 className="w-3 h-3 animate-spin" />
                         {statusMessage}
                       </motion.div>
                     )}
                   </motion.div>
 
                   {/* ACTION BUTTONS (FLOATING) */}
-                  <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-2">
+                  <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-2 sm:gap-3">
+                    {/* Analytics Button - Green Palette */}
+                    {(selectedDebate.debateType === "human-to-ai" || selectedDebate.personaA === "You") && (
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/dashboard/debatehumanarea/analysis/${selectedDebate.id}`)
+                        }}
+                        className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 flex items-center gap-2 transition-all shadow-sm"
+                        title="View Analytics"
+                      >
+                        <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline text-sm font-semibold">View Analytics</span>
+                      </motion.button>
+                    )}
+
+                    {/* Download Button - Larger Size */}
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -1387,34 +1387,25 @@ export default function DashboardPage() {
                         e.stopPropagation()
                         if (!selectedDebate) return
                         try {
-                          setStatusMessage("Preparing PDF...")
-                          await downloadDebateTranscriptPDF(
-                            selectedDebate.topic,
-                            selectedDebate.personaA,
-                            selectedDebate.personaB,
-                            selectedDebate.transcript,
-                            selectedDebate.createdAt,
-                            selectedDebate.summary,
-                          )
-                        } catch (err) {
-                          console.error("Failed to download PDF", err)
-                          showToast("Failed to generate PDF.", "error")
-                        } finally {
-                          setStatusMessage("")
-                        }
+                          setStatusMessage("Generating PDF...")
+                          await downloadDebateTranscriptPDF(selectedDebate.topic, selectedDebate.personaA, selectedDebate.personaB, selectedDebate.transcript, selectedDebate.createdAt, selectedDebate.summary);
+                        } catch (err) { showToast("Download failed", "error"); }
+                        finally { setStatusMessage(""); }
                       }}
-                      className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                      className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white border border-slate-200 dark:border-slate-700 transition-all shadow-sm"
+                      title="Download PDF"
                     >
-                      <Download className="w-5 h-5 text-foreground/70" />
+                      <Download className="w-4 h-4 sm:w-4 sm:h-4" />
                     </motion.button>
 
+                    {/* Close Button - Green Palette */}
                     <motion.button
-                      whileHover={{ scale: 1.1 }}
+                      whileHover={{ scale: 1.05, rotate: 90 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setSelectedDebate(null)}
-                      className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                      className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-emerald-50 dark:bg-emerald-500/10 hover:bg-red-50 dark:hover:bg-red-900/20 text-emerald-600 dark:text-emerald-400 hover:text-red-600 dark:hover:text-red-400 border border-emerald-200 dark:border-emerald-500/20 hover:border-red-200 dark:hover:border-red-500/20 transition-all shadow-sm"
                     >
-                      <X className="w-5 h-5 text-foreground/60" />
+                      <X className="w-4 h-4 sm:w-5 sm:h-5" />
                     </motion.button>
                   </div>
                 </div>
@@ -1594,7 +1585,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </motion.div>
-            </motion.div>
+            </motion.div >
           )
         }
       </AnimatePresence >

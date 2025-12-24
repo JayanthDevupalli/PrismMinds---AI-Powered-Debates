@@ -2,7 +2,7 @@
 import express from "express";
 import { db } from "../config/firebaseAdmin.js";
 import { verifyFirebaseToken } from "../middleware/authMiddleware.js";
-import { startDebate, startHumanDebate, generateAIResponse } from "../services/geminiService.js";
+import { startDebate, startHumanDebate, generateAIResponse, analyzeDebate } from "../services/geminiService.js";
 
 const router = express.Router();
 
@@ -372,3 +372,35 @@ router.delete("/favorite/:id", verifyFirebaseToken, async (req, res) => {
 });
 
 export default router;
+
+// 🔹 Generate Analysis for a Debate
+router.post("/:id/analyze", verifyFirebaseToken, async (req, res) => {
+  try {
+    const uid = req.user.uid;
+    const debateId = req.params.id;
+
+    const debateRef = db.collection("debates").doc(uid).collection("userDebates").doc(debateId);
+    const docSnap = await debateRef.get();
+
+    if (!docSnap.exists) return res.status(404).json({ error: "Debate not found" });
+
+    const debateData = docSnap.data();
+
+    // Return existing analysis if present
+    if (debateData.analysis) {
+      return res.json({ success: true, analysis: debateData.analysis, cached: true });
+    }
+
+    // Generate new analysis
+    const analysis = await analyzeDebate(debateData.transcript || []);
+
+    // Save to Firestore
+    await debateRef.update({ analysis });
+
+    res.json({ success: true, analysis, cached: false });
+
+  } catch (err) {
+    console.error("Analysis error:", err);
+    res.status(500).json({ error: "Failed to generate analysis" });
+  }
+});

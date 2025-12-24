@@ -343,7 +343,7 @@ export default function DebateArenaPage() {
         await endHumanDebate(debate!.id)
 
         setTimeout(() => {
-            router.push("/dashboard")
+            router.push(`/dashboard/debatehumanarea/analysis/${debate!.id}`)
         }, 1800) // shows animation before routing
     }
 
@@ -383,7 +383,7 @@ export default function DebateArenaPage() {
                     transition={{ delay: 0.6 }}
                     className="text-sm text-slate-500"
                 >
-                    Redirecting to dashboard
+                    Redirecting to analytics page
                 </motion.p>
             </div>
         )

@@ -443,3 +443,74 @@ Return ONLY valid JSON in this exact format (no markdown, no code blocks):
     throw new Error(`Failed to start human debate: ${error.message}`)
   }
 }
+
+// 🔹 Analyze a debate (On-Demand)
+export async function analyzeDebate(transcript) {
+  try {
+    console.log("📊 Starting debate analysis...")
+
+    // Use specific analysis key if available, otherwise fall back to main key
+    const apiKey = process.env.GEMINI_ANALYSIS_API_KEY
+    if (!apiKey) {
+      throw new Error("No API key configured for analysis.")
+    }
+
+    const analysisGenAI = new GoogleGenerativeAI(apiKey)
+    const model = analysisGenAI.getGenerativeModel({ model: "gemini-2.5-flash" })
+
+    const transcriptText = transcript
+      .map(m => `${m.speaker}: ${m.message}`)
+      .join("\n")
+
+    const prompt = `
+You are an expert Debate Coach and Communication Analyst (PrismMinds Inference Engine).
+Your job is to strictly evaluate the HUMAN user's performance in the following debate against an AI.
+
+TRANSCRIPT:
+${transcriptText}
+
+🚨 STRICT SCORING RULES (CRITICAL):
+1. **Low Effort Penalty**:
+   - If the human has fewer than 3 turns OR fewer than 50 total words, their scores MUST be overwhelmingly low (e.g., < 40/100).
+   - If the human replied with one-liners or single sentences, do NOT give high scores. Scoring them high (e.g., >60) is a FAILURE.
+
+2. **Argument Depth**:
+   - Count the number of distinct, substantive points made by the user.
+   - 0 points = Score 10-30
+   - 1-2 points = Score 40-60
+   - 3+ strong points = Score 70+
+
+3. **Rubric**:
+   - **Logic**: Did they provide evidence and reasoning? (Simply stating an opinion is NOT logic).
+   - **Persuasion**: Did they use rhetoric, analogies, or emotional appeals effectively?
+   - **Clarity**: Was their argument structured and easy to follow?
+   - **Emotional Intelligence (EQ)**: Did they acknowledge the opponent's points respectfully before countering?
+
+OUTPUT FORMAT (STRICT JSON ONLY):
+{
+  "scores": {
+    "logic": 0-100,
+    "persuasion": 0-100,
+    "clarity": 0-100,
+    "emotional_intelligence": 0-100
+  },
+  "feedback": {
+    "strengths": ["Specific point user made...", "Good use of... (if applicable)"],
+    "improvements": ["You only made X points...", "Expand on..."],
+    "coach_note": "A brutal but constructive assessment. If they barely debated, call them out (e.g., 'You barely scratched the surface...'). If they did well, praise specific tactics. You MUST end this note by telling the user to check the 'Learning Guides' for specific skills."
+  }
+}
+`
+    const result = await model.generateContent(prompt)
+    let text = result.response.text()
+
+    // Clean JSON
+    text = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim()
+
+    return JSON.parse(text)
+
+  } catch (error) {
+    console.error("💥 Analysis failed:", error)
+    throw new Error("Failed to analyze debate")
+  }
+}
