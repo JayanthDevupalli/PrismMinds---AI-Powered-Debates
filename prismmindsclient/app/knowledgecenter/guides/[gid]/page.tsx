@@ -449,7 +449,7 @@ export default function GuideDetailPage({
                                 </Link>
                             ) : (
                                 <div className="text-sm font-medium text-green-600 dark:text-green-500 flex items-center gap-2">
-                                    <CheckCircleIcon className="w-5 h-5" /> Course Complete!
+                                    <CheckCircleIcon className="w-5 h-5" /> Guides Complete!
                                 </div>
                             )}
                         </div>
@@ -648,7 +648,7 @@ export default function GuideDetailPage({
                                             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
                                             <div className="relative z-10 w-full flex flex-col items-end">
                                                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-100 mb-3 flex items-center gap-2">
-                                                    Finish Course <CheckCircleIcon className="w-4 h-4" />
+                                                    Finish Guide <CheckCircleIcon className="w-4 h-4" />
                                                 </span>
                                                 <span className="font-bold text-xl">
                                                     Back to All Guides

@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     "PrismMinds is an AI debate platform where humans and AI personas engage in structured arguments, critical thinking, and real-time debates with full transcripts.",
 
   openGraph: {
-    title: "PrismMinds - AI Debate Platform",
+    title: "PrismMinds - Multi-Perspective AI Debating & Consensus Platform",
     description:
       "Debate AI personas, explore Human vs AI and AI vs AI discussions, and analyze structured arguments with transparent transcripts.",
     url: "https://prismminds.vercel.app",
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "PrismMinds - AI Debate Platform",
+    title: "PrismMinds - Multi-Perspective AI Debating & Consensus Platform",
     description:
       "Engage in Human vs AI debates and explore AI-driven arguments with full transcripts.",
     images: ["mainlogo.jpg"],
