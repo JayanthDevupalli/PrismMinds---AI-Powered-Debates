@@ -361,3 +361,24 @@ export async function removeFavorite(debateId: string) {
     throw error;
   }
 }
+
+export async function explainText(text: string) {
+  try {
+    const headers = await getAuthHeader()
+    const res = await fetch(`http://localhost:5000/api/ai/explain`, {
+      method: "POST",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    })
+
+    if (!res.ok) {
+      throw new Error("Failed to get explanation")
+    }
+
+    const data = await res.json()
+    return data.explanation
+  } catch (err) {
+    console.error("Explain text error:", err)
+    throw err
+  }
+}
