@@ -17,7 +17,11 @@ import {
     ArrowsPointingInIcon,
     ChevronUpIcon,
     HandThumbUpIcon,
-    HandThumbDownIcon
+    HandThumbDownIcon,
+    LinkIcon,
+    ChatBubbleOvalLeftEllipsisIcon,
+    AtSymbolIcon,
+    EllipsisHorizontalCircleIcon
 } from "@heroicons/react/24/outline"
 import { BookmarkIcon as BookmarkIconSolid, HandThumbUpIcon as HandThumbUpSolid } from "@heroicons/react/24/solid"
 import ReactMarkdown from "react-markdown"
@@ -41,6 +45,7 @@ export default function GuideDetailPage({
     const [isBookmarked, setIsBookmarked] = useState(false)
     const [notes, setNotes] = useState("")
     const [showShareTooltip, setShowShareTooltip] = useState(false)
+    const [isShareMenuOpen, setIsShareMenuOpen] = useState(false)
 
     // New Premium States
     const [isFocusMode, setIsFocusMode] = useState(false)
@@ -71,10 +76,41 @@ export default function GuideDetailPage({
         localStorage.setItem(`guide_bookmark_${gid}`, JSON.stringify(newState))
     }
 
-    const handleShare = () => {
+    const handleCopyLink = () => {
         navigator.clipboard.writeText(window.location.href)
         setShowShareTooltip(true)
-        setTimeout(() => setShowShareTooltip(false), 2000)
+        setTimeout(() => {
+            setShowShareTooltip(false)
+            setIsShareMenuOpen(false)
+        }, 2000)
+    }
+
+    const handleSocialShare = async (platform: 'whatsapp' | 'twitter' | 'native') => {
+        const url = window.location.href
+        const text = `Check out this guide: ${guide.title}`
+
+        if (platform === 'native') {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: guide.title,
+                        text: text,
+                        url: url,
+                    })
+                } catch (err) {
+                    console.error("Error sharing:", err)
+                }
+            } else {
+                // Fallback if native share not supported
+                alert("Native sharing is not supported on this device/browser.")
+            }
+        } else if (platform === 'whatsapp') {
+            window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank')
+        } else if (platform === 'twitter') {
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank')
+        }
+
+        setIsShareMenuOpen(false)
     }
 
     const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -256,7 +292,7 @@ export default function GuideDetailPage({
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={scrollToTop}
-                        className="fixed bottom-6 right-24 xl:right-10 z-40 p-3 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 group"
+                        className="fixed bottom-24 right-6 xl:bottom-6 xl:right-10 z-40 p-3 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 group"
                     >
                         {/* Circular Progress SVG */}
                         <svg className="absolute inset-0 w-full h-full -rotate-90 transform p-0.5 pointer-events-none" viewBox="0 0 36 36">
@@ -345,22 +381,79 @@ export default function GuideDetailPage({
 
                             <div className="relative">
                                 <button
-                                    onClick={handleShare}
-                                    className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-indigo-600 transition"
-                                    title="Share guide"
+                                    onClick={() => setIsShareMenuOpen(!isShareMenuOpen)}
+                                    className={`p-2 rounded-full transition-colors ${isShareMenuOpen ? 'bg-indigo-100 text-indigo-600 dark:bg-slate-800 dark:text-indigo-400' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-indigo-600'}`}
+                                    title="Share options"
                                 >
                                     <ShareIcon className="w-5 h-5" />
                                 </button>
+
                                 <AnimatePresence>
-                                    {showShareTooltip && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: 10 }}
-                                            className="absolute top-full right-0 mt-2 px-3 py-1 bg-slate-800 text-white text-xs rounded-md shadow-lg whitespace-nowrap z-50"
-                                        >
-                                            Link copied!
-                                        </motion.div>
+                                    {isShareMenuOpen && (
+                                        <>
+                                            {/* Backdrop to close */}
+                                            <div
+                                                className="fixed inset-0 z-40"
+                                                onClick={() => setIsShareMenuOpen(false)}
+                                            />
+
+                                            {/* Dropdown Menu */}
+                                            <motion.div
+                                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                                transition={{ duration: 0.1 }}
+                                                className="absolute top-full right-0 mt-2 w-56 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden z-50 p-1.5"
+                                            >
+                                                <button
+                                                    onClick={handleCopyLink}
+                                                    className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors group"
+                                                >
+                                                    <div className="p-1.5 bg-slate-100 dark:bg-slate-800 rounded-md group-hover:bg-white dark:group-hover:bg-slate-700 transition-colors">
+                                                        <LinkIcon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                                                    </div>
+                                                    {showShareTooltip ? (
+                                                        <span className="text-green-600 dark:text-green-500">Copied!</span>
+                                                    ) : (
+                                                        <span>Copy Link</span>
+                                                    )}
+                                                </button>
+
+                                                <div className="my-1.5 border-t border-slate-100 dark:border-slate-800/50" />
+
+                                                <button
+                                                    onClick={() => handleSocialShare('whatsapp')}
+                                                    className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-green-50 dark:hover:bg-green-900/10 hover:text-green-700 dark:hover:text-green-400 rounded-lg transition-colors group"
+                                                >
+                                                    {/* WhatsApp Icon Placeholder (Chat Bubble) */}
+                                                    <div className="p-1.5 bg-green-100 dark:bg-green-900/30 rounded-md group-hover:bg-green-200 dark:group-hover:bg-green-900/50 transition-colors text-green-600 dark:text-green-500">
+                                                        <ChatBubbleOvalLeftEllipsisIcon className="w-4 h-4" />
+                                                    </div>
+                                                    WhatsApp
+                                                </button>
+
+                                                <button
+                                                    onClick={() => handleSocialShare('twitter')}
+                                                    className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-sky-50 dark:hover:bg-sky-900/10 hover:text-sky-600 dark:hover:text-sky-400 rounded-lg transition-colors group"
+                                                >
+                                                    {/* Twitter/X Icon Placeholder (At Symbol) */}
+                                                    <div className="p-1.5 bg-sky-100 dark:bg-sky-900/30 rounded-md group-hover:bg-sky-200 dark:group-hover:bg-sky-900/50 transition-colors text-sky-600 dark:text-sky-500">
+                                                        <AtSymbolIcon className="w-4 h-4" />
+                                                    </div>
+                                                    Twitter / X
+                                                </button>
+
+                                                <button
+                                                    onClick={() => handleSocialShare('native')}
+                                                    className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors group"
+                                                >
+                                                    <div className="p-1.5 bg-slate-100 dark:bg-slate-800 rounded-md group-hover:bg-white dark:group-hover:bg-slate-700 transition-colors">
+                                                        <EllipsisHorizontalCircleIcon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                                                    </div>
+                                                    More Apps...
+                                                </button>
+                                            </motion.div>
+                                        </>
                                     )}
                                 </AnimatePresence>
                             </div>
