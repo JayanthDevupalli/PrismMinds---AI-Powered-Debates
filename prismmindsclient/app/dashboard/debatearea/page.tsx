@@ -160,12 +160,155 @@ async function speakTextSync(
 }
 
 /* ---------------------------
+   AIAvatar Component (Quantum Core Design)
+   --------------------------- */
+interface AvatarProps {
+  name: string
+  isActive: boolean
+  isThinking: boolean
+  emotion: EmotionTone
+  color: "cyan" | "orange"
+}
+
+function QuantumAvatar({ name, isActive, isThinking, emotion, color }: AvatarProps) {
+  // Advanced Theme Configuration
+  const theme =
+    color === "cyan"
+      ? {
+        // Deep, rich gradients for 3D depth
+        coreGradient: "radial-gradient(circle at 35% 35%, #e0f2fe 0%, #38bdf8 30%, #0284c7 60%, #0c4a6e 100%)",
+        lens: "bg-sky-400/10",
+        ring1: "border-sky-300/60 shadow-[0_0_15px_rgba(56,189,248,0.3)]",
+        ring2: "border-cyan-300/40",
+        bracket: "border-blue-400 video-shadow",
+        text: "text-sky-100 drop-shadow-[0_0_10px_rgba(14,165,233,0.8)]",
+        glow: "shadow-[0_0_60px_rgba(14,165,233,0.4)]",
+        activeGlow: "shadow-[0_0_100px_rgba(14,165,233,0.8)]",
+      }
+      : {
+        coreGradient: "radial-gradient(circle at 35% 35%, #fff7ed 0%, #fb923c 30%, #ea580c 60%, #7c2d12 100%)",
+        lens: "bg-orange-400/10",
+        ring1: "border-orange-300/60 shadow-[0_0_15px_rgba(251,146,60,0.3)]",
+        ring2: "border-amber-300/40",
+        bracket: "border-red-400",
+        text: "text-orange-100 drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]",
+        glow: "shadow-[0_0_60px_rgba(249,115,22,0.4)]",
+        activeGlow: "shadow-[0_0_100px_rgba(249,115,22,0.8)]",
+      }
+
+  // Animation variants for specific states
+  const coreAnim = isActive
+    ? { scale: [1, 1.05, 1], filter: "brightness(1.3)" }
+    : { scale: 1, filter: "brightness(1)" }
+
+  return (
+    <div className="relative w-48 h-48 flex items-center justify-center perspective-[1200px] transform-style-3d">
+
+      {/* 1. PRIMARY GYROSCOPE (The "Stabilizer") */}
+      {/* A single, elegant ring rotating slowly to define the space */}
+      <motion.div
+        className={`absolute inset-[10%] rounded-full border-[1.5px] ${theme.ring1} opacity-60`}
+        style={{ rotateX: 70 }}
+        animate={{ rotateZ: 360 }}
+        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+      />
+
+      {/* 2. SECONDARY ORBIT (Counter-rotation) */}
+      <motion.div
+        className={`absolute inset-[15%] rounded-full border-[1px] ${theme.ring2} opacity-40`}
+        style={{ rotateY: 65 }}
+        animate={{ rotateZ: -360 }}
+        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+      />
+
+      {/* 3. ACTIVE ENERGY DISCHARGE (The "Aurora") */}
+      {isActive && (
+        <motion.div
+          className={`absolute inset-6 rounded-full opacity-30 blur-2xl ${theme.lens}`}
+          animate={{ scale: [0.9, 1.3, 0.9], opacity: [0.2, 0.5, 0.2] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        />
+      )}
+
+      {/* 4. 4D HYPER-CORE (The Sphere) */}
+      <motion.div
+        className={`
+            relative z-10 w-24 h-24 rounded-full 
+            flex items-center justify-center 
+            transition-shadow duration-500
+            ${isActive ? theme.activeGlow : theme.glow}
+        `}
+        style={{
+          background: theme.coreGradient,
+          boxShadow: `inset -10px -10px 20px rgba(0,0,0,0.5), inset 10px 10px 20px rgba(255,255,255,0.4)` // Deep 3D Sphere effect
+        }}
+        variants={{
+          active: { scale: 1.05 },
+          idle: { scale: 1 }
+        }}
+        animate={isActive ? "active" : "idle"}
+        transition={{ duration: 1.2, ease: "easeInOut", repeat: isActive ? Infinity : 0, repeatType: "reverse" }}
+      >
+        {/* Holographic Surface Texture */}
+        <motion.div
+          className="absolute inset-0 rounded-full opacity-30 mix-blend-overlay"
+          style={{
+            backgroundImage: "linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.4) 50%, transparent 60%)"
+          }}
+          animate={{ backgroundPosition: ["100% 100%", "0% 0%"] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+        />
+
+        {/* Specular Highlight (The "Glass" look) */}
+        <div className="absolute top-[8%] left-[12%] w-[30%] h-[15%] bg-white rounded-full blur-[2px] opacity-70" />
+
+        {/* Thinking Pulse */}
+        {isThinking && isActive && (
+          <div className="absolute inset-0 rounded-full bg-white/60 animate-pulse mix-blend-overlay" />
+        )}
+
+        {/* Avatar Character */}
+        <div className="relative z-20 flex flex-col items-center justify-center transform translate-z-10">
+          <span className={`text-2xl font-bold tracking-widest ${theme.text}`}>
+            {name.slice(0, 2).toUpperCase()}
+          </span>
+          {/* Audio Bars simulation */}
+          {isActive && (
+            <div className="flex gap-[3px] mt-1 h-3 items-end">
+              {[1, 2, 3].map(i => (
+                <motion.div
+                  key={i}
+                  className={`w-1 rounded-full ${color === 'cyan' ? 'bg-sky-100' : 'bg-orange-100'}`}
+                  animate={{ height: [4, 12, 4] }}
+                  transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.15 }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </motion.div>
+
+      {/* 5. FLOATING SATELLITE (Single Electron) */}
+      <motion.div
+        className="absolute w-full h-full"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+      >
+        <div className={`absolute top-[4%] left-1/2 w-2.5 h-2.5 -ml-1 rounded-full ${color === 'cyan' ? 'bg-sky-200 shadow-[0_0_8px_#38bdf8]' : 'bg-orange-200 shadow-[0_0_8px_#fb923c]'}`} />
+      </motion.div>
+
+    </div>
+  )
+}
+
+/* ---------------------------
    DebateVisualizer (Aurora Professional)
    --------------------------- */
 function DebateVisualizer({ debate, onPlayingChange }: { debate: Debate; onPlayingChange?: (isPlaying: boolean) => void }) {
   const [currentIndex, setCurrentIndex] = useState<number>(0)
   const [displayText, setDisplayText] = useState<string>("")
   const [speaking, setSpeaking] = useState<string | null>(null)
+  const [nextSpeaker, setNextSpeaker] = useState<string | null>(null)
   const [isPlaying, setIsPlaying] = useState<boolean>(false)
   const [started, setStarted] = useState<boolean>(false)
   const [thinking, setThinking] = useState<boolean>(false)
@@ -195,9 +338,11 @@ function DebateVisualizer({ debate, onPlayingChange }: { debate: Debate; onPlayi
       if (!msg) return
 
       // micro thinking delay
+      setNextSpeaker(msg.speaker)
       setThinking(true)
       await new Promise((r) => setTimeout(r, 600 + Math.random() * 600))
       setThinking(false)
+      setNextSpeaker(null)
 
       setSpeaking(msg.speaker)
       setDisplayText("")
@@ -376,126 +521,13 @@ function DebateVisualizer({ debate, onPlayingChange }: { debate: Debate; onPlayi
         {/* Persona A */}
         <div className="flex flex-col items-center max-w-xs">
           {/* Avatar with emotional feedback */}
-          <div className="relative">
-
-            {/* FLOATING SHADOW UNDER AVATAR */}
-            <div
-              className="
-      absolute left-1/2 -translate-x-1/2
-      bottom-[-10px]
-      w-16 h-4
-      rounded-full
-    "
-              style={{
-                background: "radial-gradient(circle, rgba(0,0,0,0.25), transparent 70%)",
-                filter: "blur(6px)",
-              }}
-            />
-
-            {/* MAIN AVATAR */}
-            {/* MAIN AVATAR COMPONENT - ADVANCED ORBITAL DESIGN */}
-            {/* Added 'perspective' for 3D gyro effects */}
-            <div className="relative w-32 h-32 flex items-center justify-center perspective-[1000px] group">
-
-              {/* PULSE WAVE (Radar Ping) - Behind everything */}
-              {personaAIsSpeaking && (
-                <>
-                  <motion.div
-                    className="absolute inset-0 rounded-full border border-sky-400/30 bg-sky-400/10"
-                    initial={{ scale: 1, opacity: 0.8 }}
-                    animate={{ scale: 2.2, opacity: 0 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-                  />
-                  <motion.div
-                    className="absolute inset-0 rounded-full border border-sky-400/20"
-                    initial={{ scale: 1, opacity: 0.6 }}
-                    animate={{ scale: 1.8, opacity: 0 }}
-                    transition={{ duration: 2, delay: 0.6, repeat: Infinity, ease: "easeOut" }}
-                  />
-                </>
-              )}
-
-              {/* ORBITAL RING 1 (Flat Outer - Dashed) */}
-              <motion.div
-                className="absolute inset-[-15px] rounded-full border-2 border-sky-200/30 border-dashed"
-                animate={personaAIsSpeaking ? { rotate: 360, scale: 1.05 } : { rotate: 360, scale: 1 }}
-                transition={{
-                  rotate: { duration: 25, repeat: Infinity, ease: "linear" },
-                  scale: { duration: 1.5, repeat: Infinity, repeatType: "reverse" }
-                }}
-              />
-
-              {/* ORBITAL RING 2 (Gyro Tilted) */}
-              <motion.div
-                className="absolute inset-[-8px] rounded-full border border-indigo-400/40"
-                style={{ rotateX: 70 }} // Permanent 3D Tilt
-                animate={{ rotateZ: 360 }} // Spin on its axis
-                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-              />
-
-              {/* ORBITAL RING 3 (Opposite Gyro) */}
-              <motion.div
-                className="absolute inset-[-8px] rounded-full border border-cyan-400/40"
-                style={{ rotateY: 70 }} // Permanent 3D Tilt
-                animate={{ rotateZ: -360 }} // Spin on its axis
-                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-              />
-
-              {/* ORBITAL RING 4 (Eccentric/Wobbly) */}
-              <motion.div
-                className="absolute inset-[-2px] rounded-full border-2 border-sky-300/20"
-                style={{ borderRadius: "40% 60% 70% 30% / 40% 50% 60% 50%" }}
-                animate={{ rotate: -360 }}
-                transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-              />
-
-              {/* ACTIVE GLOW CORE */}
-              {personaAIsSpeaking && (
-                <motion.div
-                  className="absolute inset-2 rounded-full bg-sky-400/30 blur-xl"
-                  animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                />
-              )}
-
-              {/* CORE SPHERE */}
-              <motion.div
-                className="
-                  relative w-24 h-24 rounded-full
-                  flex items-center justify-center
-                  text-white font-bold text-xl shadow-[0_0_30px_rgba(2,132,199,0.5)]
-                  z-20 overflow-hidden
-                "
-                style={{
-                  background: "radial-gradient(circle at 30% 30%, #e0f2fe, #38bdf8, #0369a1)",
-                }}
-                animate={
-                  personaAIsSpeaking
-                    ? { scale: [1, 1.05, 1] }
-                    : { scale: 1 }
-                }
-                transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
-              >
-                {/* Internal "Energy" Texture */}
-                <motion.div
-                  className="absolute inset-0 opacity-30 mix-blend-overlay"
-                  style={{
-                    backgroundImage: "radial-gradient(circle, #fff 2px, transparent 2px)",
-                    backgroundSize: "12px 12px"
-                  }}
-                  animate={{ rotate: 360, scale: [1, 1.2, 1] }}
-                  transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-                />
-
-                {/* GLASSY HIGHLIGHT */}
-                <div className="absolute top-2 left-3 w-8 h-4 bg-white/60 rounded-full blur-[2px] transform -rotate-12" />
-
-                <span className="relative z-10 drop-shadow-lg text-2xl tracking-widest">
-                  {debate.personaA.slice(0, 2).toUpperCase()}
-                </span>
-              </motion.div>
-            </div>
-          </div>
+          <QuantumAvatar
+            name={debate.personaA}
+            isActive={personaAIsSpeaking}
+            isThinking={thinking && nextSpeaker === debate.personaA}
+            emotion={personaAEmotion}
+            color="cyan"
+          />
 
 
           {/* Emotion indicator */}
@@ -516,7 +548,7 @@ function DebateVisualizer({ debate, onPlayingChange }: { debate: Debate; onPlayi
             transition={{ duration: 0.28 }}
             className="mt-4 w-[18rem] sm:w-[20rem] bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-sm"
           >
-            {thinking && personaBIsSpeaking ? (
+            {thinking && nextSpeaker === debate.personaA ? (
               <div className="h-3 rounded-full bg-gradient-to-r from-sky-200 via-indigo-200 to-sky-200 animate-pulse" />
             ) : (
               <p className="text-sm text-slate-800 leading-relaxed">
@@ -534,125 +566,13 @@ function DebateVisualizer({ debate, onPlayingChange }: { debate: Debate; onPlayi
         {/* Persona B */}
         <div className="flex flex-col items-center max-w-xs">
           {/* Avatar with emotional feedback */}
-          <div className="relative">
-
-            {/* FLOATING SHADOW UNDER AVATAR */}
-            <div
-              className="
-      absolute left-1/2 -translate-x-1/2
-      bottom-[-10px]
-      w-16 h-4
-      rounded-full
-    "
-              style={{
-                background: "radial-gradient(circle, rgba(0,0,0,0.25), transparent 70%)",
-                filter: "blur(6px)",
-              }}
-            />
-
-            {/* MAIN AVATAR */}
-            {/* MAIN AVATAR COMPONENT - ADVANCED ORBITAL DESIGN */}
-            <div className="relative w-32 h-32 flex items-center justify-center perspective-[1000px] group">
-
-              {/* PULSE WAVE (Radar Ping) */}
-              {personaBIsSpeaking && (
-                <>
-                  <motion.div
-                    className="absolute inset-0 rounded-full border border-orange-400/30 bg-orange-400/10"
-                    initial={{ scale: 1, opacity: 0.8 }}
-                    animate={{ scale: 2.2, opacity: 0 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-                  />
-                  <motion.div
-                    className="absolute inset-0 rounded-full border border-orange-400/20"
-                    initial={{ scale: 1, opacity: 0.6 }}
-                    animate={{ scale: 1.8, opacity: 0 }}
-                    transition={{ duration: 2, delay: 0.6, repeat: Infinity, ease: "easeOut" }}
-                  />
-                </>
-              )}
-
-              {/* ORBITAL RING 1 (Slow Outer - Dashed) */}
-              <motion.div
-                className="absolute inset-[-15px] rounded-full border-2 border-orange-200/30 border-dashed"
-                animate={personaBIsSpeaking ? { rotate: -360, scale: 1.05 } : { rotate: -360, scale: 1 }}
-                transition={{
-                  rotate: { duration: 25, repeat: Infinity, ease: "linear" },
-                  scale: { duration: 1.5, repeat: Infinity, repeatType: "reverse" }
-                }}
-              />
-
-              {/* ORBITAL RING 2 (Gyro Tilted) */}
-              <motion.div
-                className="absolute inset-[-8px] rounded-full border border-amber-400/40"
-                style={{ rotateX: 70 }}
-                animate={{ rotateZ: -360 }}
-                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-              />
-
-              {/* ORBITAL RING 3 (Opposite Gyro) */}
-              <motion.div
-                className="absolute inset-[-8px] rounded-full border border-red-400/40"
-                style={{ rotateY: 70 }}
-                animate={{ rotateZ: 360 }}
-                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-              />
-
-              {/* ORBITAL RING 4 (Eccentric) */}
-              <motion.div
-                className="absolute inset-[-2px] rounded-full border-2 border-orange-300/20"
-                style={{ borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%" }}
-                animate={{ rotate: 360 }}
-                transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-              />
-
-              {/* ACTIVE GLOW CORE */}
-              {personaBIsSpeaking && (
-                <motion.div
-                  className="absolute inset-2 rounded-full bg-orange-400/30 blur-xl"
-                  animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                />
-              )}
-
-              {/* CORE SPHERE */}
-              <motion.div
-                className="
-                  relative w-24 h-24 rounded-full
-                  flex items-center justify-center
-                  text-white font-bold text-xl shadow-[0_0_30px_rgba(249,115,22,0.5)]
-                  z-20 overflow-hidden
-                "
-                style={{
-                  background: "radial-gradient(circle at 30% 30%, #ffedd5, #fb923c, #c2410c)",
-                }}
-                animate={
-                  personaBIsSpeaking
-                    ? { scale: [1, 1.05, 1] }
-                    : { scale: 1 }
-                }
-                transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
-              >
-                {/* Internal Energy Texture */}
-                <motion.div
-                  className="absolute inset-0 opacity-30 mix-blend-overlay"
-                  style={{
-                    backgroundImage: "radial-gradient(circle, #fff 2px, transparent 2px)",
-                    backgroundSize: "12px 12px"
-                  }}
-                  animate={{ rotate: -360, scale: [1, 1.2, 1] }}
-                  transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-                />
-
-                {/* GLASSY HIGHLIGHT */}
-                <div className="absolute top-2 left-3 w-8 h-4 bg-white/60 rounded-full blur-[2px] transform -rotate-12" />
-
-                <span className="relative z-10 drop-shadow-lg text-2xl tracking-widest">
-                  {debate.personaB.slice(0, 2).toUpperCase()}
-                </span>
-              </motion.div>
-            </div>
-          </div>
+          <QuantumAvatar
+            name={debate.personaB}
+            isActive={personaBIsSpeaking}
+            isThinking={thinking && nextSpeaker === debate.personaB}
+            emotion={personaBEmotion}
+            color="orange"
+          />
 
 
           {/* Emotion indicator */}
@@ -673,7 +593,7 @@ function DebateVisualizer({ debate, onPlayingChange }: { debate: Debate; onPlayi
             transition={{ duration: 0.28 }}
             className="mt-4 w-[18rem] sm:w-[20rem] bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-sm"
           >
-            {thinking && personaAIsSpeaking ? (
+            {thinking && nextSpeaker === debate.personaB ? (
               <div className="h-3 rounded-full bg-gradient-to-r from-orange-200 via-red-200 to-orange-200 animate-pulse" />
             ) : (
               <p className="text-sm text-slate-800 leading-relaxed">
@@ -692,23 +612,32 @@ function DebateVisualizer({ debate, onPlayingChange }: { debate: Debate; onPlayi
       {/* Transcript / Summary */}
       {showTranscript && (
         <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 30, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="
-      mt-10 w-full max-w-3xl mx-auto
-      bg-white/80 backdrop-blur-lg
-      rounded-3xl shadow-xl border border-slate-200
-      p-6
-    "
+            mt-12 w-full max-w-4xl mx-auto
+            bg-white/40 backdrop-blur-2xl
+            rounded-[2.5rem] shadow-2xl shadow-indigo-500/10
+            border border-white/60
+            p-8 overflow-hidden
+          "
         >
-          {/* Title Section */}
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-semibold text-slate-800">
-              Full Transcript
-            </h3>
+          {/* Header Section */}
+          <div className="flex items-center justify-between mb-8 px-2">
+            <div>
+              <h3 className="text-2xl font-bold text-slate-800 tracking-tight">
+                Debate Transcript
+              </h3>
+              <p className="text-slate-500 text-sm font-medium mt-1">
+                Full conversation history & analysis
+              </p>
+            </div>
 
-            <div className="flex gap-2">
-              <button
+            <div className="flex gap-3">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={async () =>
                   await downloadDebateTranscriptPDF(
                     debate.topic,
@@ -719,12 +648,20 @@ function DebateVisualizer({ debate, onPlayingChange }: { debate: Debate; onPlayi
                     debate.summary,
                   )
                 }
-                className="px-3 py-2 rounded-lg bg-sky-500 text-white hover:bg-sky-600 transition"
+                className="
+                  flex items-center justify-center w-12 h-12 rounded-full
+                  bg-white/60 backdrop-blur-md border border-white/50
+                  text-slate-700 shadow-sm hover:bg-white transition-all
+                  group
+                "
+                title="Download PDF"
               >
-                <Download className="w-4 h-4" />
-              </button>
+                <Download className="w-5 h-5 group-hover:text-sky-600 transition-colors" />
+              </motion.button>
 
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   synthRef.current?.cancel()
                   setShowTranscript(false)
@@ -732,76 +669,113 @@ function DebateVisualizer({ debate, onPlayingChange }: { debate: Debate; onPlayi
                   setStarted(false)
                   setIsPlaying(false)
                 }}
-                className="px-3 py-2 rounded-lg bg-slate-200/80 hover:bg-slate-300 transition"
+                className="
+                  flex items-center justify-center w-12 h-12 rounded-full
+                  bg-white/60 backdrop-blur-md border border-white/50
+                  text-slate-700 shadow-sm hover:bg-white transition-all
+                  group
+                "
+                title="Reset Debate"
               >
-                <RotateCcw className="w-4 h-4" />
-              </button>
+                <RotateCcw className="w-5 h-5 group-hover:text-orange-500 transition-colors" />
+              </motion.button>
             </div>
           </div>
 
-          {/* Timeline container */}
-          <div className="relative pl-6 space-y-6 max-h-[52vh] overflow-y-auto">
-            {/* Vertical timeline line */}
-            <div className="absolute left-3 top-0 bottom-0 w-[2px] bg-slate-300/50 rounded-full"></div>
-
+          {/* Chat Container */}
+          <div className="
+            relative space-y-8 max-h-[60vh] overflow-y-auto pr-4 px-2
+            scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent
+          ">
             {queue.map((m, i) => {
               const isA = m.speaker === debate.personaA
-              const bubbleColor = isA ? "bg-sky-50" : "bg-orange-50"
-              const borderColor = isA ? "border-sky-300" : "border-orange-300"
-              const textColor = isA ? "text-sky-700" : "text-orange-700"
+
+              // Premium Gradients
+              const bubbleGradient = isA
+                ? "bg-gradient-to-br from-[#007AFF] to-[#0055D4]" // Apple Blue-ish
+                : "bg-gradient-to-br from-[#FF9500] to-[#FF5E3A]" // Apple Orange-ish
+
+              const shadowColor = isA ? "shadow-blue-500/20" : "shadow-orange-500/20"
 
               return (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.22 }}
-                  className="relative"
+                  initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.4, delay: i * 0.05 }}
+                  className={`flex w-full ${isA ? "justify-start" : "justify-end"}`}
                 >
-                  {/* Dot */}
-                  <div
-                    className={`
-                absolute left-[-6px] top-2 w-3 h-3 rounded-full
-                border-2 ${borderColor}
-                ${isA ? "bg-sky-200" : "bg-orange-200"}
-              `}
-                  />
+                  <div className={`flex max-w-[85%] md:max-w-[75%] gap-3 ${isA ? "flex-row" : "flex-row-reverse"}`}>
 
-                  {/* Bubble */}
-                  <div
-                    className={`
-                rounded-2xl p-4 shadow-sm border ${borderColor}
-                ${bubbleColor}
-              `}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className={`font-semibold ${textColor}`}>
-                        {m.speaker}
-                      </span>
-                      <span className="text-xs text-slate-500">
-                        {m.phase} • {m.timestamp ?? "-"}
-                      </span>
+                    {/* Tiny Avatar Wrapper */}
+                    <div className="flex flex-col justify-end pb-1">
+                      <div className={`
+                        w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-md
+                        ${isA ? "bg-sky-400" : "bg-orange-400"}
+                      `}>
+                        {m.speaker.slice(0, 1)}
+                      </div>
                     </div>
 
-                    <p className="text-sm text-slate-700 leading-relaxed">
-                      {m.message}
-                    </p>
+                    {/* Message Bubble + Info */}
+                    <div className={`flex flex-col ${isA ? "items-start" : "items-end"}`}>
+                      {/* Speaker Name (Tiny) */}
+                      <span className="text-[10px] font-bold text-slate-400 mb-1 px-1 uppercase tracking-wider">
+                        {m.speaker} • {m.timestamp || "00:00"}
+                      </span>
+
+                      {/* The Bubble */}
+                      <div className={`
+                        relative px-6 py-4 text-white shadow-lg ${shadowColor}
+                        ${isA ? "rounded-[20px] rounded-bl-[4px]" : "rounded-[20px] rounded-br-[4px]"}
+                        ${bubbleGradient}
+                      `}>
+                        <p className="text-[15px] leading-relaxed font-medium opacity-95">
+                          {m.message}
+                        </p>
+                      </div>
+
+                      {/* Phase Tag */}
+                      {m.phase && (
+                        <span className="text-[10px] text-slate-400 mt-1 px-1 opacity-70">
+                          {m.phase}
+                        </span>
+                      )}
+                    </div>
+
                   </div>
                 </motion.div>
               )
             })}
           </div>
 
-          {/* Summary */}
+          {/* Golden Summary Card */}
           {debate.summary && (
-            <div className="mt-8 bg-slate-100 p-5 rounded-2xl shadow-inner">
-              <h4 className="text-md font-semibold text-slate-800 mb-2">
-                Summary
-              </h4>
-              <p className="text-sm text-slate-700 leading-relaxed">
-                {debate.summary}
-              </p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mt-10 relative overflow-hidden rounded-3xl"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-orange-50 opacity-80" />
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]" />
+
+              <div className="relative p-6 border border-amber-100/50 rounded-3xl">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-amber-100 rounded-lg text-amber-600">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                  </div>
+                  <h4 className="text-lg font-bold text-slate-800">
+                    AI Strategic Analysis
+                  </h4>
+                </div>
+
+                <p className="text-slate-700 leading-relaxed text-sm md:text-base font-medium">
+                  {debate.summary}
+                </p>
+              </div>
+            </motion.div>
           )}
         </motion.div>
       )}
@@ -912,12 +886,7 @@ export default function DebateArea() {
   }
 
 
-  if (loading)
-    return (
-      <div className="flex items-center justify-center h-screen text-slate-500">
-        Loading debate...
-      </div>
-    )
+
 
   if (!debate)
     return (
