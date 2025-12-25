@@ -1,5 +1,6 @@
 'use client';
 
+import Head from 'next/head';
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import {
@@ -49,7 +50,21 @@ export default function FeaturesPage() {
   };
 
   return (
-    <main ref={containerRef} className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/20 dark:from-slate-950 dark:via-indigo-950/40 dark:to-slate-900 text-gray-800 dark:text-gray-200 font-['Inter',sans-serif]">
+    <>
+      <Head>
+        <title>Features - PrismMinds AI Debate Platform</title>
+        <meta name="description" content="Discover the powerful features of PrismMinds: AI personas, dynamic arguments, consensus synthesis, transcript history, interactive UI, and human-AI debating capabilities." />
+        <meta name="keywords" content="AI debate features, debate platform features, AI personas, dynamic arguments, consensus synthesis, debate transcripts, interactive debating" />
+        <meta property="og:title" content="Features - PrismMinds AI Debate Platform" />
+        <meta property="og:description" content="Explore the comprehensive features that make PrismMinds the leading AI-powered debate platform for critical thinking and consensus building." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://prismminds.vercel.app/features" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Features - PrismMinds AI Debate Platform" />
+        <meta name="twitter:description" content="Discover the powerful features of PrismMinds AI debate platform." />
+        <link rel="canonical" href="https://prismminds.vercel.app/features" />
+      </Head>
+      <main ref={containerRef} className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/20 dark:from-slate-950 dark:via-indigo-950/40 dark:to-slate-900 text-gray-800 dark:text-gray-200 font-['Inter',sans-serif]">
       {/* Floating Background Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-50 sm:opacity-100">
         <motion.div
@@ -640,5 +655,6 @@ export default function FeaturesPage() {
         </motion.section>
       </div>
     </main>
+    </>
   );
 }

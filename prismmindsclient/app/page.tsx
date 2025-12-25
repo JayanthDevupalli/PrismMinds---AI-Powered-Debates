@@ -1,5 +1,6 @@
 "use client"
 
+import Head from 'next/head';
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
@@ -97,7 +98,14 @@ export default function Home() {
   ]
 
   return (
-    <main className="min-h-screen relative overflow-x-hidden bg-gradient-to-br from-[#fcfeff] via-[#eef2ff] to-[#fff6fb] text-slate-900 dark:bg-gradient-to-br dark:from-[#071124] dark:via-[#0b1220] dark:to-[#060611]">
+    <>
+      <Head>
+        <title>PrismMinds - AI-Powered Debate Platform for Critical Thinking</title>
+        <meta name="description" content="Experience revolutionary AI debates with PrismMinds. Engage in Human vs AI discussions, explore multi-perspective arguments, and achieve consensus through structured, intelligent debates." />
+        <meta name="keywords" content="AI debate platform, artificial intelligence debates, critical thinking, human vs AI, debate AI, consensus building, structured arguments, intelligent discussions" />
+        <link rel="canonical" href="https://prismminds.vercel.app" />
+      </Head>
+      <main className="min-h-screen relative overflow-x-hidden bg-gradient-to-br from-[#fcfeff] via-[#eef2ff] to-[#fff6fb] text-slate-900 dark:bg-gradient-to-br dark:from-[#071124] dark:via-[#0b1220] dark:to-[#060611]">
       {/* Decorative UI background (radial blobs + subtle grid + grain) */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#fcfeff] via-[#eef2ff] to-[#fff6fb] dark:from-transparent"></div>
@@ -525,5 +533,6 @@ export default function Home() {
         </div>
       </footer>
     </main>
+    </>
   )
 }

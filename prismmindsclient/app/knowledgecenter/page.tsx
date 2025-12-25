@@ -1,5 +1,6 @@
 "use client"
 
+import Head from 'next/head';
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Sparkles, BookOpen, Video, Landmark, ArrowRight, ArrowLeft, Brain } from "lucide-react"
@@ -7,7 +8,21 @@ import { Button } from "@/components/ui/button"
 
 export default function KnowledgeCenter() {
     return (
-        <div className="relative min-h-screen overflow-hidden bg-white dark:bg-slate-950">
+        <>
+            <Head>
+                <title>Knowledge Center - Learn About AI Debates | PrismMinds</title>
+                <meta name="description" content="Explore our comprehensive Knowledge Center with blogs, guides, and videos about AI debates, critical thinking, debate frameworks, and intellectual discourse." />
+                <meta name="keywords" content="AI debate knowledge, debate guides, critical thinking resources, debate frameworks, intellectual discourse, debate education" />
+                <meta property="og:title" content="Knowledge Center - Learn About AI Debates | PrismMinds" />
+                <meta property="og:description" content="Access comprehensive resources about AI-powered debates, critical thinking, and structured argumentation in our Knowledge Center." />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://prismminds.vercel.app/knowledgecenter" />
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content="Knowledge Center - PrismMinds" />
+                <meta name="twitter:description" content="Learn about AI debates and critical thinking with our comprehensive resources." />
+                <link rel="canonical" href="https://prismminds.vercel.app/knowledgecenter" />
+            </Head>
+            <div className="relative min-h-screen overflow-hidden bg-white dark:bg-slate-950">
 
             {/* ===== BACKGROUND MESH ===== */}
             <div className="pointer-events-none absolute inset-0">
@@ -268,5 +283,6 @@ export default function KnowledgeCenter() {
                 </div>
             </section>
         </div>
+        </>
     )
 }

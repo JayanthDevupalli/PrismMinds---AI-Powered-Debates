@@ -1,5 +1,6 @@
 "use client"
 
+import Head from 'next/head';
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -69,7 +70,21 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center p-4 overflow-hidden relative">
+    <>
+      <Head>
+        <title>Register - Join PrismMinds AI Debate Platform</title>
+        <meta name="description" content="Create your free PrismMinds account to start engaging in AI-powered debates, explore critical thinking, and participate in structured discussions." />
+        <meta name="keywords" content="register PrismMinds, sign up, create account, AI debate platform, free registration" />
+        <meta property="og:title" content="Register - Join PrismMinds AI Debate Platform" />
+        <meta property="og:description" content="Sign up for free and start your journey in AI-powered debates and critical thinking." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://prismminds.vercel.app/register" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Register for PrismMinds" />
+        <meta name="twitter:description" content="Join the AI debate platform for free." />
+        <link rel="canonical" href="https://prismminds.vercel.app/register" />
+      </Head>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center p-4 overflow-hidden relative">
       <div className="absolute inset-0 -z-10 overflow-hidden">
         {/* Soft base glow */}
         <div className="absolute inset-0 bg-gradient-to-br from-sky-50 via-white to-purple-50" />
@@ -230,5 +245,6 @@ export default function Register() {
         </div>
       </motion.div>
     </div>
+    </>
   )
 }

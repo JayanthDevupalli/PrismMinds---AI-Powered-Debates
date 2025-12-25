@@ -1,5 +1,6 @@
 "use client"
 
+import Head from 'next/head';
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -73,7 +74,21 @@ export default function Login() {
   }
 
   return (
-    <main className="relative w-full min-h-screen overflow-hidden bg-background flex items-center justify-center">
+    <>
+      <Head>
+        <title>Login - Access Your PrismMinds Account</title>
+        <meta name="description" content="Sign in to your PrismMinds account to access AI-powered debates, manage your discussions, and explore intellectual discourse." />
+        <meta name="keywords" content="login PrismMinds, sign in, AI debate account, user authentication" />
+        <meta property="og:title" content="Login - PrismMinds AI Debate Platform" />
+        <meta property="og:description" content="Access your PrismMinds account to engage in AI debates and explore critical thinking." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://prismminds.vercel.app/login" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Login to PrismMinds" />
+        <meta name="twitter:description" content="Sign in to access AI debate features." />
+        <link rel="canonical" href="https://prismminds.vercel.app/login" />
+      </Head>
+      <main className="relative w-full min-h-screen overflow-hidden bg-background flex items-center justify-center">
       {/* Background Effects */}
       <div className="absolute inset-0 -z-20 w-full h-full">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/15 via-background to-cyan-900/15" />
@@ -312,5 +327,6 @@ export default function Login() {
         />
       </div>
     </main>
+    </>
   )
 }

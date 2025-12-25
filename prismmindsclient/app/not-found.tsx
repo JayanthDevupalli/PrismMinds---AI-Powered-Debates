@@ -1,12 +1,19 @@
 "use client";
 
+import Head from 'next/head';
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-[#e0f2ff] via-[#f4e7ff] to-[#ffe6e6] p-6">
+    <>
+      <Head>
+        <title>Page Not Found - PrismMinds</title>
+        <meta name="description" content="The page you're looking for doesn't exist. Return to PrismMinds AI debate platform." />
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
+      <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-[#e0f2ff] via-[#f4e7ff] to-[#ffe6e6] p-6">
 
       {/* Floating SVG Blobs */}
       <motion.div
@@ -46,5 +53,6 @@ export default function NotFound() {
         </Link>
       </motion.div>
     </div>
+    </>
   );
 }

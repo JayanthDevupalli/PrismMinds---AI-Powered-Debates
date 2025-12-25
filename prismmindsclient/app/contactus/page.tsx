@@ -1,5 +1,6 @@
 "use client";
 
+import Head from 'next/head';
 import React, { useState } from "react";
 import Link from "next/link";
 import {
@@ -190,7 +191,21 @@ export default function ContactPage() {
     "w-full px-4 pt-6 pb-2 text-sm rounded-xl bg-white/80 border backdrop-blur-xl shadow-sm outline-none transition-all duration-200 focus:shadow-md focus:bg-white";
 
   return (
-    <main className="relative min-h-screen bg-gradient-to-b from-white via-neutral-50 to-neutral-100 overflow-hidden">
+    <>
+      <Head>
+        <title>Contact Us - Get in Touch with PrismMinds</title>
+        <meta name="description" content="Contact PrismMinds team for questions, ideas, or partnership opportunities. Reach out to us about AI debate platform, collaborations, or support." />
+        <meta name="keywords" content="contact PrismMinds, AI debate support, partnership opportunities, get in touch, customer support" />
+        <meta property="og:title" content="Contact Us - PrismMinds AI Debate Platform" />
+        <meta property="og:description" content="Have questions or ideas? Contact the PrismMinds team for support, partnerships, or collaboration opportunities." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://prismminds.vercel.app/contactus" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Contact PrismMinds" />
+        <meta name="twitter:description" content="Get in touch with the PrismMinds team." />
+        <link rel="canonical" href="https://prismminds.vercel.app/contactus" />
+      </Head>
+      <main className="relative min-h-screen bg-gradient-to-b from-white via-neutral-50 to-neutral-100 overflow-hidden">
 
       {/* BACK BUTTON */}
       <motion.div
@@ -579,5 +594,6 @@ export default function ContactPage() {
         © 2025 PrismMinds
       </footer>
     </main>
+    </>
   );
 }
