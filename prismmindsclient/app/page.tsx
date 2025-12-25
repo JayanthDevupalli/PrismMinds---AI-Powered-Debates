@@ -104,7 +104,6 @@ export default function Home() {
         <meta name="description" content="Experience revolutionary AI debates with PrismMinds. Engage in Human vs AI discussions, explore multi-perspective arguments, and achieve consensus through structured, intelligent debates." />
         <meta name="keywords" content="AI debate platform, artificial intelligence debates, critical thinking, human vs AI, debate AI, consensus building, structured arguments, intelligent discussions" />
         <link rel="canonical" href="https://prismminds.vercel.app" />
-        <meta name="google-site-verification" content="ZoqqZ6cB_22XWp19-ulO7LDFOIkaS24zOov1Vn8A5Ek" />
       </Head>
       <main className="min-h-screen relative overflow-x-hidden bg-gradient-to-br from-[#fcfeff] via-[#eef2ff] to-[#fff6fb] text-slate-900 dark:bg-gradient-to-br dark:from-[#071124] dark:via-[#0b1220] dark:to-[#060611]">
       {/* Decorative UI background (radial blobs + subtle grid + grain) */}
