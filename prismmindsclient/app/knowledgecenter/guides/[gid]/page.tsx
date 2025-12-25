@@ -260,7 +260,7 @@ export default function GuideDetailPage({
                                 <textarea
                                     value={notes}
                                     onChange={handleNoteChange}
-                                    placeholder="Jot down your key takeaways here..."
+                                    placeholder="Note down your key takeaways here..."
                                     className="flex-1 w-full bg-slate-50 dark:bg-slate-900/50 rounded-xl p-4 text-sm text-slate-700 dark:text-slate-300 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500/50 border border-slate-200 dark:border-slate-800"
                                     spellCheck={false}
                                 />
