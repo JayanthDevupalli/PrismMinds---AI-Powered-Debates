@@ -9,6 +9,33 @@ import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import { LockClosedIcon, EnvelopeIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline"
 
+// Helper function to convert Firebase errors to user-friendly messages
+const getAuthErrorMessage = (error: any): string => {
+  const errorCode = error?.code || ""
+
+  switch (errorCode) {
+    case "auth/invalid-credential":
+    case "auth/wrong-password":
+    case "auth/user-not-found":
+    case "auth/invalid-email":
+      return "Invalid email or password. Please try again."
+    case "auth/user-disabled":
+      return "This account has been disabled. Please contact support."
+    case "auth/too-many-requests":
+      return "Too many failed login attempts. Please try again later."
+    case "auth/network-request-failed":
+      return "Network error. Please check your internet connection."
+    case "auth/popup-closed-by-user":
+      return "Sign-in cancelled."
+    case "auth/popup-blocked":
+      return "Popup was blocked. Please allow popups for this site."
+    case "auth/account-exists-with-different-credential":
+      return "An account already exists with the same email but different sign-in method."
+    default:
+      return "An error occurred during sign-in. Please try again."
+  }
+}
+
 export default function Login() {
   const router = useRouter()
   const [form, setForm] = useState({ email: "", password: "" })
@@ -26,7 +53,7 @@ export default function Login() {
       await signInWithEmailAndPassword(auth, form.email, form.password)
       router.push("/dashboard")
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred")
+      setError(getAuthErrorMessage(err))
     } finally {
       setLoading(false)
     }
@@ -39,7 +66,7 @@ export default function Login() {
       await signInWithPopup(auth, googleProvider)
       router.push("/dashboard")
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred")
+      setError(getAuthErrorMessage(err))
     } finally {
       setLoading(false)
     }

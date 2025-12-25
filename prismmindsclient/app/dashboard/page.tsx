@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 import { fetchRecentDebates, createDebate, createHumanDebate, deleteDebate, fetchFavorites, addFavorite, removeFavorite } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline"
-import { SparklesIcon, Trash2Icon, X, History, Download, ScrollText, Sparkles, Rocket, BookOpen, Mic2, MessageCircle, Target, BarChart3, Globe, Heart, ArrowRight, Loader2 } from "lucide-react"
+import { SparklesIcon, Trash2Icon, X, History, Download, ScrollText, Sparkles, Rocket, BookOpen, Mic2, MessageCircle, Target, BarChart3, Globe, Heart, ArrowRight, Loader2, Menu } from "lucide-react"
 import { downloadDebateTranscriptPDF } from "@/lib/pdf-generator"
 
 type DebateMessage = {
@@ -89,6 +89,10 @@ export default function DashboardPage() {
       debate.personaA.toLowerCase().includes(searchQuery.toLowerCase()) ||
       debate.personaB.toLowerCase().includes(searchQuery.toLowerCase()),
   )
+
+  // Split debates by type for the dashboard views
+  const aiDebates = recentDebates.filter(d => d.debateType !== 'human-to-ai');
+  const humanDebates = recentDebates.filter(d => d.debateType === 'human-to-ai');
 
   // Pagination support to show more debates when scrolling
   const displayedDebates = filteredDebates.slice(0, displayedCount)
@@ -258,8 +262,8 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (user) {
-      // By default load only 2 items for the "Recent Debates" dashboard grid
-      fetchRecentDebates(2)
+      // Load more items to ensure we have enough for both categories (displayed as 2 each)
+      fetchRecentDebates(20)
         .then(setRecentDebates)
         .catch(console.error)
         .finally(() => setLoading(false))
@@ -366,6 +370,8 @@ export default function DashboardPage() {
 
 
 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-500/20">
 
@@ -375,124 +381,251 @@ export default function DashboardPage() {
         animate={{ opacity: 1, y: 0 }}
         className="sticky top-0 z-40 backdrop-blur-xl border-b border-indigo-100/50 bg-white/80 dark:bg-slate-900/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="w-full sm:w-auto">
-            <p className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest flex items-center gap-2 mb-1">
-              <Globe className="w-3.5 h-3.5" />
-              <span className="opacity-50">|</span>
-              <SparklesIcon className="w-3.5 h-3.5" />
-              PrismMinds AI
-            </p>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-              {`${greeting}, ${user?.displayName?.split(" ")[0] || "Debater"}`}
-            </h1>
-          </motion.div>
-          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-end">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={async () => {
-                // When opening the full transcripts view, fetch more debates
-                try {
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex justify-between items-center gap-3">
+            {/* Logo Section */}
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+              <p className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest flex items-center gap-2 mb-1">
+                <Globe className="w-3.5 h-3.5" />
+                <span className="opacity-50">|</span>
+                <SparklesIcon className="w-3.5 h-3.5" />
+                PrismMinds AI
+              </p>
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                {`${greeting}, ${user?.displayName?.split(" ")[0] || "Debater"}`}
+              </h1>
+            </motion.div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden sm:flex items-center gap-3">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={async () => {
+                  try {
+                    setLoading(true)
+                    const all = await fetchRecentDebates(100)
+                    setRecentDebates(all)
+                  } catch (err) {
+                    console.error('Failed to load transcripts:', err)
+                  } finally {
+                    setLoading(false)
+                    setCurrentView("transcripts")
+                    setDisplayedCount(ITEMS_PER_PAGE)
+                    setSearchQuery("")
+                    setTranscriptIndex(0)
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 border border-border/50 transition-all text-sm font-medium text-foreground"
+                title="View all transcripts"
+              >
+                <History className="w-4 h-4 flex-shrink-0" />
+                <span>Transcripts</span>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={async () => {
                   setLoading(true)
-                  const all = await fetchRecentDebates(100)
-                  setRecentDebates(all)
-                } catch (err) {
-                  console.error('Failed to load transcripts:', err)
-                } finally {
-                  setLoading(false)
-                  setCurrentView("transcripts")
-                  setDisplayedCount(ITEMS_PER_PAGE)
-                  setSearchQuery("")
-                  setTranscriptIndex(0)
-                }
-              }}
-              className="flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 border border-border/50 transition-all text-xs sm:text-sm font-medium text-foreground"
-              title="View all transcripts"
-            >
-              <History className="w-4 h-4 flex-shrink-0" />
-              <span className="hidden sm:inline">Transcripts</span>
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={async () => {
-                // Open favorites view
-                setLoading(true)
-                try {
-                  // We've already fetched favorites in useEffect, but we can refresh them here if needed
-                  // or just switch view. Since favorites are independent now, we don't need to fetch recent debates.
-                  const favs = await fetchFavorites()
-                  setFavorites(favs)
-                } catch (err) {
-                  console.error('Failed to refresh favorites:', err)
-                } finally {
-                  setLoading(false)
-                  setCurrentView("favorites")
-                }
-              }}
-              className="flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-red-500/20 to-pink-500/20 hover:from-red-500/30 hover:to-pink-500/30 border border-border/50 transition-all text-xs sm:text-sm font-medium text-foreground"
-              title="View favorite debates"
-            >
-              <Heart className="w-4 h-4 flex-shrink-0" />
-              <span className="hidden sm:inline">Favorites</span>
-            </motion.button>
-            {currentView === "transcripts" && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={async () => {
-                  // Return to the main dashboard and load only the 2 most recent debates
                   try {
-                    setLoading(true)
-                    const recent = await fetchRecentDebates(2)
-                    setRecentDebates(recent)
+                    const favs = await fetchFavorites()
+                    setFavorites(favs)
                   } catch (err) {
-                    console.error('Failed to load recent debates:', err)
+                    console.error('Failed to refresh favorites:', err)
                   } finally {
                     setLoading(false)
-                    setCurrentView("main")
+                    setCurrentView("favorites")
                   }
                 }}
-                className="flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 hover:from-blue-100 hover:to-cyan-100 border border-blue-200/50 dark:border-blue-800/50 transition-all text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-500/20 to-pink-500/20 hover:from-red-500/30 hover:to-pink-500/30 border border-border/50 transition-all text-sm font-medium text-foreground"
+                title="View favorite debates"
               >
-                ← Back
+                <Heart className="w-4 h-4 flex-shrink-0" />
+                <span>Favorites</span>
               </motion.button>
-            )}
-            {currentView === "favorites" && (
+              {currentView === "transcripts" && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={async () => {
+                    try {
+                      setLoading(true)
+                      const recent = await fetchRecentDebates(2)
+                      setRecentDebates(recent)
+                    } catch (err) {
+                      console.error('Failed to load recent debates:', err)
+                    } finally {
+                      setLoading(false)
+                      setCurrentView("main")
+                    }
+                  }}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 hover:from-blue-100 hover:to-cyan-100 border border-blue-200/50 dark:border-blue-800/50 transition-all text-sm font-medium text-blue-600 dark:text-blue-400"
+                >
+                  ← Back
+                </motion.button>
+              )}
+              {currentView === "favorites" && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={async () => {
+                    try {
+                      setLoading(true)
+                      const recent = await fetchRecentDebates(2)
+                      setRecentDebates(recent)
+                    } catch (err) {
+                      console.error('Failed to load recent debates:', err)
+                    } finally {
+                      setLoading(false)
+                      setCurrentView("main")
+                    }
+                  }}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 hover:from-red-100 hover:to-pink-100 border border-red-200/50 dark:border-red-800/50 transition-all text-sm font-medium text-red-600 dark:text-red-400"
+                >
+                  ← Back
+                </motion.button>
+              )}
               <motion.button
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={async () => {
-                  try {
-                    setLoading(true)
-                    const recent = await fetchRecentDebates(2)
-                    setRecentDebates(recent)
-                  } catch (err) {
-                    console.error('Failed to load recent debates:', err)
-                  } finally {
-                    setLoading(false)
-                    setCurrentView("main")
-                  }
+                  await logout()
+                  router.push("/")
                 }}
-                className="flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 hover:from-red-100 hover:to-pink-100 border border-red-200/50 dark:border-red-800/50 transition-all text-xs sm:text-sm font-medium text-red-600 dark:text-red-400"
+                className="p-2.5 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-all text-slate-400 hover:text-red-600"
+                title="Logout"
               >
-                ← Back
+                <ArrowLeftOnRectangleIcon className="w-5 h-5" />
               </motion.button>
-            )}
+            </div>
+
+            {/* Mobile Menu Button */}
             <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={async () => {
-                await logout()
-                router.push("/")
-              }}
-              className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-all text-slate-400 hover:text-red-600"
-              title="Logout"
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="sm:hidden p-2 rounded-lg bg-indigo-50 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400"
             >
-              <ArrowLeftOnRectangleIcon className="w-4 sm:w-5 h-4 sm:h-5" />
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </motion.button>
           </div>
+
+          {/* Mobile Navigation Dropdown */}
+          <AnimatePresence>
+            {isMobileMenuOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden sm:hidden"
+              >
+                <div className="pt-4 pb-2 space-y-2 border-t border-slate-200 dark:border-slate-800 mt-4">
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    onClick={async () => {
+                      setIsMobileMenuOpen(false);
+                      try {
+                        setLoading(true)
+                        const all = await fetchRecentDebates(100)
+                        setRecentDebates(all)
+                      } catch (err) {
+                        console.error('Failed to load transcripts:', err)
+                      } finally {
+                        setLoading(false)
+                        setCurrentView("transcripts")
+                        setDisplayedCount(ITEMS_PER_PAGE)
+                        setSearchQuery("")
+                        setTranscriptIndex(0)
+                      }
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-blue-500/10 to-cyan-500/10 active:from-blue-500/20 active:to-cyan-500/20 border border-blue-100/50 dark:border-blue-900/50 text-foreground font-medium"
+                  >
+                    <History className="w-5 h-5 text-blue-500" />
+                    Transcripts
+                  </motion.button>
+
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    onClick={async () => {
+                      setIsMobileMenuOpen(false);
+                      setLoading(true)
+                      try {
+                        const favs = await fetchFavorites()
+                        setFavorites(favs)
+                      } catch (err) {
+                        console.error('Failed to refresh favorites:', err)
+                      } finally {
+                        setLoading(false)
+                        setCurrentView("favorites")
+                      }
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-red-500/10 to-pink-500/10 active:from-red-500/20 active:to-pink-500/20 border border-red-100/50 dark:border-red-900/50 text-foreground font-medium"
+                  >
+                    <Heart className="w-5 h-5 text-red-500" />
+                    Favorites
+                  </motion.button>
+
+                  {currentView === "transcripts" && (
+                    <motion.button
+                      whileTap={{ scale: 0.98 }}
+                      onClick={async () => {
+                        setIsMobileMenuOpen(false);
+                        try {
+                          setLoading(true)
+                          const recent = await fetchRecentDebates(2)
+                          setRecentDebates(recent)
+                        } catch (err) {
+                          console.error('Failed to load recent debates:', err)
+                        } finally {
+                          setLoading(false)
+                          setCurrentView("main")
+                        }
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium"
+                    >
+                      <ArrowRight className="w-5 h-5 rotate-180" />
+                      Back to Dashboard
+                    </motion.button>
+                  )}
+
+                  {currentView === "favorites" && (
+                    <motion.button
+                      whileTap={{ scale: 0.98 }}
+                      onClick={async () => {
+                        setIsMobileMenuOpen(false);
+                        try {
+                          setLoading(true)
+                          const recent = await fetchRecentDebates(2)
+                          setRecentDebates(recent)
+                        } catch (err) {
+                          console.error('Failed to load recent debates:', err)
+                        } finally {
+                          setLoading(false)
+                          setCurrentView("main")
+                        }
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium"
+                    >
+                      <ArrowRight className="w-5 h-5 rotate-180" />
+                      Back to Dashboard
+                    </motion.button>
+                  )}
+
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    onClick={async () => {
+                      setIsMobileMenuOpen(false);
+                      await logout()
+                      router.push("/")
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium transition-colors"
+                  >
+                    <ArrowLeftOnRectangleIcon className="w-5 h-5" />
+                    Sign Out
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </motion.header>
 
@@ -975,7 +1108,7 @@ export default function DashboardPage() {
                             />
                           ))}
                         </div>
-                      ) : recentDebates.length === 0 ? (
+                      ) : aiDebates.length === 0 ? (
                         <motion.div
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
@@ -995,7 +1128,7 @@ export default function DashboardPage() {
                           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
                         >
                           <AnimatePresence>
-                            {recentDebates.map((debate, index) => (
+                            {aiDebates.slice(0, 2).map((debate, index) => (
                               <motion.div
                                 key={debate.id}
                                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -1104,30 +1237,49 @@ export default function DashboardPage() {
       border border-slate-200/60 dark:border-slate-800
       bg-white dark:bg-slate-900
       shadow-sm
-      p-6 sm:p-8
+      p-5 sm:p-8
     "
                       >
                         {/* Soft floating top highlight */}
                         <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/35 dark:from-white/[0.06] to-transparent" />
 
                         {/* Title */}
-                        <h2 className="text-3xl font-semibold mb-8 flex items-center gap-4 tracking-tight">
+                        <h2 className="text-xl sm:text-3xl font-semibold mb-6 sm:mb-8 flex items-center gap-3 sm:gap-4 tracking-tight">
                           <motion.span
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             transition={{ duration: 0.4 }}
                             className="
-          w-12 h-12 rounded-xl 
+          w-10 h-10 sm:w-12 sm:h-12 rounded-xl 
           bg-gradient-to-br from-blue-500 to-cyan-500 
           flex items-center justify-center 
           shadow-lg shadow-blue-500/25
+          flex-shrink-0
         "
                           >
-                            <MessageCircle className="w-6 h-6 text-white" />
+                            <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                           </motion.span>
 
                           Human → AI Debate
                         </h2>
+
+                        {/* Info Note about Performance Audit */}
+                        <motion.div
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                          className="mb-6 p-3 rounded-lg bg-blue-50/50 dark:bg-blue-900/10 border border-blue-200/50 dark:border-blue-700/30 flex items-start gap-3"
+                        >
+                          <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                          <div>
+                            <p className="text-sm text-blue-900 dark:text-blue-100 font-medium mb-1">
+                              Post-Debate Performance Audit
+                            </p>
+                            <p className="text-xs text-blue-700 dark:text-blue-300">
+                              After completing your debate, you'll receive a comprehensive performance analysis with insights on your argumentation, reasoning, and overall debate quality.
+                            </p>
+                          </div>
+                        </motion.div>
 
                         {/* FORM */}
                         <form onSubmit={handleHumanDebateSubmit} className="space-y-6">
@@ -1145,7 +1297,7 @@ export default function DashboardPage() {
             rounded-xl
             bg-white/80 dark:bg-slate-800/40 
             border border-neutral-300/60 dark:border-neutral-700
-            text-sm sm:text-base
+            text-base
             placeholder:text-neutral-400
             focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15
             transition-all
@@ -1169,7 +1321,7 @@ export default function DashboardPage() {
                           </div>
 
                           {/* CAPSULE SUGGESTIONS */}
-                          <div className="flex flex-wrap gap-3">
+                          <div className="flex flex-wrap gap-2 sm:gap-3">
                             {suggestions.map((topic, i) => (
                               <motion.button
                                 type="button"
@@ -1238,6 +1390,131 @@ export default function DashboardPage() {
                         </form>
 
                       </div>
+
+                    </motion.div>
+
+                    {/* Human Mode Recent Debates Grid */}
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+                      <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                        <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-secondary to-accent flex items-center justify-center text-base sm:text-lg flex-shrink-0">
+                          <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                        </span>
+                        Recent Debates
+                      </h2>
+
+                      {loading ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                          {[1, 2, 3, 4, 5, 6].map((i) => (
+                            <div
+                              key={i}
+                              className="h-48 sm:h-64 rounded-lg sm:rounded-2xl bg-gradient-to-br from-muted to-muted/50 animate-pulse"
+                            />
+                          ))}
+                        </div>
+                      ) : humanDebates.length === 0 ? (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="text-center py-12 sm:py-16 px-4 sm:px-6 rounded-lg sm:rounded-2xl border-2 border-dashed border-border/30"
+                        >
+                          <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
+                            <SparklesIcon className="w-6 h-6 sm:w-8 sm:h-8 text-primary/50" />
+                          </div>
+                          <p className="text-xs sm:text-sm text-muted-foreground">
+                            No human debates yet. Start one to begin!
+                          </p>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+                        >
+                          <AnimatePresence>
+                            {humanDebates.slice(0, 2).map((debate, index) => (
+                              <motion.div
+                                key={debate.id}
+                                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                                transition={{ delay: index * 0.05 }}
+                                className="group relative"
+                              >
+                                <motion.div
+                                  onClick={() => setSelectedDebate(debate)}
+                                  whileHover={{ y: -4 }}
+                                  whileTap={{ scale: 0.98 }}
+                                  className="h-48 sm:h-60 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-5 cursor-pointer transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:hover:shadow-indigo-900/20 hover:border-indigo-500/30 flex flex-col justify-between overflow-hidden relative group"
+                                >
+                                  {/* Subtle grain or gradient overlay could go here */}
+                                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110" />
+
+                                  <div className="relative z-10">
+                                    <div className="flex items-start justify-between mb-2 sm:mb-3">
+                                      <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                                        {debate.duration}m
+                                      </span>
+                                      <div className="flex gap-1 opacity-100 transition-opacity">
+                                        <motion.button
+                                          whileHover={{ scale: 1.1 }}
+                                          onClick={(e) => {
+                                            e.stopPropagation()
+                                            toggleFavorite(debate)
+                                          }}
+                                          className={`p-2 rounded-lg transition-all opacity-100 ${favorites.some(f => f.id === debate.id) ? 'bg-red-100/80 dark:bg-red-900/30 text-red-600 hover:bg-red-200' : 'bg-gray-100/80 dark:bg-gray-900/30 text-gray-600 hover:bg-gray-200'}`}
+                                          title={favorites.some(f => f.id === debate.id) ? "Remove from favorites" : "Add to favorites"}
+                                        >
+                                          <Heart className={`w-3.5 sm:w-4 h-3.5 sm:h-4 ${favorites.some(f => f.id === debate.id) ? 'fill-current' : ''}`} />
+                                        </motion.button>
+                                        <motion.button
+                                          whileHover={{ scale: 1.1 }}
+                                          onClick={async (e) => {
+                                            e.stopPropagation()
+                                            if (window.confirm("Delete this debate?")) {
+                                              try {
+                                                await deleteDebate(debate.id)
+                                                const updated = await fetchRecentDebates()
+                                                setRecentDebates(updated)
+                                                setFavorites(prev => prev.filter(f => f.id !== debate.id))
+                                                if (selectedDebate?.id === debate.id) {
+                                                  setSelectedDebate(null)
+                                                }
+                                              } catch (err) {
+                                                console.error("Failed to delete debate:", err)
+                                                showToast("Failed to delete debate.", "error");
+
+                                              }
+                                            }
+                                          }}
+                                          className="p-2 rounded-lg bg-red-100/80 dark:bg-red-900/30 text-red-600 hover:bg-red-200 transition-all opacity-100"
+                                          title="Delete"
+                                        >
+                                          <Trash2Icon className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+                                        </motion.button>
+                                      </div>
+                                    </div>
+
+                                    <h3 className="text-base sm:text-lg font-bold mb-1 sm:mb-2 line-clamp-2 text-foreground group-hover:text-primary transition-colors">
+                                      {debate.topic}
+                                    </h3>
+                                    <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
+                                      <span className="font-semibold text-primary">{debate.personaA}</span>
+                                      <span className="mx-1">vs</span>
+                                      <span className="font-semibold text-accent">{debate.personaB}</span>
+                                    </p>
+                                  </div>
+
+                                  <div className="relative z-10 pt-3 sm:pt-4 border-t border-border/30">
+                                    <p className="text-xs text-muted-foreground" suppressHydrationWarning>
+                                      {new Date(debate.createdAt).toLocaleString()}
+                                    </p>
+                                  </div>
+                                </motion.div>
+                              </motion.div>
+                            ))}
+                          </AnimatePresence>
+                        </motion.div>
+                      )}
                     </motion.div>
 
                   </motion.div>
