@@ -1,8 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
 
 // IMPORTANT: no hardcoded API key here.
-// Ensure GEMINI_API_KEY is set in your environment.
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+// Ensure GEMINI_API_KEY and GEMINI_HUMAN_API_KEY are set in your environment.
 
 export async function startDebate(topic, personaA, personaB, duration) {
   try {
@@ -15,6 +14,8 @@ export async function startDebate(topic, personaA, personaB, duration) {
     if (!process.env.GEMINI_API_KEY) {
       throw new Error("Gemini API key not configured. Please set GEMINI_API_KEY environment variable.")
     }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
 
     // Try different model names
     const modelNames = [
@@ -171,10 +172,14 @@ export async function generateAIResponse(topic, conversationHistory) {
     console.log("Topic:", topic)
     console.log("Conversation history length:", conversationHistory.length)
 
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_HUMAN_API_KEY)
+
     // Check if API key exists
-    if (!process.env.GEMINI_API_KEY) {
-      throw new Error("Gemini API key not configured. Please set GEMINI_API_KEY environment variable.")
+    if (!process.env.GEMINI_HUMAN_API_KEY) {
+      throw new Error("Gemini Human API key not configured. Please set GEMINI_HUMAN_API_KEY environment variable.")
     }
+
+
 
     // Try different model names
     const modelNames = ["gemini-2.5-flash"]
@@ -303,9 +308,11 @@ export async function startHumanDebate(topic) {
     console.log("🔍 Starting human-to-AI debate generation...")
     console.log("Topic:", topic)
 
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_HUMAN_API_KEY)
+
     // Check if API key exists
-    if (!process.env.GEMINI_API_KEY) {
-      console.warn("⚠️ No GEMINI_API_KEY found, using mock human debate")
+    if (process.env.GEMINI_HUMAN_API_KEY) {
+      console.warn("⚠️ No GEMINI_HUMAN_API_KEY found, using mock human debate")
       return {
         transcript: [
           {
@@ -318,6 +325,8 @@ export async function startHumanDebate(topic) {
         moderator_summary: `A human-to-AI debate has been initiated on the topic: "${topic}". The AI debater has provided a casual, inviting opening statement to begin the conversation.`,
       }
     }
+
+
 
     // Try different model names
     const modelNames = ["gemini-2.5-flash"]
@@ -449,6 +458,38 @@ export async function analyzeDebate(transcript) {
   try {
     console.log("📊 Starting debate analysis...")
 
+    // 1. First, separate Human vs AI messages to check participation levels
+    // We assume the AI is "AI Debater" (from startHumanDebate).
+    // Any other speaker is treated as the Human.
+    const humanMessages = transcript.filter(m => m.speaker !== "AI Debater");
+
+    const humanTurnCount = humanMessages.length;
+    const humanTotalWords = humanMessages.reduce((acc, msg) => {
+      return acc + (msg.message || "").trim().split(/\s+/).length;
+    }, 0);
+
+    console.log(`🔍 Human Participation Check: ${humanTurnCount} turns, ~${humanTotalWords} words.`);
+
+    // 2. IMMEDIATE FAIL CONDITION
+    // If the human didn't speak (0 turns), return 0.
+    // We ALLOW short inputs now (e.g. "ok") to go to Gemini for a fair (low) score and feedback.
+    if (humanTurnCount === 0) {
+      console.warn("⚠️ Human participation check: 0 turns. Returning 0 scores.");
+      return {
+        scores: {
+          logic: 0,
+          persuasion: 0,
+          clarity: 0,
+          emotional_intelligence: 0
+        },
+        feedback: {
+          strengths: ["N/A"],
+          improvements: ["It looks like you didn't say anything!", "Jump in and start the debate next time."],
+          coach_note: "No participation detected. Don't be shy! Speak up to get a score."
+        }
+      };
+    }
+
     // Use specific analysis key if available, otherwise fall back to main key
     const apiKey = process.env.GEMINI_ANALYSIS_API_KEY
     if (!apiKey) {
@@ -469,22 +510,23 @@ Your job is to strictly evaluate the HUMAN user's performance in the following d
 TRANSCRIPT:
 ${transcriptText}
 
-🚨 STRICT SCORING RULES (CRITICAL):
-1. **Low Effort Penalty**:
-   - If the human has fewer than 3 turns OR fewer than 50 total words, their scores MUST be overwhelmingly low (e.g., < 40/100).
-   - If the human replied with one-liners or single sentences, do NOT give high scores. Scoring them high (e.g., >60) is a FAILURE.
+🚨 SCORING GUIDELINES:
+1. **Participation Context**:
+   - The user spoke roughly ${humanTotalWords} words across ${humanTurnCount} turns.
+   - **Low Effort**: If the user only said "ok", "cool", or "hello", they should receive a **LOW score (e.g., 5-15)** based on lack of substance, but **NOT necessarily 0** if it was a coherent response.
+   - **Non-sequiturs**: If the response is total gibberish (e.g. "asdf"), score 0.
 
 2. **Argument Depth**:
    - Count the number of distinct, substantive points made by the user.
-   - 0 points = Score 10-30
+   - 0 substantive points = Score 10-30
    - 1-2 points = Score 40-60
    - 3+ strong points = Score 70+
 
 3. **Rubric**:
-   - **Logic**: Did they provide evidence and reasoning? (Simply stating an opinion is NOT logic).
-   - **Persuasion**: Did they use rhetoric, analogies, or emotional appeals effectively?
-   - **Clarity**: Was their argument structured and easy to follow?
-   - **Emotional Intelligence (EQ)**: Did they acknowledge the opponent's points respectfully before countering?
+   - **Logic**: Did they provide evidence and reasoning?
+   - **Persuasion**: Did they use rhetoric, analogies, or emotional appeals?
+   - **Clarity**: Was their argument structured?
+   - **Emotional Intelligence (EQ)**: Did they acknowledge the opponent's points?
 
 OUTPUT FORMAT (STRICT JSON ONLY):
 {
@@ -497,7 +539,7 @@ OUTPUT FORMAT (STRICT JSON ONLY):
   "feedback": {
     "strengths": ["Specific point user made...", "Good use of... (if applicable)"],
     "improvements": ["You only made X points...", "Expand on..."],
-    "coach_note": "A brutal but constructive assessment. If they barely debated, call them out (e.g., 'You barely scratched the surface...'). If they did well, praise specific tactics. You MUST end this note by telling the user to check the 'Learning Guides' for specific skills."
+    "coach_note": "Constructive feedback from a debate coach. If they participated poorly, encourage them to say more next time rather than scolding them. Be helpful but honest about the low score."
   }
 }
 `
