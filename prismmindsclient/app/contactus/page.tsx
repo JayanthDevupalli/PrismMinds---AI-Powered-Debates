@@ -464,10 +464,10 @@ export default function ContactPage() {
         {/* CONTACT INFO */}
         <div className="space-y-5">
           {[
-            { icon: Mail, title: "Email", text: "contact@prismmindai.com" },
-            { icon: Phone, title: "Phone", text: "+91 (555) 123-4567" },
+            { icon: Mail, title: "Email", text: "prismmindscontact@gmail.com" },
+            { icon: Phone, title: "Phone", text: "+91 93910 82866" },
             { icon: MapPin, title: "Location", text: "Hyderabad, India" },
-            { icon: Globe, title: "Website", text: "www.prismmindai.com" },
+            { icon: Globe, title: "Website", text: "www.prismminds.vercel.app" },
           ].map((item) => (
             <motion.div
               key={item.title}
