@@ -35,6 +35,16 @@ export function DebateTimer({
     setRemaining(t)
   }, [duration])
 
+  // Reset timer when starting from stopped state
+  const prevRunningRef = useRef(running)
+  useEffect(() => {
+    // If transitioning from not running to running, reset the timer
+    if (running && !prevRunningRef.current && total > 0) {
+      setRemaining(total)
+    }
+    prevRunningRef.current = running
+  }, [running, total])
+
   useEffect(() => {
     if (!running || total <= 0) return
 
