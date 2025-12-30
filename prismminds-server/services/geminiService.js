@@ -311,7 +311,7 @@ export async function startHumanDebate(topic) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_HUMAN_API_KEY)
 
     // Check if API key exists
-    if (process.env.GEMINI_HUMAN_API_KEY) {
+    if (!process.env.GEMINI_HUMAN_API_KEY) {
       console.warn("⚠️ No GEMINI_HUMAN_API_KEY found, using mock human debate")
       return {
         transcript: [

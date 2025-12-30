@@ -74,7 +74,6 @@ export default function DashboardPage() {
   const [creating, setCreating] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [statusMessage, setStatusMessage] = useState("")
-  const [typing, setTyping] = useState<{ speaker?: string } | null>(null)
   const [greeting, setGreeting] = useState("Good Morning")
 
   useEffect(() => {
@@ -159,106 +158,6 @@ export default function DashboardPage() {
     }
   }
 
-  async function revealTranscript(fullTranscript: DebateMessage[] | undefined, durationMin: number | string) {
-    if (!fullTranscript || fullTranscript.length === 0) return
-    const duration = typeof durationMin === "string" ? Number.parseInt(durationMin || "5") : durationMin || 5
-
-    // Calculate timings for a natural feel
-    const perMinuteMs = 10000
-    const capMs = 30000
-    const revealDurationMs = Math.min(duration * perMinuteMs, capMs)
-    const basePerMsgDelay = Math.max(200, Math.round(revealDurationMs / fullTranscript.length))
-    const avgCharactersPerMsg = fullTranscript.reduce((sum, msg) => sum + msg.message.length, 0) / fullTranscript.length
-    const msPerCharacter = Math.min(50, basePerMsgDelay / avgCharactersPerMsg) // Adjust typing speed
-
-    // Reset transcript
-    setSelectedDebate((prev) => (prev ? { ...prev, transcript: [] } : prev))
-
-    for (let i = 0; i < fullTranscript.length; i++) {
-      const msg = fullTranscript[i]
-
-      // Show typing indicator
-      setTyping({ speaker: msg.speaker })
-      setStatusMessage(`${msg.speaker} is composing...`)
-
-      // Small delay before typing starts
-      await sleep(300)
-
-      // Initialize message with empty content
-      setSelectedDebate((prev) => {
-        if (!prev) return prev
-        const nextTranscript = [
-          ...(prev.transcript || []),
-          { ...msg, message: '' } // Start with empty message
-        ]
-        return { ...prev, transcript: nextTranscript }
-      })
-
-      // Type out the message character by character
-      let currentText = ''
-      for (let charIndex = 0; charIndex < msg.message.length; charIndex++) {
-        currentText += msg.message[charIndex]
-
-        setSelectedDebate((prev) => {
-          if (!prev?.transcript) return prev
-          const nextTranscript = [...prev.transcript]
-          nextTranscript[nextTranscript.length - 1] = {
-            ...msg,
-            message: currentText
-          }
-          // Importantly, don't include summary yet
-          return { ...prev, transcript: nextTranscript, summary: undefined }
-        })
-
-        // Scroll to bottom smoothly
-        const modalContent = document.querySelector('.modal-content')
-        if (modalContent) {
-          modalContent.scrollTo({
-            top: modalContent.scrollHeight,
-            behavior: 'smooth'
-          })
-        }
-
-        // Vary typing speed slightly for natural feel
-        const variance = Math.random() * 30 - 15 // ±15ms
-        await sleep(msPerCharacter + variance)
-      }
-
-      // Small pause between messages
-      setTyping(null)
-      setStatusMessage("")
-      await sleep(Math.max(300, msg.message.length * 0.05)) // Longer pause for longer messages
-    }
-
-    // After all messages are done, show "Generating summary..." and reveal summary
-    const debateSummary = selectedDebate?.summary
-    if (debateSummary) {
-      setTyping(null)
-      setStatusMessage("Generating summary...")
-      await sleep(1000) // Pause for anticipation
-
-      setSelectedDebate((prev) => {
-        if (!prev) return prev
-        // Now reveal the summary that was previously hidden
-        return { ...prev, summary: debateSummary }
-      })
-
-      // Scroll to show summary
-      const modalContent = document.querySelector('.modal-content')
-      if (modalContent) {
-        modalContent.scrollTo({
-          top: modalContent.scrollHeight,
-          behavior: 'smooth'
-        })
-      }
-
-      await sleep(500) // Short pause after summary appears
-    }
-
-    setGenerating(false)
-    setTyping(null)
-    setStatusMessage("")
-  }
 
   useEffect(() => {
     if (user) {
@@ -1731,39 +1630,7 @@ export default function DashboardPage() {
                               </motion.div>
                             )}
 
-                            {/* Typing Indicator */}
-                            {typing && (
-                              <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className={`flex ${typing.speaker === selectedDebate.personaA ? "justify-start" : "justify-end"}`}
-                              >
-                                <div
-                                  className={`max-w-sm p-4 rounded-2xl ${typing.speaker === selectedDebate.personaA
-                                    ? "bg-white dark:bg-slate-800 text-foreground"
-                                    : "bg-gradient-to-br from-primary to-accent text-white"
-                                    } shadow-lg`}
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs font-medium">{typing.speaker}</span>
-                                    <div className="flex gap-1">
-                                      {[0, 1, 2].map((j) => (
-                                        <motion.div
-                                          key={j}
-                                          animate={{ y: [0, -6, 0] }}
-                                          transition={{
-                                            delay: j * 0.15,
-                                            duration: 0.6,
-                                            repeat: Number.POSITIVE_INFINITY,
-                                          }}
-                                          className="w-2 h-2 bg-current rounded-full"
-                                        />
-                                      ))}
-                                    </div>
-                                  </div>
-                                </div>
-                              </motion.div>
-                            )}
+
 
                             <motion.div
                               initial={{ opacity: 0, y: 10 }}
