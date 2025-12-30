@@ -7,24 +7,7 @@ dotenv.config();
 // Moving this outside the function ensures we reuse the connection pool if configured (though for Gmail, simpler is often better)
 // Added 'family: 4' to force IPv4 which resolves many "Connection Timeout" issues in production environments (like Vercel/Render)
 // Added connectionTimeout to fail fast if blocked
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true, // Use SSL
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS?.replace(/\s+/g, ''), // Sanitize password
-    },
-    tls: {
-        rejectUnauthorized: true, // Recommended for security
-    },
-    // Production fixes:
-    family: 4, // Force IPv4. Many cloud providers have flaky IPv6 routing to Gmail
-    connectionTimeout: 10000, // 10 seconds timeout
-    greetingTimeout: 5000,
-    socketTimeout: 10000,
-});
+// Transporter creation moved inside functions to prevent connection timeouts
 
 /**
  * Helper function to send email with Promise wrapper
@@ -34,6 +17,23 @@ const transporter = nodemailer.createTransport({
  * @returns {Promise<Object>}
  */
 export const sendEmail = async (mailOptions) => {
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS?.replace(/\s+/g, ''),
+        },
+        tls: {
+            rejectUnauthorized: false,
+        },
+        // Production fixes (keeping these as they are good practice):
+        family: 4,
+        connectionTimeout: 10000,
+    });
+
     return new Promise((resolve, reject) => {
         transporter.sendMail(mailOptions, (err, info) => {
             if (err) {
@@ -52,6 +52,18 @@ export const sendEmail = async (mailOptions) => {
  * @returns {Promise<boolean>}
  */
 export const verifyEmailConnection = async () => {
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS?.replace(/\s+/g, ''),
+        },
+        tls: { rejectUnauthorized: false }
+    });
+
     try {
         await transporter.verify();
         console.log('✅ Email service is ready and connected');
