@@ -153,7 +153,7 @@ router.post("/forgot-password", async (req, res) => {
 
     } catch (error) {
         console.error("❌ Forgot password error:", error);
-        res.status(500).json({ error: "Failed to process request" });
+        res.status(500).json({ error: error.message || "Failed to process request" });
     }
 });
 
