@@ -19,7 +19,7 @@ const createTransporter = () => {
         service: "gmail", // You can use other services like 'SendGrid', 'Outlook', etc.
         auth: {
             user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS, // For Gmail, this should be an App Password
+            pass: process.env.EMAIL_PASS?.replace(/\s+/g, ''), // Automatically remove spaces from App Password
         },
     });
 };
