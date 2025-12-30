@@ -27,6 +27,27 @@ const transporter = nodemailer.createTransport({
 });
 
 /**
+ * Helper function to send email with Promise wrapper
+ * This creates a new Promise effectively handling the callback
+ * which can help in environments like Vercel/AWS Lambda
+ * @param {Object} mailOptions 
+ * @returns {Promise<Object>}
+ */
+export const sendEmail = async (mailOptions) => {
+    return new Promise((resolve, reject) => {
+        transporter.sendMail(mailOptions, (err, info) => {
+            if (err) {
+                console.error("❌ Error sending email:", err);
+                reject(err);
+            } else {
+                console.log("✅ Email sent:", info.messageId);
+                resolve(info);
+            }
+        });
+    });
+};
+
+/**
  * Verifies the transporter connection
  * @returns {Promise<boolean>}
  */
@@ -88,7 +109,7 @@ export const sendWelcomeEmail = async (to, name) => {
         `,
     };
 
-    return transporter.sendMail(mailOptions);
+    return sendEmail(mailOptions);
 };
 
 /**
@@ -113,11 +134,12 @@ export const sendOTPEmail = async (to, otp) => {
         `
     };
 
-    return transporter.sendMail(mailOptions);
+    return sendEmail(mailOptions);
 };
 
 export default {
     sendWelcomeEmail,
     sendOTPEmail,
+    sendEmail,
     verifyEmailConnection
 };
