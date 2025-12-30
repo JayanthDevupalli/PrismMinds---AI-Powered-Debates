@@ -224,6 +224,15 @@ export default function Login() {
                 </div>
               </motion.div>
 
+              <div className="flex justify-end">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm font-medium text-primary/80 hover:text-accent transition-colors duration-200"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
+
               {/* Error Message */}
               {error && (
                 <motion.div
@@ -325,8 +334,8 @@ export default function Login() {
             transition={{ delay: 0.6, duration: 0.8 }}
             className="h-1 mt-8 bg-gradient-to-r from-transparent via-primary to-transparent rounded-full"
           />
-        </div>
-      </main>
+        </div >
+      </main >
     </>
   )
 }

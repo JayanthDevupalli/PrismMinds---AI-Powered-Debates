@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import testRoutes from "./routes/testRoutes.js";
 import debateRoutes from "./routes/debateRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use((req, res, next) => {
 
 // app.use("/api/test", testRoutes);
 app.use("/api/debate", debateRoutes);
+app.use("/api/user", userRoutes);
 
 app.get("/", (req, res) => res.send("PrismMinds Server is on AIR Jayanth, Rock the show!"));
 

@@ -379,3 +379,105 @@ export async function generateAnalysis(debateId: string) {
     throw err
   }
 }
+
+export async function sendWelcomeEmail(email: string, name: string) {
+  try {
+    let headers = {};
+    try {
+      headers = await getAuthHeader();
+    } catch (e) {
+      console.log("No auth header available for welcome email");
+    }
+
+    const userApiUrl = API_URL.replace("/api/debate", "/api/user");
+
+    console.log("📧 Sending welcome email to:", email);
+    const res = await fetch(`${userApiUrl}/welcome`, {
+      method: "POST",
+      headers: {
+        ...headers,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, name }),
+    });
+
+    if (!res.ok) {
+      console.warn("⚠️ Failed to send welcome email");
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("❌ Error sending welcome email:", error);
+    return false;
+  }
+}
+
+// Forgot Password / OTP Flow
+export async function sendForgotPasswordEmail(email: string) {
+  try {
+    const userApiUrl = API_URL.replace("/api/debate", "/api/user");
+    console.log("📧 Requesting password reset OTP for:", email);
+
+    const res = await fetch(`${userApiUrl}/forgot-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || "Failed to send OTP");
+    }
+
+    return true;
+  } catch (error) {
+    console.error("❌ Error requesting password reset:", error);
+    throw error;
+  }
+}
+
+export async function verifyOTP(email: string, otp: string) {
+  try {
+    const userApiUrl = API_URL.replace("/api/debate", "/api/user");
+    console.log("🔐 Verifying OTP for:", email);
+
+    const res = await fetch(`${userApiUrl}/verify-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, otp }),
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || "Invalid OTP");
+    }
+
+    return true;
+  } catch (error) {
+    console.error("❌ Error verifying OTP:", error);
+    throw error;
+  }
+}
+
+export async function resetPasswordWithOtp(email: string, otp: string, newPassword: string) {
+  try {
+    const userApiUrl = API_URL.replace("/api/debate", "/api/user");
+    console.log("🔄 Resetting password for:", email);
+
+    const res = await fetch(`${userApiUrl}/reset-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, otp, newPassword }),
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || "Failed to reset password");
+    }
+
+    return true;
+  } catch (error) {
+    console.error("❌ Error resetting password:", error);
+    throw error;
+  }
+}
