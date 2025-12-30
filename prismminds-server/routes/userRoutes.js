@@ -20,6 +20,9 @@ const createTransporter = () => {
         host: "smtp.gmail.com",
         port: 465,
         secure: true, // true for 465, false for other ports
+        tls: {
+            rejectUnauthorized: true,
+        },
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS?.replace(/\s+/g, ''), // Automatically remove spaces from App Password
