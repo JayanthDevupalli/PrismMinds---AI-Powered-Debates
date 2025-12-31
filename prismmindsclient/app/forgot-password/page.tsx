@@ -22,6 +22,26 @@ export default function ForgotPassword() {
     const [confirmPassword, setConfirmPassword] = useState("")
     const [showPass, setShowPass] = useState(false)
 
+    const [showConfirmPass, setShowConfirmPass] = useState(false)
+
+    // Password Strength Checks
+    const checks = [
+        { test: newPassword.length >= 8, text: "8+ characters" },
+        { test: /[A-Z]/.test(newPassword), text: "Uppercase letter" },
+        { test: /[0-9]/.test(newPassword), text: "Number" },
+        { test: /[^A-Za-z0-9]/.test(newPassword), text: "Symbol" },
+    ]
+    const passed = checks.filter(c => c.test).length
+
+    const getStrength = () => {
+        if (passed === 0) return { label: "Very Weak", color: "bg-gray-200", text: "text-gray-400" }
+        if (passed <= 2) return { label: "Weak", color: "bg-red-500", text: "text-red-500" }
+        if (passed === 3) return { label: "Moderate", color: "bg-yellow-500", text: "text-yellow-500" }
+        return { label: "Strong", color: "bg-green-500", text: "text-green-500" }
+    }
+
+    const strength = getStrength()
+
     // Step 1: Send OTP
     const handleRequestOtp = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -61,8 +81,8 @@ export default function ForgotPassword() {
             setError("Passwords do not match")
             return
         }
-        if (newPassword.length < 6) {
-            setError("Password must be at least 6 characters")
+        if (passed < 4) {
+            setError("Password is not strong enough")
             return
         }
 
@@ -204,21 +224,52 @@ export default function ForgotPassword() {
                             </button>
                         </div>
 
+                        {/* Password Strength Meter */}
+                        {newPassword && (
+                            <div className="space-y-2">
+                                <div className="flex justify-between items-center text-xs">
+                                    <span className="text-gray-500">Security</span>
+                                    <span className={`font-medium ${strength.text}`}>{strength.label}</span>
+                                </div>
+                                <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                    <div
+                                        className={`h-full ${strength.color} transition-all duration-300 ease-out`}
+                                        style={{ width: `${(passed / 4) * 100}%` }}
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-2 text-xs pt-1">
+                                    {checks.map((c, i) => (
+                                        <div key={i} className={`flex items-center gap-1.5 ${c.test ? "text-emerald-600" : "text-gray-400"}`}>
+                                            <Check className="w-3.5 h-3.5" />
+                                            {c.text}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         <div className="relative">
                             <Lock className="absolute left-4 top-3.5 w-4 h-4 text-gray-400 pointer-events-none" />
                             <input
                                 required
-                                type="password"
+                                type={showConfirmPass ? "text" : "password"}
                                 placeholder="Confirm Password"
                                 value={confirmPassword}
                                 onChange={e => setConfirmPassword(e.target.value)}
-                                className="w-full pl-11 pr-4 py-3.5 bg-gray-50/80 border border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 transition text-sm"
+                                className="w-full pl-11 pr-12 py-3.5 bg-gray-50/80 border border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 transition text-sm"
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirmPass(!showConfirmPass)}
+                                className="absolute right-4 top-3.5 text-gray-400 hover:text-gray-700"
+                            >
+                                {showConfirmPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
                         </div>
 
                         <Button
                             type="submit"
-                            disabled={loading}
+                            disabled={loading || passed < 4}
                             className="w-full h-11 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-xl shadow-lg transition-all disabled:opacity-50"
                         >
                             {loading ? "Resetting..." : "Reset Password"}
