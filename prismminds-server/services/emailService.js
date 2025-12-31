@@ -20,8 +20,8 @@ export const sendEmail = async (mailOptions) => {
     const transporter = nodemailer.createTransport({
         service: "gmail",
         host: "smtp.gmail.com",
-        port: 465,
-        secure: true,
+        port: 587,
+        secure: false, // upgrade later with STARTTLS
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS?.replace(/\s+/g, ''),
@@ -29,9 +29,12 @@ export const sendEmail = async (mailOptions) => {
         tls: {
             rejectUnauthorized: false,
         },
-        // Production fixes (keeping these as they are good practice):
+        logger: true, // Log to console
+        debug: true,  // include SMTP traffic in logs
+        // Production fixes:
         family: 4,
-        connectionTimeout: 10000,
+        greetingTimeout: 30000, // wait up to 30s for greeting
+        socketTimeout: 30000,   // close after 30s of inactivity
     });
 
     return new Promise((resolve, reject) => {
