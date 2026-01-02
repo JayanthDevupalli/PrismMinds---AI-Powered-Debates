@@ -523,7 +523,7 @@ export default function Home() {
         {/* Footer */}
         <footer className="backdrop-blur-xl bg-white/30 dark:bg-slate-900/40 border-t border-slate-200/30 dark:border-slate-700/40 py-8 px-6">
           <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center text-sm text-slate-700 dark:text-slate-300 gap-3">
-            <p>© {new Date().getFullYear()} PrismMinds</p>
+            <p>&copy; {new Date().getFullYear()} PrismMinds</p>
             <div className="flex gap-6">
               <Link href="#" className="hover:text-sky-600 dark:hover:text-sky-400 transition">
                 About

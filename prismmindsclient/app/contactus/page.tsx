@@ -591,7 +591,7 @@ export default function ContactPage() {
 
 
         <footer className="text-center py-8 text-neutral-500">
-          © 2025 PrismMinds
+          &copy; {new Date().getFullYear()} PrismMinds
         </footer>
       </main>
     </>
