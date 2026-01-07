@@ -420,27 +420,77 @@ function DashboardContent() {
               </motion.button>
             </div>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button - PREMIUM NEW LOOK */}
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="sm:hidden p-2 rounded-lg bg-indigo-50 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400"
+              className="sm:hidden relative z-50 p-2 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border border-white/20 dark:border-white/10 shadow-lg text-slate-600 dark:text-slate-300 overflow-hidden"
             >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              <AnimatePresence mode="wait" initial={false}>
+                {isMobileMenuOpen ? (
+                  <motion.div
+                    key="close"
+                    initial={{ opacity: 0, rotate: -90 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    exit={{ opacity: 0, rotate: 90 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <X className="w-6 h-6" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="menu"
+                    initial={{ opacity: 0, rotate: 90 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    exit={{ opacity: 0, rotate: -90 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Menu className="w-6 h-6" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Subtle background glow */}
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-400/10 to-amber-400/10 pointer-events-none" />
             </motion.button>
           </div>
 
-          {/* Mobile Navigation Dropdown */}
+          {/* Mobile Navigation Dropdown - PREMIUM GLASS MORPHISM */}
           <AnimatePresence>
             {isMobileMenuOpen && (
               <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
+                initial={{ height: 0, opacity: 0, y: -20, filter: "blur(10px)" }}
+                animate={{
+                  height: "auto",
+                  opacity: 1,
+                  y: 0,
+                  filter: "blur(0px)",
+                  transition: {
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 30,
+                    mass: 0.8
+                  }
+                }}
+                exit={{
+                  height: 0,
+                  opacity: 0,
+                  y: -10,
+                  filter: "blur(5px)",
+                  transition: { duration: 0.2 }
+                }}
                 className="overflow-hidden sm:hidden"
               >
-                <div className="pt-4 pb-2 space-y-2 border-t border-slate-200 dark:border-slate-800 mt-4">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className="pt-4 pb-2 space-y-2 border-t border-slate-200/50 dark:border-slate-800/50 mt-4 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl p-4 shadow-xl border border-white/20"
+                >
                   <motion.button
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={async () => {
                       setIsMobileMenuOpen(false);
@@ -458,13 +508,18 @@ function DashboardContent() {
                         setTranscriptIndex(0)
                       }
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-blue-500/10 to-cyan-500/10 active:from-blue-500/20 active:to-cyan-500/20 border border-blue-100/50 dark:border-blue-900/50 text-foreground font-medium"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 active:from-blue-500/20 active:to-cyan-500/20 border border-blue-200/50 dark:border-blue-800/50 text-foreground font-medium group"
                   >
-                    <History className="w-5 h-5 text-blue-500" />
+                    <div className="p-1.5 rounded-lg bg-blue-500/20 text-blue-600 dark:text-blue-400 group-active:scale-95 transition-transform">
+                      <History className="w-5 h-5" />
+                    </div>
                     Transcripts
                   </motion.button>
 
                   <motion.button
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.15 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={async () => {
                       setIsMobileMenuOpen(false);
@@ -479,14 +534,19 @@ function DashboardContent() {
                         setCurrentView("favorites")
                       }
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-red-500/10 to-pink-500/10 active:from-red-500/20 active:to-pink-500/20 border border-red-100/50 dark:border-red-900/50 text-foreground font-medium"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-red-500/10 to-pink-500/10 active:from-red-500/20 active:to-pink-500/20 border border-red-200/50 dark:border-red-800/50 text-foreground font-medium group"
                   >
-                    <Heart className="w-5 h-5 text-red-500" />
+                    <div className="p-1.5 rounded-lg bg-red-500/20 text-red-600 dark:text-red-400 group-active:scale-95 transition-transform">
+                      <Heart className="w-5 h-5" />
+                    </div>
                     Favorites
                   </motion.button>
 
                   {currentView === "transcripts" && (
                     <motion.button
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.2 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={async () => {
                         setIsMobileMenuOpen(false);
@@ -501,7 +561,7 @@ function DashboardContent() {
                           setCurrentView("main")
                         }
                       }}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium"
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium"
                     >
                       <ArrowRight className="w-5 h-5 rotate-180" />
                       Back to Dashboard
@@ -510,6 +570,9 @@ function DashboardContent() {
 
                   {currentView === "favorites" && (
                     <motion.button
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.2 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={async () => {
                         setIsMobileMenuOpen(false);
@@ -524,7 +587,7 @@ function DashboardContent() {
                           setCurrentView("main")
                         }
                       }}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium"
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium"
                     >
                       <ArrowRight className="w-5 h-5 rotate-180" />
                       Back to Dashboard
@@ -532,18 +595,21 @@ function DashboardContent() {
                   )}
 
                   <motion.button
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.25 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={async () => {
                       setIsMobileMenuOpen(false);
                       await logout()
                       router.push("/")
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium transition-colors"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium transition-colors"
                   >
                     <ArrowLeftOnRectangleIcon className="w-5 h-5" />
                     Sign Out
                   </motion.button>
-                </div>
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
