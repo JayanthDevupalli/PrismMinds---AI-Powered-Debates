@@ -1,7 +1,7 @@
 "use client"
 
 import Head from 'next/head';
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { auth, googleProvider, db } from "@/lib/firebase"
@@ -10,9 +10,17 @@ import { sendWelcomeEmail } from "@/lib/api"
 import { doc, setDoc } from "firebase/firestore"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
-import { Mail, Lock, User, Eye, EyeOff, Check } from "lucide-react"
+import { Mail, Lock, User, Eye, EyeOff, Check, Loader2 } from "lucide-react"
 
 export default function Register() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="w-10 h-10 animate-spin text-orange-600" /></div>}>
+      <RegisterContent />
+    </Suspense>
+  )
+}
+
+function RegisterContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectUrl = searchParams.get("redirect") || "/dashboard"

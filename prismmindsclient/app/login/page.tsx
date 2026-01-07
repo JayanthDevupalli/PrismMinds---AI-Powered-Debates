@@ -1,7 +1,7 @@
 "use client"
 
 import Head from 'next/head';
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { auth, googleProvider } from "@/lib/firebase"
@@ -38,6 +38,14 @@ const getAuthErrorMessage = (error: any): string => {
 }
 
 export default function Login() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center"><div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div></div>}>
+      <LoginContent />
+    </Suspense>
+  )
+}
+
+function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectUrl = searchParams.get("redirect") || "/dashboard"

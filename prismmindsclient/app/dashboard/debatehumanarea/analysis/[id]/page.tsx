@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, Suspense } from "react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import { ArrowLeft, Sparkles, Trophy, Zap, Brain, Loader2, CheckCircle2, TrendingUp, AlertCircle, Quote, Download, Swords } from "lucide-react"
@@ -10,6 +10,14 @@ import { downloadAnalysisReportPDF } from "@/lib/pdf-generator"
 import { useAuth } from "@/lib/auth-context"
 
 export default function AnalysisPage() {
+    return (
+        <Suspense fallback={<AnalysisSkeleton />}>
+            <AnalysisContent />
+        </Suspense>
+    )
+}
+
+function AnalysisContent() {
     const { id } = useParams()
     const { user } = useAuth()
     const router = useRouter()

@@ -1,7 +1,7 @@
 "use client"
 
 import { useParams, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, Suspense } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Download, Mic, MicOff, Loader2, User, Bot, Square, Play, Zap, Check } from "lucide-react"
 import { fetchDebateById, sendHumanMessage, endHumanDebate } from "@/lib/api"
@@ -214,6 +214,14 @@ async function fallbackTyping(text: string, onChunk: (s: string) => void) {
 
 /* ====================== Main Component ====================== */
 export default function DebateArenaPage() {
+    return (
+        <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="w-10 h-10 animate-spin text-indigo-600" /></div>}>
+            <DebateArenaContent />
+        </Suspense>
+    )
+}
+
+function DebateArenaContent() {
     const { id } = useParams()
     const router = useRouter()
     const searchParams = useSearchParams()
