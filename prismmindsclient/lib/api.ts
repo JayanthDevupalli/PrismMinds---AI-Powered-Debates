@@ -481,3 +481,53 @@ export async function resetPasswordWithOtp(email: string, otp: string, newPasswo
     throw error;
   }
 }
+
+// 🔹 Challenge API
+export async function createChallenge(data: { topic: string, score: number, challengerName: string, challengerId?: string }) {
+  try {
+    const headers = await getAuthHeader();
+    const res = await fetch(`${API_URL}/../challenge/create`, {
+      method: "POST",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) throw new Error("Failed to create challenge");
+    return await res.json();
+  } catch (error) {
+    console.error("Create challenge error:", error);
+    throw error;
+  }
+}
+
+export async function getChallenge(id: string) {
+  try {
+    // Public endpoint, no auth header needed for GET (usually)
+    // But if your server requires it, add it. The route definition above didn't use `verifyFirebaseToken` for GET.
+    const res = await fetch(`${API_URL}/../challenge/${id}`);
+    if (!res.ok) throw new Error("Challenge not found");
+    return await res.json();
+  } catch (error) {
+    console.error("Get challenge error:", error);
+    throw error;
+  }
+}
+
+export async function acceptChallenge(id: string) {
+  try {
+    const headers = await getAuthHeader();
+    const res = await fetch(`${API_URL}/../challenge/${id}/accept`, {
+      method: "POST",
+      headers
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || "Failed to accept challenge");
+    }
+    return await res.json();
+  } catch (error) {
+    console.error("Accept challenge error:", error);
+    throw error;
+  }
+}

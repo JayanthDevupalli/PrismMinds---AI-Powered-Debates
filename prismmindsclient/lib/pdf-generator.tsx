@@ -246,3 +246,185 @@ export async function downloadDebateTranscriptPDF(
     alert("Failed to generate PDF. Please try again.")
   }
 }
+
+export async function downloadAnalysisReportPDF(debate: any, analysis: any, userName?: string) {
+  if (!analysis || !debate) return;
+
+  try {
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+      compress: true
+    })
+
+    // Layout Constants
+    const pageWidth = 210
+    const margin = 20
+    let y = margin
+    const contentWidth = pageWidth - (margin * 2)
+
+    // Colors
+    const colors = {
+      primary: [15, 23, 42],      // Slate-900
+      secondary: [71, 85, 105],   // Slate-600
+      accent: [79, 70, 229],      // Indigo-600
+      emerald: [16, 185, 129],    // Emerald-500
+      light: [248, 250, 252]      // Slate-50
+    }
+
+    // --- PAGE 1: OVERVIEW ---
+
+    // Header Logo
+    pdf.setFont("helvetica", "bold")
+    pdf.setFontSize(12)
+    pdf.setTextColor(colors.accent[0], colors.accent[1], colors.accent[2])
+    pdf.text("PRISMMINDS", margin, y)
+
+    // Date
+    pdf.setFont("helvetica", "normal")
+    pdf.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2])
+    const dateStr = new Date(debate.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+    pdf.text(dateStr, pageWidth - margin, y, { align: "right" })
+
+    if (userName) {
+      y += 5
+      pdf.setFontSize(10)
+      pdf.text(`Prepared for: ${userName}`, pageWidth - margin, y, { align: "right" })
+    }
+
+    y += 20
+
+    // Title
+    pdf.setFont("times", "bold")
+    pdf.setFontSize(28)
+    pdf.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2])
+    const titleLines = pdf.splitTextToSize(debate.topic, contentWidth)
+    pdf.text(titleLines, margin, y)
+    y += (titleLines.length * 10) + 10
+
+    // Overall Score Badge
+    const overallScore = Math.round((analysis.scores.logic + analysis.scores.persuasion + analysis.scores.clarity + analysis.scores.emotional_intelligence) / 4)
+
+    // Draw Badge Background
+    pdf.setFillColor(colors.light[0], colors.light[1], colors.light[2])
+    pdf.roundedRect(margin, y, contentWidth, 50, 4, 4, "F")
+
+    // Score Text inside Badge
+    pdf.setFont("helvetica", "bold")
+    pdf.setFontSize(48)
+    pdf.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2])
+    pdf.text(`${overallScore}`, margin + 20, y + 38)
+
+    pdf.setFontSize(14)
+    pdf.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2])
+    pdf.text("/ 100", margin + 55, y + 38)
+
+    pdf.setFontSize(12)
+    pdf.setTextColor(colors.accent[0], colors.accent[1], colors.accent[2])
+    pdf.text("OVERALL PERFORMANCE SCORE", margin + 20, y + 15)
+
+    y += 65
+
+    // Metric Grid (2x2)
+    const metricsY = y
+    const boxW = (contentWidth / 2) - 5
+    const boxH = 25
+
+    const drawMetric = (label: string, score: number, bx: number, by: number) => {
+      pdf.setDrawColor(226, 232, 240)
+      pdf.setFillColor(255, 255, 255)
+      pdf.roundedRect(bx, by, boxW, boxH, 2, 2, "FD")
+
+      pdf.setFontSize(10)
+      pdf.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2])
+      pdf.text(label.toUpperCase(), bx + 5, by + 16)
+
+      pdf.setFontSize(14)
+      pdf.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2])
+      pdf.text(`${score}`, bx + boxW - 10, by + 16, { align: "right" })
+    }
+
+    drawMetric("Logic", analysis.scores.logic, margin, metricsY)
+    drawMetric("Persuasion", analysis.scores.persuasion, margin + boxW + 10, metricsY)
+    drawMetric("Clarity", analysis.scores.clarity, margin, metricsY + boxH + 5)
+    drawMetric("Emotional EQ", analysis.scores.emotional_intelligence, margin + boxW + 10, metricsY + boxH + 5)
+
+    y += (boxH * 2) + 20
+
+    // Coach Feedback
+    pdf.setFont("helvetica", "bold")
+    pdf.setFontSize(14)
+    pdf.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2])
+    pdf.text("Head Coach's Insight", margin, y)
+    y += 8
+
+    pdf.setFont("times", "italic")
+    pdf.setFontSize(12)
+    pdf.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2])
+    const feedbackLines = pdf.splitTextToSize(`"${analysis.feedback.coach_note}"`, contentWidth)
+    pdf.text(feedbackLines, margin, y)
+    y += (feedbackLines.length * 6) + 15
+
+    // --- PAGE CHANGE CHECK ---
+    const checkHeight = (needed: number) => {
+      if (y + needed > 280) {
+        pdf.addPage()
+        y = margin
+      }
+    }
+
+    // Strengths
+    checkHeight(60)
+    pdf.setFont("helvetica", "bold")
+    pdf.setFontSize(14)
+    pdf.setTextColor(16, 185, 129) // Emerald for Strengths
+    pdf.text("Top Strengths", margin, y)
+    y += 8
+
+    pdf.setFont("helvetica", "normal")
+    pdf.setFontSize(11)
+    pdf.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2])
+
+    analysis.feedback.strengths.forEach((str: string) => {
+      const lines = pdf.splitTextToSize(`• ${str}`, contentWidth - 5)
+      pdf.text(lines, margin + 5, y)
+      y += (lines.length * 6) + 2
+    })
+    y += 10
+
+    // Improvements
+    checkHeight(60)
+    pdf.setFont("helvetica", "bold")
+    pdf.setFontSize(14)
+    pdf.setTextColor(245, 158, 11) // Amber for improvements
+    pdf.text("Areas to Focus On", margin, y)
+    y += 8
+
+    pdf.setFont("helvetica", "normal")
+    pdf.setFontSize(11)
+    pdf.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2])
+
+    analysis.feedback.improvements.forEach((imp: string) => {
+      const lines = pdf.splitTextToSize(`• ${imp}`, contentWidth - 5)
+      pdf.text(lines, margin + 5, y)
+      y += (lines.length * 6) + 2
+    })
+
+    // Footer
+    const totalPages = pdf.getNumberOfPages()
+    for (let i = 1; i <= totalPages; i++) {
+      pdf.setPage(i)
+      pdf.setFontSize(8)
+      pdf.setTextColor(150, 150, 150)
+      pdf.text(`PrismMinds Analysis Report - Page ${i}`, pageWidth / 2, 290, { align: 'center' })
+    }
+
+    const safeTopic = debate.topic.substring(0, 20).replace(/[^a-z0-9]/gi, "_")
+    pdf.save(`Analysis_${safeTopic}.pdf`)
+
+  } catch (e) {
+    console.error("PDF Report Gen Failed", e)
+    alert("Could not generate report PDF.")
+  }
+}

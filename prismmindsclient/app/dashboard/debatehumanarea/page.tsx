@@ -1,6 +1,6 @@
 "use client"
 
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Download, Mic, MicOff, Loader2, User, Bot, Square, Play, Zap, Check } from "lucide-react"
@@ -216,6 +216,7 @@ async function fallbackTyping(text: string, onChunk: (s: string) => void) {
 export default function DebateArenaPage() {
     const { id } = useParams()
     const router = useRouter()
+    const searchParams = useSearchParams()
     const searchId = typeof window !== "undefined" ? new URLSearchParams(location.search).get("id") : null
     const debateId = (searchId ?? id) as string
 
@@ -343,7 +344,11 @@ export default function DebateArenaPage() {
         await endHumanDebate(debate!.id)
 
         setTimeout(() => {
-            router.push(`/dashboard/debatehumanarea/analysis/${debate!.id}`)
+            const challengerScore = searchParams.get("challengerScore")
+            const challengerName = searchParams.get("challengerName")
+
+            router.push(`/dashboard/debatehumanarea/analysis/${debate!.id}?challengerScore=${challengerScore || ''}&challengerName=${encodeURIComponent(challengerName || '')}`)
+
         }, 1800) // shows animation before routing
     }
 

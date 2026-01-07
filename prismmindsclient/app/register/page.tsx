@@ -2,7 +2,7 @@
 
 import Head from 'next/head';
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { auth, googleProvider, db } from "@/lib/firebase"
 import { createUserWithEmailAndPassword, signInWithPopup, updateProfile, getAdditionalUserInfo } from "firebase/auth"
@@ -14,6 +14,9 @@ import { Mail, Lock, User, Eye, EyeOff, Check } from "lucide-react"
 
 export default function Register() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectUrl = searchParams.get("redirect") || "/dashboard"
+
   const [form, setForm] = useState({ name: "", email: "", password: "" })
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -46,7 +49,7 @@ export default function Register() {
       sendWelcomeEmail(form.email, form.name).catch(console.error)
 
 
-      router.push("/dashboard")
+      router.push(redirectUrl)
     } catch (err: any) {
       setError(
         err.code === "auth/email-already-in-use"
@@ -73,7 +76,7 @@ export default function Register() {
         sendWelcomeEmail(res.user.email || "", res.user.displayName || "User").catch(console.error)
       }
 
-      router.push("/dashboard")
+      router.push(redirectUrl)
     } catch {
       setError("Google sign-in failed")
     } finally {
@@ -96,41 +99,29 @@ export default function Register() {
         <meta name="twitter:description" content="Join the AI debate platform for free." />
         <link rel="canonical" href="https://prismminds.vercel.app/register" />
       </Head>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center p-4 overflow-hidden relative">
+      <div className="min-h-screen bg-[#fafafa] flex items-center justify-center p-4 overflow-hidden relative">
         <div className="absolute inset-0 -z-10 overflow-hidden">
           {/* Soft base glow */}
-          <div className="absolute inset-0 bg-gradient-to-br from-sky-50 via-white to-purple-50" />
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-50/40 via-[#fafafa] to-amber-50/30" />
 
-          {/* Aurora-style flowing light waves – pure 2025 magic */}
-          <motion.div
-            animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-            transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-0 opacity-40"
-            style={{
-              background: "linear-gradient(90deg, transparent 0%, #dbeafe 20%, #e0e7ff 40%, #f0abfc 60%, #fce7f3 80%, transparent 100%)",
-              backgroundSize: "300% 100%",
-              filter: "blur(80px)"
-            }}
-          />
-
-          {/* Floating pastel orbs with gentle movement */}
+          {/* Animated gradient orbs - Orange/Amber theme */}
           <motion.div
             animate={{ y: [-60, 60, -60], x: [-40, 40, -40] }}
             transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-10 left-20 w-[420px] h-[420px] bg-gradient-to-br from-blue-200/50 via-purple-200/40 to-pink-200/30 rounded-full blur-3xl"
+            className="absolute top-10 left-20 w-[420px] h-[420px] bg-gradient-to-br from-orange-300/30 via-amber-300/20 to-orange-200/20 rounded-full blur-3xl"
           />
 
           <motion.div
             animate={{ y: [40, -80, 40], x: [60, -60, 60] }}
             transition={{ duration: 38, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-10 right-10 w-[380px] h-[380px] bg-gradient-to-tl from-cyan-200/40 via-indigo-200/30 to-purple-200/40 rounded-full blur-3xl"
+            className="absolute bottom-10 right-10 w-[380px] h-[380px] bg-gradient-to-tl from-amber-300/25 via-orange-200/20 to-amber-200/25 rounded-full blur-3xl"
           />
 
           {/* Center soft glow */}
           <motion.div
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-yellow-100/30 via-purple-100/20 to-transparent rounded-full blur-3xl opacity-60"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-orange-100/20 via-amber-100/15 to-transparent rounded-full blur-3xl opacity-60"
           />
         </div>
 
@@ -140,7 +131,7 @@ export default function Register() {
           transition={{ duration: 0.6 }}
           className="w-full max-w-md"
         >
-          <div className="bg-white/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/60 p-7">
+          <div className="bg-white/90 backdrop-blur-2xl rounded-[2rem] shadow-2xl shadow-slate-900/5 border-2 border-slate-100 p-7">
             <div className="text-center mb-7">
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto shadow-lg overflow-hidden bg-transparent">
                 <img
@@ -150,53 +141,53 @@ export default function Register() {
                 />
               </div>
 
-              <h1 className="text-2xl font-bold text-gray-900 mt-4">Join PrismMinds Now</h1>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent mt-4">Join PrismMinds Now</h1>
             </div>
 
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Name Field */}
               <div className="relative">
-                <User className="absolute left-4 top-3.5 w-4 h-4 text-gray-400 pointer-events-none" />
+                <User className="absolute left-4 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
                 <input
                   required
                   type="text"
                   placeholder="Full name"
                   value={form.name}
                   onChange={e => setForm({ ...form, name: e.target.value })}
-                  className="w-full pl-11 pr-4 py-3.5 bg-gray-50/80 border border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 transition text-sm"
+                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:border-orange-400 focus:bg-white focus:ring-2 focus:ring-orange-100 transition text-sm text-slate-900"
                 />
               </div>
 
               {/* Email Field */}
               <div className="relative">
-                <Mail className="absolute left-4 top-3.5 w-4 h-4 text-gray-400 pointer-events-none" />
+                <Mail className="absolute left-4 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
                 <input
                   required
                   type="email"
                   placeholder="your@email.com"
                   value={form.email}
                   onChange={e => setForm({ ...form, email: e.target.value })}
-                  className="w-full pl-11 pr-4 py-3.5 bg-gray-50/80 border border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 transition text-sm"
+                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:border-orange-400 focus:bg-white focus:ring-2 focus:ring-orange-100 transition text-sm text-slate-900"
                 />
-                <p className="text-[10px] text-gray-500 ml-1 mt-1">Please use a valid email address that you can access.</p>
+                <p className="text-[10px] text-slate-500 ml-1 mt-1">Please use a valid email address that you can access.</p>
               </div>
 
               {/* Password Field */}
               <div className="relative">
-                <Lock className="absolute left-4 top-3.5 w-4 h-4 text-gray-400 pointer-events-none" />
+                <Lock className="absolute left-4 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
                 <input
                   required
                   type={showPass ? "text" : "password"}
                   placeholder="Create password"
                   value={form.password}
                   onChange={e => setForm({ ...form, password: e.target.value })}
-                  className="w-full pl-11 pr-12 py-3.5 bg-gray-50/80 border border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 transition text-sm"
+                  className="w-full pl-11 pr-12 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:border-orange-400 focus:bg-white focus:ring-2 focus:ring-orange-100 transition text-sm text-slate-900"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
-                  className="absolute right-4 top-3.5 text-gray-400 hover:text-gray-700"
+                  className="absolute right-4 top-3.5 text-slate-400 hover:text-orange-600 transition-colors"
                 >
                   {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -206,7 +197,7 @@ export default function Register() {
               {form.password && (
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   {checks.map((c, i) => (
-                    <div key={i} className={`flex items-center gap-1.5 ${c.test ? "text-emerald-600" : "text-gray-400"}`}>
+                    <div key={i} className={`flex items-center gap-1.5 ${c.test ? "text-orange-600" : "text-slate-400"}`}>
                       <Check className="w-3.5 h-3.5" />
                       {c.text}
                     </div>
@@ -223,22 +214,22 @@ export default function Register() {
               <Button
                 type="submit"
                 disabled={loading || passed < 3}
-                className="w-full h-11 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-xl shadow-lg transition-all disabled:opacity-50"
+                className="w-full h-11 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 hover:shadow-xl hover:shadow-orange-500/30 transition-all disabled:opacity-50"
               >
                 {loading ? "Creating..." : "Create Account"}
               </Button>
             </form>
 
             <div className="my-5 flex items-center gap-3">
-              <div className="flex-1 h-px bg-gray-200" />
-              <span className="text-xs text-gray-500">or</span>
-              <div className="flex-1 h-px bg-gray-200" />
+              <div className="flex-1 h-px bg-slate-200" />
+              <span className="text-xs text-slate-400">or</span>
+              <div className="flex-1 h-px bg-slate-200" />
             </div>
 
             <Button
               onClick={googleSignIn}
               disabled={loading}
-              className="w-full h-11 bg-white border border-gray-300 hover:border-gray-400 rounded-xl text-gray-800 font-medium flex items-center justify-center gap-3 shadow-sm hover:shadow transition-all duration-200"
+              className="w-full h-11 bg-white border-2 border-slate-200 hover:border-orange-200 rounded-xl text-slate-700 font-medium flex items-center justify-center gap-3 shadow-sm hover:shadow-md transition-all duration-200"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -249,9 +240,9 @@ export default function Register() {
               Continue with Google
             </Button>
 
-            <p className="text-center text-md text-gray-600 mt-5">
+            <p className="text-center text-md text-slate-600 mt-5">
               Already have an account?{" "}
-              <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-700">
+              <Link href="/login" className="font-bold text-orange-600 hover:text-orange-700 transition-colors">
                 Sign in
               </Link>
             </p>

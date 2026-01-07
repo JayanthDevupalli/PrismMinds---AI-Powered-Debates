@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { fetchRecentDebates, createDebate, createHumanDebate, deleteDebate, fetchFavorites, addFavorite, removeFavorite } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline"
@@ -76,11 +76,25 @@ export default function DashboardPage() {
   const [statusMessage, setStatusMessage] = useState("")
   const [greeting, setGreeting] = useState("Good Morning")
 
+
   useEffect(() => {
     const hour = new Date().getHours()
     const msg = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening"
     setGreeting(msg)
   }, [])
+
+  const searchParams = useSearchParams()
+  const initialTopic = searchParams.get("initialTopic")
+  const challengerScore = searchParams.get("challengerScore")
+  const challengerName = searchParams.get("challengerName")
+
+  useEffect(() => {
+    if (initialTopic) {
+      setDebateMode("human")
+      setHumanDebateTopic(initialTopic)
+    }
+  }, [initialTopic])
+
 
   const filteredDebates = recentDebates.filter(
     (debate) =>
@@ -246,7 +260,7 @@ export default function DashboardPage() {
         throw new Error("Couldn't retrieve the created debate from server")
       }
 
-      router.push(`dashboard/debatehumanarea?id=${createdDebate.id}`)
+      router.push(`dashboard/debatehumanarea?id=${createdDebate.id}&challengerScore=${challengerScore || ''}&challengerName=${encodeURIComponent(challengerName || '')}`)
       setHumanDebateTopic("")
     } catch (err: any) {
       console.error("Human debate creation error:", err)
@@ -272,19 +286,19 @@ export default function DashboardPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-500/20">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50/30 to-orange-50 text-slate-900 dark:text-slate-100 font-sans selection:bg-orange-500/20">
 
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 z-40 backdrop-blur-xl border-b border-indigo-100/50 bg-white/80 dark:bg-slate-900/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]"
+        className="sticky top-0 z-40 backdrop-blur-xl border-b border-orange-100/50 bg-white/80 dark:bg-slate-900/80 shadow-[0_4px_20px_-4px_rgba(251,146,60,0.1)]"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex justify-between items-center gap-3">
             {/* Logo Section */}
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-              <p className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest flex items-center gap-2 mb-1">
+              <p className="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-widest flex items-center gap-2 mb-1">
                 <Globe className="w-3.5 h-3.5" />
                 <span className="opacity-50">|</span>
                 <SparklesIcon className="w-3.5 h-3.5" />
@@ -315,7 +329,7 @@ export default function DashboardPage() {
                     setTranscriptIndex(0)
                   }
                 }}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 border border-border/50 transition-all text-sm font-medium text-foreground"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500/20 to-amber-500/20 hover:from-orange-500/30 hover:to-amber-500/30 border border-orange-200/50 transition-all text-sm font-medium text-foreground"
                 title="View all transcripts"
               >
                 <History className="w-4 h-4 flex-shrink-0" />
@@ -539,10 +553,10 @@ export default function DashboardPage() {
           >
             <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
               <div className="flex items-start gap-2 sm:gap-3 mb-2">
-                <span className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-lg sm:text-xl flex-shrink-0">
+                <span className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-lg sm:text-xl flex-shrink-0">
                   <ScrollText className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent break-words">
+                <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent break-words">
                   All Transcripts
                 </h2>
               </div>
@@ -559,7 +573,7 @@ export default function DashboardPage() {
               placeholder="Search debates..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 sm:px-5 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl border border-border/50 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm placeholder:text-muted-foreground font-medium"
+              className="w-full px-4 sm:px-5 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl border border-slate-200/50 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all text-sm placeholder:text-muted-foreground font-medium"
             />
 
             {/* Transcripts Pagination */}
@@ -569,8 +583,8 @@ export default function DashboardPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="text-center py-12 sm:py-16 px-4 sm:px-6 rounded-xl sm:rounded-2xl border-2 border-dashed border-border/30"
               >
-                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-                  <History className="w-6 h-6 sm:w-8 sm:h-8 text-primary/50" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center">
+                  <History className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500/50" />
                 </div>
                 <p className="text-xs sm:text-sm text-muted-foreground">
                   {searchQuery ? "No debates match your search" : "No debates yet"}
@@ -597,7 +611,7 @@ export default function DashboardPage() {
                       disabled={transcriptIndex === 0}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="px-3 py-2 rounded-lg bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/50 hover:from-primary/30 hover:to-accent/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all font-medium text-sm"
+                      className="px-3 py-2 rounded-lg bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/50 hover:from-orange-500/30 hover:to-amber-500/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all font-medium text-sm"
                     >
                       ← Prev
                     </motion.button>
@@ -606,7 +620,7 @@ export default function DashboardPage() {
                       disabled={transcriptIndex + 5 >= filteredDebates.length}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="px-3 py-2 rounded-lg bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/50 hover:from-primary/30 hover:to-accent/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all font-medium text-sm"
+                      className="px-3 py-2 rounded-lg bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/50 hover:from-orange-500/30 hover:to-amber-500/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all font-medium text-sm"
                     >
                       Next →
                     </motion.button>
@@ -633,24 +647,24 @@ export default function DashboardPage() {
                           damping: 25,
                           delay: idx * 0.08
                         }}
-                        className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 hover:shadow-lg hover:border-indigo-500/30 transition-all cursor-pointer group"
+                        className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 hover:shadow-lg hover:border-orange-500/30 transition-all cursor-pointer group"
                         onClick={() => setSelectedDebate(debate)}
                       >
                         <div className="flex items-start justify-between gap-2 sm:gap-3">
                           <div className="flex-1 min-w-0">
-                            <h3 className="text-sm sm:text-base font-bold text-foreground transition-colors mb-1 line-clamp-2 group-hover:text-primary">
+                            <h3 className="text-sm sm:text-base font-bold text-foreground transition-colors mb-1 line-clamp-2 group-hover:text-orange-600">
                               {debate.topic}
                             </h3>
                             <p className="text-xs text-muted-foreground mb-2 break-words">
-                              <span className="font-semibold text-primary">{debate.personaA}</span>
+                              <span className="font-semibold text-orange-600">{debate.personaA}</span>
                               <span className="mx-1">vs</span>
-                              <span className="font-semibold text-accent">{debate.personaB}</span>
+                              <span className="font-semibold text-amber-600">{debate.personaB}</span>
                             </p>
                             <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
                               <span className="text-xs text-muted-foreground whitespace-nowrap" suppressHydrationWarning>
                                 📅 {new Date(debate.createdAt).toLocaleDateString()}
                               </span>
-                              <span className="text-xs bg-gradient-to-r from-primary/20 to-accent/20 text-primary font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
+                              <span className="text-xs bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
                                 ⏱️ {debate.duration}min
                               </span>
                             </div>
@@ -767,19 +781,19 @@ export default function DashboardPage() {
                     >
                       <div className="flex items-start justify-between gap-2 sm:gap-3">
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-sm sm:text-base font-bold text-foreground transition-colors mb-1 line-clamp-2 group-hover:text-primary">
+                          <h3 className="text-sm sm:text-base font-bold text-foreground transition-colors mb-1 line-clamp-2 group-hover:text-orange-600">
                             {debate.topic}
                           </h3>
                           <p className="text-xs text-muted-foreground mb-2 break-words">
-                            <span className="font-semibold text-primary">{debate.personaA}</span>
+                            <span className="font-semibold text-orange-600">{debate.personaA}</span>
                             <span className="mx-1">vs</span>
-                            <span className="font-semibold text-accent">{debate.personaB}</span>
+                            <span className="font-semibold text-amber-600">{debate.personaB}</span>
                           </p>
                           <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
                             <span className="text-xs text-muted-foreground whitespace-nowrap" suppressHydrationWarning>
                               📅 {new Date(debate.createdAt).toLocaleDateString()}
                             </span>
-                            <span className="text-xs bg-gradient-to-r from-primary/20 to-accent/20 text-primary font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
+                            <span className="text-xs bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
                               ⏱️ {debate.duration}min
                             </span>
                           </div>
@@ -850,7 +864,7 @@ export default function DashboardPage() {
                     whileTap={{ scale: 0.97 }}
                     className={`px-5 py-2 rounded-full text-sm font-semibold transition-all
       ${debateMode === "ai"
-                        ? "bg-gradient-to-r from-primary to-accent text-white shadow-md"
+                        ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md"
                         : "text-muted-foreground hover:text-foreground"
                       }`}
                   >
@@ -892,7 +906,7 @@ export default function DashboardPage() {
                     >
                       <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/60 dark:border-slate-800 p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow duration-500">
                         <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                          <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-base sm:text-lg flex-shrink-0">
+                          <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-base sm:text-lg flex-shrink-0">
                             <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                           </span>
                           Start a New Debate
@@ -967,7 +981,7 @@ export default function DashboardPage() {
                             whileTap={{ scale: 0.98 }}
                             type="submit"
                             disabled={creating}
-                            className="w-full py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-blue-500 via-sky-500 to-primary bg-size-200 hover:bg-pos-right text-white font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 text-sm sm:text-base"
+                            className="w-full py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 bg-size-200 hover:bg-pos-right text-white font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/20 hover:shadow-xl hover:shadow-orange-500/30 text-sm sm:text-base"
                           >
                             {creating ? (
                               <span className="flex items-center justify-center gap-2">
@@ -992,7 +1006,7 @@ export default function DashboardPage() {
                     {/* Debates Grid */}
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
                       <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                        <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-secondary to-accent flex items-center justify-center text-base sm:text-lg flex-shrink-0">
+                        <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-base sm:text-lg flex-shrink-0">
                           <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                         </span>
                         Recent Debates
@@ -1013,8 +1027,8 @@ export default function DashboardPage() {
                           animate={{ opacity: 1, scale: 1 }}
                           className="text-center py-12 sm:py-16 px-4 sm:px-6 rounded-lg sm:rounded-2xl border-2 border-dashed border-border/30"
                         >
-                          <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-                            <SparklesIcon className="w-6 h-6 sm:w-8 sm:h-8 text-primary/50" />
+                          <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center">
+                            <SparklesIcon className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500/50" />
                           </div>
                           <p className="text-xs sm:text-sm text-muted-foreground">
                             No debates created yet. Start one to begin!
@@ -1040,10 +1054,10 @@ export default function DashboardPage() {
                                   onClick={() => setSelectedDebate(debate)}
                                   whileHover={{ y: -4 }}
                                   whileTap={{ scale: 0.98 }}
-                                  className="h-48 sm:h-60 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-5 cursor-pointer transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:hover:shadow-indigo-900/20 hover:border-indigo-500/30 flex flex-col justify-between overflow-hidden relative group"
+                                  className="h-48 sm:h-60 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-5 cursor-pointer transition-all duration-300 hover:shadow-[0_8px_30px_rgba(251,146,60,0.15)] dark:hover:shadow-orange-900/20 hover:border-orange-500/30 flex flex-col justify-between overflow-hidden relative group"
                                 >
                                   {/* Subtle grain or gradient overlay could go here */}
-                                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110" />
+                                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-500/5 to-amber-500/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110" />
 
                                   <div className="relative z-10">
                                     <div className="flex items-start justify-between mb-2 sm:mb-3">
@@ -1090,13 +1104,13 @@ export default function DashboardPage() {
                                       </div>
                                     </div>
 
-                                    <h3 className="text-base sm:text-lg font-bold mb-1 sm:mb-2 line-clamp-2 text-foreground group-hover:text-primary transition-colors">
+                                    <h3 className="text-base sm:text-lg font-bold mb-1 sm:mb-2 line-clamp-2 text-foreground group-hover:text-orange-600 transition-colors">
                                       {debate.topic}
                                     </h3>
                                     <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
-                                      <span className="font-semibold text-primary">{debate.personaA}</span>
+                                      <span className="font-semibold text-orange-600">{debate.personaA}</span>
                                       <span className="mx-1">vs</span>
-                                      <span className="font-semibold text-accent">{debate.personaB}</span>
+                                      <span className="font-semibold text-amber-600">{debate.personaB}</span>
                                     </p>
                                   </div>
 
@@ -1477,18 +1491,18 @@ export default function DashboardPage() {
                       </h2>
 
                       <div className="flex flex-wrap items-center gap-2 mb-4">
-                        <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-indigo-50/50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20">
-                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
-                          <span className="text-[11px] sm:text-xs font-semibold text-indigo-600 dark:text-indigo-300 truncate max-w-[100px] sm:max-w-none">
+                        <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-orange-50/50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20">
+                          <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                          <span className="text-[11px] sm:text-xs font-semibold text-orange-600 dark:text-orange-300 truncate max-w-[100px] sm:max-w-none">
                             {selectedDebate.personaA}
                           </span>
                         </div>
 
                         <span className="text-slate-300 dark:text-slate-600 text-[10px] font-medium">VS</span>
 
-                        <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-pink-50/50 dark:bg-pink-500/10 border border-pink-100 dark:border-pink-500/20">
-                          <span className="w-1.5 h-1.5 rounded-full bg-pink-500"></span>
-                          <span className="text-[11px] sm:text-xs font-semibold text-pink-600 dark:text-pink-300 truncate max-w-[100px] sm:max-w-none">
+                        <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-teal-50/50 dark:bg-teal-500/10 border border-teal-100 dark:border-teal-500/20">
+                          <span className="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
+                          <span className="text-[11px] sm:text-xs font-semibold text-teal-600 dark:text-teal-300 truncate max-w-[100px] sm:max-w-none">
                             {selectedDebate.personaB}
                           </span>
                         </div>
@@ -1520,7 +1534,7 @@ export default function DashboardPage() {
                       <div className="w-full mt-3 group">
                         <div className="w-full h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                           <motion.div
-                            className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-80 group-hover:opacity-100 transition-opacity"
+                            className="h-full bg-gradient-to-r from-orange-500 via-purple-500 to-teal-500 opacity-80 group-hover:opacity-100 transition-opacity"
                             style={{ width: `${scrollProgress}%` }}
                             transition={{ type: "tween", duration: 0.2 }}
                           />
@@ -1529,7 +1543,7 @@ export default function DashboardPage() {
                     )}
 
                     {generating && statusMessage && (
-                      <motion.div className="mt-2 text-[10px] font-medium text-indigo-500 flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/10 px-2 py-1 rounded-md w-fit">
+                      <motion.div className="mt-2 text-[10px] font-medium text-orange-600 flex items-center gap-2 bg-orange-50 dark:bg-orange-900/10 px-2 py-1 rounded-md w-fit">
                         <Loader2 className="w-3 h-3 animate-spin" />
                         {statusMessage}
                       </motion.div>
@@ -1608,7 +1622,7 @@ export default function DashboardPage() {
                                 className="flex items-center gap-3 sm:gap-4 my-4 sm:my-8"
                               >
                                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent"></div>
-                                <span className="text-xs font-bold text-primary/70 uppercase tracking-widest px-2.5 sm:px-3 py-1 sm:py-1.5 bg-primary/5 rounded-full border border-primary/20 whitespace-nowrap flex items-center gap-1.5">
+                                <span className="text-xs font-bold text-purple-600/70 uppercase tracking-widest px-2.5 sm:px-3 py-1 sm:py-1.5 bg-purple-500/5 rounded-full border border-purple-500/20 whitespace-nowrap flex items-center gap-1.5">
                                   {message.phase === "opening" ? (
                                     <>
                                       <Mic2 className="w-3.5 h-3.5" />
@@ -1638,12 +1652,12 @@ export default function DashboardPage() {
                               className={`flex gap-3 ${message.speaker === selectedDebate.personaA ? "justify-start" : "justify-end"}`}
                             >
                               {message.speaker === selectedDebate.personaA && (
-                                <div className="w-8 h-8 rounded-lg bg-primary/20 text-primary flex items-center justify-center flex-shrink-0 font-bold text-xs">P1</div>
+                                <div className="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-600 flex items-center justify-center flex-shrink-0 font-bold text-xs">P1</div>
                               )}
                               <div
                                 className={`max-w-xs sm:max-w-sm p-3 sm:p-4 rounded-lg sm:rounded-2xl ${message.speaker === selectedDebate.personaA
-                                  ? "bg-white dark:bg-slate-800 text-foreground rounded-tl-none border border-primary/20"
-                                  : "bg-gradient-to-br from-primary to-accent text-white rounded-tr-none shadow-lg"
+                                  ? "bg-white dark:bg-slate-800 text-foreground rounded-tl-none border border-orange-500/20"
+                                  : "bg-gradient-to-br from-teal-500 to-cyan-500 text-white rounded-tr-none shadow-lg"
                                   }`}
                               >
                                 <div className="flex items-center justify-between mb-1 sm:mb-2 pb-1 sm:pb-2 border-b border-current/10">
@@ -1662,7 +1676,7 @@ export default function DashboardPage() {
                                 <p className="text-xs sm:text-sm leading-relaxed">{message.message}</p>
                               </div>
                               {message.speaker === selectedDebate.personaB && (
-                                <div className="w-8 h-8 rounded-lg bg-accent/20 text-accent flex items-center justify-center flex-shrink-0 font-bold text-xs">P2</div>
+                                <div className="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-600 flex items-center justify-center flex-shrink-0 font-bold text-xs">P2</div>
                               )}
                             </motion.div>
                           </motion.div>
@@ -1675,18 +1689,18 @@ export default function DashboardPage() {
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="mt-8 p-4 sm:p-6 rounded-lg sm:rounded-2xl bg-gradient-to-br from-secondary/10 via-accent/5 to-primary/5 border border-secondary/30 dark:border-accent/30 shadow-lg"
+                        className="mt-8 p-4 sm:p-6 rounded-lg sm:rounded-2xl bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-blue-500/5 border border-blue-500/30 dark:border-purple-500/30 shadow-lg"
                       >
                         <div className="flex items-start gap-3 mb-3">
-                          <BarChart3 className="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
+                          <BarChart3 className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                           <h3 className="text-sm sm:text-base font-bold text-foreground">Debate Summary</h3>
                         </div>
                         <p className="text-xs sm:text-sm leading-relaxed text-foreground/85 mb-4">{selectedDebate.summary}</p>
 
                         {/* Key Takeaways */}
                         {selectedDebate.debate_metrics?.key_themes && selectedDebate.debate_metrics.key_themes.length > 0 && (
-                          <div className="mt-4 pt-4 border-t border-secondary/20">
-                            <h4 className="text-xs font-bold text-secondary mb-3 uppercase tracking-widest">Key Themes</h4>
+                          <div className="mt-4 pt-4 border-t border-orange-500/20">
+                            <h4 className="text-xs font-bold text-orange-600 mb-3 uppercase tracking-widest">Key Themes</h4>
                             <div className="flex flex-wrap gap-2">
                               {selectedDebate.debate_metrics.key_themes.slice(0, 5).map((theme, i) => (
                                 <motion.div
@@ -1694,9 +1708,9 @@ export default function DashboardPage() {
                                   initial={{ opacity: 0, scale: 0.9 }}
                                   animate={{ opacity: 1, scale: 1 }}
                                   transition={{ delay: i * 0.1 }}
-                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-secondary/20 border border-secondary/30 rounded-full text-xs font-medium text-secondary"
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-500/20 border border-orange-500/30 rounded-full text-xs font-medium text-orange-600"
                                 >
-                                  <span className="w-1.5 h-1.5 bg-secondary rounded-full" />
+                                  <span className="w-1.5 h-1.5 bg-orange-600 rounded-full" />
                                   {theme}
                                 </motion.div>
                               ))}
@@ -1706,8 +1720,8 @@ export default function DashboardPage() {
 
                         {/* Phase Statistics */}
                         {selectedDebate.debate_metrics?.exchanges_per_phase && (
-                          <div className="mt-4 pt-4 border-t border-secondary/20">
-                            <h4 className="text-xs font-bold text-secondary mb-3 uppercase tracking-widest">Exchanges by Phase</h4>
+                          <div className="mt-4 pt-4 border-t border-orange-500/20">
+                            <h4 className="text-xs font-bold text-orange-600 mb-3 uppercase tracking-widest">Exchanges by Phase</h4>
                             <div className="grid grid-cols-3 gap-2">
                               <div className="text-center p-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-primary/20">
                                 <div className="text-xs text-muted-foreground">Opening</div>

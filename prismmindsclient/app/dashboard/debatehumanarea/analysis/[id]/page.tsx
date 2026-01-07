@@ -1,15 +1,19 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useEffect, useState, useRef } from "react"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
-import { ArrowLeft, Sparkles, Trophy, Zap, Brain, Loader2, CheckCircle2, TrendingUp, Share2, AlertCircle, Quote } from "lucide-react"
+import { ArrowLeft, Sparkles, Trophy, Zap, Brain, Loader2, CheckCircle2, TrendingUp, AlertCircle, Quote, Download, Swords } from "lucide-react"
 import { fetchDebateById, generateAnalysis } from "@/lib/api"
 import confetti from "canvas-confetti"
+import { downloadAnalysisReportPDF } from "@/lib/pdf-generator"
+import { useAuth } from "@/lib/auth-context"
 
 export default function AnalysisPage() {
     const { id } = useParams()
+    const { user } = useAuth()
     const router = useRouter()
+    const searchParams = useSearchParams()
     const [debate, setDebate] = useState<any>(null)
     const [analysis, setAnalysis] = useState<any>(null)
     const [generating, setGenerating] = useState(false)
@@ -42,6 +46,8 @@ export default function AnalysisPage() {
         setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000)
     }
 
+
+
     const handleGenerate = async () => {
         setGenerating(true)
         try {
@@ -60,11 +66,14 @@ export default function AnalysisPage() {
         }
     }
 
-    const handleShare = () => {
-        if (!analysis) return
-        const text = `🚀 Debate Performance Audit: ${overallScore}/100\n\n🧠 Logic: ${analysis.scores.logic}\n⚡ Persuasion: ${analysis.scores.persuasion}\n💎 Clarity: ${analysis.scores.clarity}\n❤️ EQ: ${analysis.scores.emotional_intelligence}\n\nCheck out my full breakdown on PrismMinds!`
-        navigator.clipboard.writeText(text)
-        showToast("Analysis summary copied to clipboard!")
+
+
+    const handleDownloadPDF = () => {
+        if (!analysis || !debate) return
+        // Use user.displayName or a fallback
+        const userName = user?.displayName || "Debater"
+        downloadAnalysisReportPDF(debate, analysis, userName)
+        showToast("Downloading full report...", "success")
     }
 
     if (loading) return <AnalysisSkeleton />
@@ -73,6 +82,9 @@ export default function AnalysisPage() {
     const overallScore = analysis?.scores
         ? Math.round((analysis.scores.logic + analysis.scores.persuasion + analysis.scores.clarity + analysis.scores.emotional_intelligence) / 4)
         : 0
+
+    const challengerScore = searchParams.get("challengerScore")
+    const challengerName = searchParams.get("challengerName")
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-emerald-100 pb-20">
@@ -194,6 +206,56 @@ export default function AnalysisPage() {
                 ) : (
                     // State: Analysis Results
                     <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 space-y-8">
+
+                        {/* Comparison Card */}
+                        {challengerScore && (
+                            <motion.div
+                                initial={{ y: -20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl border border-indigo-500/30"
+                            >
+                                {/* Ambient Glow */}
+                                <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/20 rounded-full blur-[120px] -mr-32 -mt-32 mix-blend-screen animate-pulse-slow"></div>
+                                <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] -ml-32 -mb-32 mix-blend-screen"></div>
+
+                                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                                    <div className="text-center md:text-left">
+                                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 mb-4 backdrop-blur-md">
+                                            <Swords className="w-4 h-4" />
+                                            <span className="text-xs font-bold uppercase tracking-widest">Challenge Results</span>
+                                        </div>
+
+                                        <h2 className="text-3xl md:text-4xl font-black text-white mb-2 tracking-tight">
+                                            {Number(overallScore) > Number(challengerScore) ? "Victory! You won! 🎉" : Number(overallScore) === Number(challengerScore) ? "It's a Tie! 🤝" : "Nice Try! 🛡️"}
+                                        </h2>
+                                        <p className="text-indigo-200 font-medium text-lg max-w-lg">
+                                            {Number(overallScore) > Number(challengerScore)
+                                                ? `Incredible! You outperformed ${challengerName} by ${Number(overallScore) - Number(challengerScore)} points.`
+                                                : `So close! You were just ${Number(challengerScore) - Number(overallScore)} points shy of beating ${challengerName}.`}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center gap-0 bg-white/5 rounded-2xl border border-white/10 p-2 backdrop-blur-md">
+                                        {/* Challenger */}
+                                        <div className="px-8 py-4 text-center border-r border-white/10 opacity-70">
+                                            <div className="text-xs font-bold text-indigo-300 uppercase tracking-wider mb-2">{challengerName}</div>
+                                            <div className="text-3xl font-black text-white">{challengerScore}</div>
+                                        </div>
+
+                                        {/* User */}
+                                        <div className="px-8 py-4 text-center bg-gradient-to-b from-emerald-500/20 to-emerald-500/5 rounded-xl border border-emerald-500/30 shadow-lg transform scale-105 relative overflow-hidden">
+                                            <div className="absolute inset-0 bg-emerald-400/10 blur-xl"></div>
+                                            <div className="relative z-10">
+                                                <div className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">You</div>
+                                                <div className="text-4xl font-black text-white">
+                                                    {overallScore}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
 
                         {/* 1. Hero Analytics Section */}
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
@@ -347,12 +409,46 @@ export default function AnalysisPage() {
 
 
                         {/* Footer */}
-                        <div className="flex justify-center pt-8 pb-12">
+
+                        {/* Footer Actions */}
+                        <div className="md:col-span-12 flex justify-center pt-8 pb-12 gap-4">
                             <button
-                                onClick={handleShare}
-                                className="flex items-center gap-2 px-6 py-3 rounded-full bg-slate-200/50 border border-slate-200 text-slate-500 font-medium hover:bg-white hover:text-emerald-600 hover:border-emerald-200 hover:shadow-md transition-all active:scale-95"
+                                onClick={handleDownloadPDF}
+                                className="flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-slate-900 text-white font-bold hover:bg-slate-800 hover:scale-[1.02] shadow-xl hover:shadow-2xl transition-all active:scale-95"
                             >
-                                <Share2 className="w-4 h-4" /> Share Summary
+                                <Download className="w-5 h-5" />
+                                Download Full Report
+                            </button>
+
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        showToast("Creating unique challenge link...", "success")
+                                        const { createChallenge } = await import("@/lib/api")
+
+                                        const result = await createChallenge({
+                                            topic: debate?.topic,
+                                            score: overallScore,
+                                            challengerName: user?.displayName || "A Debater",
+                                            challengerId: user?.uid
+                                        })
+
+                                        if (result.success && result.id) {
+                                            const url = `${window.location.origin}/challenge?id=${result.id}`
+                                            await navigator.clipboard.writeText(url)
+                                            showToast("Secure Challenge Link Copied! Good for 7 days.")
+                                        } else {
+                                            throw new Error("Failed to create challenge")
+                                        }
+                                    } catch (e) {
+                                        console.error(e)
+                                        showToast("Failed to create challenge link", "error")
+                                    }
+                                }}
+                                className="flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold hover:shadow-lg hover:shadow-orange-500/20 hover:scale-[1.02] transition-all active:scale-95"
+                            >
+                                <Swords className="w-5 h-5" />
+                                Challenge Friends
                             </button>
                         </div>
 
@@ -506,7 +602,7 @@ function AnalysisSkeleton() {
         <div className="min-h-screen bg-slate-50 flex items-center justify-center">
             <div className="flex flex-col items-center gap-4">
                 <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
-                <p className="text-slate-500 font-medium">Loading debate...</p>
+                <p className="text-slate-500 font-medium">Loading analysis...</p>
             </div>
         </div>
     )

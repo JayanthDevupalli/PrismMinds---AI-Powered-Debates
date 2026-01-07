@@ -516,17 +516,32 @@ ${transcriptText}
    - **Low Effort**: If the user only said "ok", "cool", or "hello", they should receive a **LOW score (e.g., 5-15)** based on lack of substance, but **NOT necessarily 0** if it was a coherent response.
    - **Non-sequiturs**: If the response is total gibberish (e.g. "asdf"), score 0.
 
-2. **Argument Depth**:
-   - Count the number of distinct, substantive points made by the user.
-   - 0 substantive points = Score 10-30
-   - 1-2 points = Score 40-60
-   - 3+ strong points = Score 70+
+2. **Combined Scoring Matrix (STRICT CONSISTENCY)**:
+   The final score MUST align with BOTH the Argument Depth and Debate Proficiency. Use the lowest bracket that applies.
 
-3. **Rubric**:
-   - **Logic**: Did they provide evidence and reasoning?
-   - **Persuasion**: Did they use rhetoric, analogies, or emotional appeals?
-   - **Clarity**: Was their argument structured?
-   - **Emotional Intelligence (EQ)**: Did they acknowledge the opponent's points?
+   - **Tier 1: Novice (Score 0-40)**
+     - *Depth*: Made 0-3 substantive points.
+     - *Proficiency*: Mostly assertions/opinion, little evidence, repetitive.
+
+   - **Tier 2: Competent (Score 40-70)**
+     - *Depth*: Made 4-6 substantive points.
+     - *Proficiency*: Clear arguments, attempts rebuttal, some logical grounding.
+
+   - **Tier 3: Proficient (Score 70-90)**
+     - *Depth*: Made 7+ substantive points.
+     - *Proficiency*: Strong evidence, direct refutation, good structure.
+
+   - **Tier 4: Mastery (Score 90-100)**
+     - *Depth*: Made 7+ substantive points (deeply developed).
+     - *Proficiency*: Exceptional rhetoric, nuanced synthesis, strategic framing.
+
+   *Example*: If a user makes 7 points (Tier 3 Quantity) but has poor logic (Tier 1 Quality), the score is capped at **Tier 2 (max 50-60)**.
+
+3. **Rubric Categories**:
+   - **Logic (0-100)**: Evidence, reasoning chains, and valid premises.
+   - **Persuasion (0-100)**: Rhetoric, emotional appeals (Pathos), and credibility (Ethos).
+   - **Clarity (0-100)**: Structure, conciseness, and articulation.
+   - **Emotional Intelligence (0-100)**: Acknowledging opponent, tone management, and intellectual honesty.
 
 OUTPUT FORMAT (STRICT JSON ONLY):
 {
