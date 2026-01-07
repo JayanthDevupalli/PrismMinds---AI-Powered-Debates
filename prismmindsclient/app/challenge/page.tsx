@@ -135,7 +135,7 @@ function ChallengeContent() {
                     initial={{ y: -20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.2 }}
-                    className="flex justify-center mb-6"
+                    className="flex justify-center mb-4"
                 >
                     <div className="bg-white p-1 rounded-full shadow-lg shadow-orange-500/10 border border-orange-100">
                         <div className="bg-orange-50 px-4 py-1.5 rounded-full flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-orange-600">
@@ -146,7 +146,7 @@ function ChallengeContent() {
                 </motion.div>
 
                 {/* Main Card */}
-                <div className="bg-white border border-slate-100/80 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
+                <div className="bg-white border border-slate-100/80 rounded-[2.5rem] p-6 md:p-8 shadow-2xl relative overflow-hidden group">
 
                     {/* Glow Effects */}
                     <div className="absolute -top-20 -right-20 w-40 h-40 bg-orange-500/10 blur-[60px] rounded-full group-hover:bg-orange-500/20 transition-colors"></div>
@@ -154,7 +154,7 @@ function ChallengeContent() {
                     <div className="relative z-10 text-center">
 
                         {/* Avatar / Icon */}
-                        <div className="mx-auto w-24 h-24 rounded-full bg-white border-4 border-slate-50 shadow-xl flex items-center justify-center mb-6 relative">
+                        <div className="mx-auto w-24 h-24 rounded-full bg-white border-4 border-slate-50 shadow-xl flex items-center justify-center mb-4 relative">
                             <div className="w-full h-full rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white">
                                 <User className="w-10 h-10" />
                             </div>
@@ -166,12 +166,12 @@ function ChallengeContent() {
                         <h1 className="text-2xl font-bold text-slate-900 mb-2">
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">{challenge?.challengerName}</span> challenged you!
                         </h1>
-                        <p className="text-slate-500 text-sm mb-8 font-medium">
+                        <p className="text-slate-500 text-sm mb-6 font-medium">
                             Think you can beat their debate performance?
                         </p>
 
                         {/* Vs Block */}
-                        <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 mb-8 relative">
+                        <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 mb-6 relative">
                             <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Topic</div>
                             <div className="text-lg font-bold text-slate-800 leading-relaxed mb-6 line-clamp-2">
                                 "{challenge?.topic}"

@@ -1317,7 +1317,7 @@ function DashboardContent() {
                     {/* Human Mode Recent Debates Grid */}
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
                       <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                        <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-secondary to-accent flex items-center justify-center text-base sm:text-lg flex-shrink-0">
+                        <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-base sm:text-lg flex-shrink-0">
                           <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                         </span>
                         Recent Debates
@@ -1419,9 +1419,9 @@ function DashboardContent() {
                                       {debate.topic}
                                     </h3>
                                     <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
-                                      <span className="font-semibold text-primary">{debate.personaA}</span>
-                                      <span className="mx-1">vs</span>
-                                      <span className="font-semibold text-accent">{debate.personaB}</span>
+                                      <span className="font-semibold text-slate-700 dark:text-slate-200">{debate.personaA}</span>
+                                      <span className="mx-1 text-slate-400 font-medium">vs</span>
+                                      <span className="font-semibold text-sky-600 dark:text-sky-400">{debate.personaB}</span>
                                     </p>
                                   </div>
 

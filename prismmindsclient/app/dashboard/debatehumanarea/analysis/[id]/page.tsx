@@ -419,10 +419,10 @@ function AnalysisContent() {
                         {/* Footer */}
 
                         {/* Footer Actions */}
-                        <div className="md:col-span-12 flex justify-center pt-8 pb-12 gap-4">
+                        <div className="md:col-span-12 flex flex-col sm:flex-row justify-center items-center pt-8 pb-12 gap-4">
                             <button
                                 onClick={handleDownloadPDF}
-                                className="flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-slate-900 text-white font-bold hover:bg-slate-800 hover:scale-[1.02] shadow-xl hover:shadow-2xl transition-all active:scale-95"
+                                className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-slate-900 text-white font-bold hover:bg-slate-800 hover:scale-[1.02] shadow-xl hover:shadow-2xl transition-all active:scale-95"
                             >
                                 <Download className="w-5 h-5" />
                                 Download Full Report
@@ -453,7 +453,7 @@ function AnalysisContent() {
                                         showToast("Failed to create challenge link", "error")
                                     }
                                 }}
-                                className="flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold hover:shadow-lg hover:shadow-orange-500/20 hover:scale-[1.02] transition-all active:scale-95"
+                                className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold hover:shadow-lg hover:shadow-orange-500/20 hover:scale-[1.02] transition-all active:scale-95"
                             >
                                 <Swords className="w-5 h-5" />
                                 Challenge Friends
