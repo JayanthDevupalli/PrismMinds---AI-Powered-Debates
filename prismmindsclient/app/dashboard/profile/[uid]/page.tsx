@@ -606,7 +606,7 @@ export default function ProfilePage() {
                                 <div className="flex justify-between items-center mb-6">
                                     <h3 className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-slate-200">
                                         <TrendingUp className="w-4 h-4 text-orange-500" />
-                                        Your Recent Performance
+                                        Your Recent Performance ({selectedYear})
                                     </h3>
                                 </div>
 
