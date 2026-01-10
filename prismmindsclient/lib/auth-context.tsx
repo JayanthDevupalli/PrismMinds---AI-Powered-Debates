@@ -9,6 +9,9 @@ import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
+  updatePassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
 } from "firebase/auth"
 import { doc, setDoc } from "firebase/firestore"
 import { auth, db } from "./firebase"
@@ -27,15 +30,23 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<void>
   googleSignIn: () => Promise<void>
   logout: () => Promise<void>
+  updateDisplayName: (name: string) => Promise<void>
+  deleteUserAccount: () => Promise<void>
+  updateUserPassword: (password: string) => Promise<void>
+  reauthenticate: (password: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  register: async () => {},
-  login: async () => {},
-  googleSignIn: async () => {},
-  logout: async () => {},
+  register: async () => { },
+  login: async () => { },
+  googleSignIn: async () => { },
+  logout: async () => { },
+  updateDisplayName: async () => { },
+  deleteUserAccount: async () => { },
+  updateUserPassword: async () => { },
+  reauthenticate: async () => { },
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -115,6 +126,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         googleSignIn,
         logout,
+        updateDisplayName: async (name: string) => {
+          if (user && auth.currentUser) {
+            await updateProfile(auth.currentUser, { displayName: name });
+            // Update local state to reflect change immediately
+            setUser(prev => prev ? { ...prev, displayName: name } : null);
+
+            // Update Firestore as well
+            await setDoc(doc(db, "users", user.uid), { name }, { merge: true });
+          }
+        },
+        deleteUserAccount: async () => {
+          // Deleting logic handled by API, but we can sign out client-side cleanup here if needed
+          if (auth.currentUser) {
+            await auth.currentUser.delete();
+          }
+        },
+        updateUserPassword: async (password: string) => {
+          if (auth.currentUser) {
+            await updatePassword(auth.currentUser, password)
+          }
+        },
+        reauthenticate: async (password: string) => {
+          if (auth.currentUser && auth.currentUser.email) {
+            const credential = EmailAuthProvider.credential(auth.currentUser.email, password)
+            await reauthenticateWithCredential(auth.currentUser, credential)
+          }
+        }
       }}
     >
       {children}

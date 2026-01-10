@@ -4,9 +4,52 @@ import dotenv from "dotenv";
 import { admin, db } from "../config/firebaseAdmin.js";
 
 
+import { verifyFirebaseToken } from "../middleware/authMiddleware.js";
+
 dotenv.config();
 
 const router = express.Router();
+
+// 🔹 Delete User Account & All Data
+router.delete("/profile", verifyFirebaseToken, async (req, res) => {
+    const uid = req.user.uid;
+    console.log(`⚠️ Request to delete account for user: ${uid}`);
+
+    try {
+        // 1. Delete all user debates
+        const debatesRef = db.collection("debates").doc(uid).collection("userDebates");
+        const snapshot = await debatesRef.get();
+
+        if (!snapshot.empty) {
+            const batch = db.batch();
+            snapshot.docs.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            await batch.commit();
+            console.log(`🗑️ Deleted ${snapshot.size} debates for user ${uid}`);
+        }
+
+        // 2. Delete the parent debate doc
+        await db.collection("debates").doc(uid).delete();
+
+        // 3. Delete user profile doc
+        await db.collection("users").doc(uid).delete();
+
+        // 4. Delete Auth User (Optional: Client might do it, but good to ensure)
+        try {
+            await admin.auth().deleteUser(uid);
+            console.log(`✅ Deleted Firebase Auth user ${uid}`);
+        } catch (authError) {
+            console.warn("⚠️ Could not delete auth user (might already be deleted):", authError.message);
+        }
+
+        res.status(200).json({ message: "Account and all data deleted successfully" });
+
+    } catch (error) {
+        console.error("❌ Delete account error:", error);
+        res.status(500).json({ error: "Failed to delete account data" });
+    }
+});
 
 const generateOTP = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();

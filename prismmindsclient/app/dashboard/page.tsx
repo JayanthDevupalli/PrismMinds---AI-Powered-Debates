@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { fetchRecentDebates, createDebate, createHumanDebate, deleteDebate, fetchFavorites, addFavorite, removeFavorite } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline"
-import { SparklesIcon, Trash2Icon, X, History, Download, ScrollText, Sparkles, Rocket, BookOpen, Mic2, MessageCircle, Target, BarChart3, Globe, Heart, ArrowRight, Loader2, Menu } from "lucide-react"
+import { SparklesIcon, Trash2Icon, X, History, Download, ScrollText, Sparkles, Rocket, BookOpen, Mic2, MessageCircle, Target, BarChart3, Globe, Heart, ArrowRight, Loader2, Menu, User } from "lucide-react"
 import { downloadDebateTranscriptPDF } from "@/lib/pdf-generator"
 
 type DebateMessage = {
@@ -87,7 +87,7 @@ function DashboardContent() {
 
   useEffect(() => {
     const hour = new Date().getHours()
-    const msg = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening"
+    const msg = hour < 12 ? "Good Morning" : hour < 16 ? "Good Afternoon" : "Good Evening"
     setGreeting(msg)
   }, [])
 
@@ -292,6 +292,7 @@ function DashboardContent() {
 
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50/30 to-orange-50 text-slate-900 dark:text-slate-100 font-sans selection:bg-orange-500/20">
@@ -300,35 +301,64 @@ function DashboardContent() {
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 z-40 backdrop-blur-xl border-b border-orange-100/50 bg-white/80 dark:bg-slate-900/80 shadow-[0_4px_20px_-4px_rgba(251,146,60,0.1)]"
+        className="sticky top-0 z-40 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 shadow-sm supports-[backdrop-filter]:bg-white/60"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex justify-between items-center gap-3">
-            {/* Logo Section */}
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-              <p className="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-widest flex items-center gap-2 mb-1">
-                <Globe className="w-3.5 h-3.5" />
-                <span className="opacity-50">|</span>
-                <SparklesIcon className="w-3.5 h-3.5" />
-                PrismMinds AI
-              </p>
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                {`${greeting}, ${user?.displayName?.split(" ")[0] || "Debater"}`}
-              </h1>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 lg:h-20 flex items-center justify-between gap-4">
+          {/* Left: Logo Section */}
+          <div className="flex items-center gap-4">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex flex-col"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white shadow-sm shadow-orange-500/20 overflow-hidden border border-slate-100 dark:border-slate-800 flex items-center justify-center p-1">
+                  <img src="/mainlogo.png" alt="PrismMinds Logo" className="w-full h-full object-contain" />
+                </div>
+                <div className="hidden sm:block">
+                  <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-white dark:via-slate-200 dark:to-white tracking-tight">
+                    PrismMinds
+                  </h1>
+                </div>
+              </div>
             </motion.div>
+          </div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden sm:flex items-center gap-3">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+          {/* Center: Navigation Tabs (Desktop) */}
+          <div className="hidden md:flex items-center justify-center absolute left-1/2 -translate-x-1/2">
+            <div className="flex items-center p-1.5 rounded-2xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800 backdrop-blur-md shadow-inner">
+              <button
+                onClick={() => {
+                  if (currentView === "main") return;
+                  setLoading(true)
+                  fetchRecentDebates(20).then(setRecentDebates).finally(() => {
+                    setLoading(false)
+                    setCurrentView("main")
+                  })
+                }}
+                className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${currentView === "main"
+                  ? "text-orange-600 dark:text-orange-400 shadow-sm bg-white dark:bg-slate-800"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/50"
+                  }`}
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4" />
+                  Dashboard
+                </span>
+                {currentView === "main" && (
+                  <motion.div layoutId="nav-pill" className="absolute inset-0 bg-white dark:bg-slate-800 rounded-xl shadow-sm z-0" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />
+                )}
+              </button>
+
+              <button
                 onClick={async () => {
+                  if (currentView === "transcripts") return;
+                  setLoading(true)
                   try {
-                    setLoading(true)
                     const all = await fetchRecentDebates(100)
                     setRecentDebates(all)
                   } catch (err) {
-                    console.error('Failed to load transcripts:', err)
+                    console.error(err)
                   } finally {
                     setLoading(false)
                     setCurrentView("transcripts")
@@ -337,94 +367,125 @@ function DashboardContent() {
                     setTranscriptIndex(0)
                   }
                 }}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500/20 to-amber-500/20 hover:from-orange-500/30 hover:to-amber-500/30 border border-orange-200/50 transition-all text-sm font-medium text-foreground"
-                title="View all transcripts"
+                className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${currentView === "transcripts"
+                  ? "text-orange-600 dark:text-orange-400 shadow-sm bg-white dark:bg-slate-800"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/50"
+                  }`}
               >
-                <History className="w-4 h-4 flex-shrink-0" />
-                <span>Transcripts</span>
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                <span className="relative z-10 flex items-center gap-2">
+                  <History className="w-4 h-4" />
+                  Transcripts
+                </span>
+                {currentView === "transcripts" && (
+                  <motion.div layoutId="nav-pill" className="absolute inset-0 bg-white dark:bg-slate-800 rounded-xl shadow-sm z-0" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />
+                )}
+              </button>
+
+              <button
                 onClick={async () => {
+                  if (currentView === "favorites") return;
                   setLoading(true)
                   try {
                     const favs = await fetchFavorites()
                     setFavorites(favs)
                   } catch (err) {
-                    console.error('Failed to refresh favorites:', err)
+                    console.error(err)
                   } finally {
                     setLoading(false)
                     setCurrentView("favorites")
                   }
                 }}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-500/20 to-pink-500/20 hover:from-red-500/30 hover:to-pink-500/30 border border-border/50 transition-all text-sm font-medium text-foreground"
-                title="View favorite debates"
+                className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${currentView === "favorites"
+                  ? "text-orange-600 dark:text-orange-400 shadow-sm bg-white dark:bg-slate-800"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/50"
+                  }`}
               >
-                <Heart className="w-4 h-4 flex-shrink-0" />
-                <span>Favorites</span>
-              </motion.button>
-              {currentView === "transcripts" && (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={async () => {
-                    try {
-                      setLoading(true)
-                      const recent = await fetchRecentDebates(2)
-                      setRecentDebates(recent)
-                    } catch (err) {
-                      console.error('Failed to load recent debates:', err)
-                    } finally {
-                      setLoading(false)
-                      setCurrentView("main")
-                    }
-                  }}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 hover:from-blue-100 hover:to-cyan-100 border border-blue-200/50 dark:border-blue-800/50 transition-all text-sm font-medium text-blue-600 dark:text-blue-400"
-                >
-                  ← Back
-                </motion.button>
-              )}
-              {currentView === "favorites" && (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={async () => {
-                    try {
-                      setLoading(true)
-                      const recent = await fetchRecentDebates(2)
-                      setRecentDebates(recent)
-                    } catch (err) {
-                      console.error('Failed to load recent debates:', err)
-                    } finally {
-                      setLoading(false)
-                      setCurrentView("main")
-                    }
-                  }}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 hover:from-red-100 hover:to-pink-100 border border-red-200/50 dark:border-red-800/50 transition-all text-sm font-medium text-red-600 dark:text-red-400"
-                >
-                  ← Back
-                </motion.button>
-              )}
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={async () => {
-                  await logout()
-                  router.push("/")
-                }}
-                className="p-2.5 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-all text-slate-400 hover:text-red-600"
-                title="Logout"
-              >
-                <ArrowLeftOnRectangleIcon className="w-5 h-5" />
-              </motion.button>
+                <span className="relative z-10 flex items-center gap-2">
+                  <Heart className="w-4 h-4" />
+                  Favorites
+                </span>
+                {currentView === "favorites" && (
+                  <motion.div layoutId="nav-pill" className="absolute inset-0 bg-white dark:bg-slate-800 rounded-xl shadow-sm z-0" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Right: Actions & Profile */}
+          <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center text-xs font-medium text-slate-500 bg-slate-50 dark:bg-slate-900 px-3 py-1.5 rounded-full border border-slate-200/60 dark:border-slate-800">
+              {greeting}, {user?.displayName?.split(" ")[0]}
             </div>
 
-            {/* Mobile Menu Button - PREMIUM NEW LOOK */}
+            {/* Profile Dropdown */}
+            <div className="relative">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                className="relative p-1 rounded-full border-2 border-white dark:border-slate-800 shadow-md ring-2 ring-slate-100 dark:ring-slate-800 cursor-pointer overflow-hidden transition-all hover:ring-orange-200 dark:hover:ring-orange-900/30"
+              >
+                {user?.photoURL ? (
+                  <img src={user.photoURL} alt="Profile" className="w-9 h-9 rounded-full object-cover" />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                    {user?.displayName?.[0] || "U"}
+                  </div>
+                )}
+              </motion.button>
+
+              <AnimatePresence>
+                {isProfileMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.1 }}
+                    className="absolute right-0 mt-3 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200/60 dark:border-slate-800 overflow-hidden z-50 origin-top-right ring-1 ring-black/5"
+                  >
+                    <div className="p-2 space-y-1">
+                      <div className="px-3 py-2 mb-2 border-b border-slate-100 dark:border-slate-800">
+                        <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{user?.displayName}</p>
+                        <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+                      </div>
+
+                      <motion.button
+                        whileHover={{ backgroundColor: "rgba(99, 102, 241, 0.1)" }} // indigo-500/10
+                        onClick={() => {
+                          setIsProfileMenuOpen(false);
+                          if (user?.uid) {
+                            router.push(`/dashboard/profile/${user.uid}`);
+                          }
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 rounded-lg transition-colors"
+                      >
+                        <User className="w-4 h-4 text-indigo-500" />
+                        Profile Settings
+                      </motion.button>
+
+                      <motion.button
+                        whileHover={{ backgroundColor: "rgba(239, 68, 68, 0.1)" }} // red-500/10
+                        onClick={async () => {
+                          setIsProfileMenuOpen(false);
+                          await logout();
+                          router.push("/");
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 rounded-lg transition-colors"
+                      >
+                        <ArrowLeftOnRectangleIcon className="w-4 h-4" />
+                        Sign Out
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Mobile Menu Button */}
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="sm:hidden relative z-50 p-2 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border border-white/20 dark:border-white/10 shadow-lg text-slate-600 dark:text-slate-300 overflow-hidden"
+              className="md:hidden relative z-50 p-2.5 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border border-slate-200/50 dark:border-slate-700 shadow-sm text-slate-600 dark:text-slate-300"
             >
               <AnimatePresence mode="wait" initial={false}>
                 {isMobileMenuOpen ? (
@@ -433,9 +494,8 @@ function DashboardContent() {
                     initial={{ opacity: 0, rotate: -90 }}
                     animate={{ opacity: 1, rotate: 0 }}
                     exit={{ opacity: 0, rotate: 90 }}
-                    transition={{ duration: 0.2 }}
                   >
-                    <X className="w-6 h-6" />
+                    <X className="w-5 h-5" />
                   </motion.div>
                 ) : (
                   <motion.div
@@ -443,19 +503,15 @@ function DashboardContent() {
                     initial={{ opacity: 0, rotate: 90 }}
                     animate={{ opacity: 1, rotate: 0 }}
                     exit={{ opacity: 0, rotate: -90 }}
-                    transition={{ duration: 0.2 }}
                   >
-                    <Menu className="w-6 h-6" />
+                    <Menu className="w-5 h-5" />
                   </motion.div>
                 )}
               </AnimatePresence>
-
-              {/* Subtle background glow */}
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-400/10 to-amber-400/10 pointer-events-none" />
             </motion.button>
           </div>
 
-          {/* Mobile Navigation Dropdown - PREMIUM GLASS MORPHISM */}
+          {/* Mobile Navigation Dropdown */}
           <AnimatePresence>
             {isMobileMenuOpen && (
               <motion.div
@@ -479,136 +535,92 @@ function DashboardContent() {
                   filter: "blur(5px)",
                   transition: { duration: 0.2 }
                 }}
-                className="overflow-hidden sm:hidden"
+                className="absolute top-16 left-0 right-0 p-4 md:hidden z-30"
               >
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.1 }}
-                  className="pt-4 pb-2 space-y-2 border-t border-slate-200/50 dark:border-slate-800/50 mt-4 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl p-4 shadow-xl border border-white/20"
+                  className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl p-4 shadow-2xl border border-white/20 ring-1 ring-black/5"
                 >
-                  <motion.button
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={async () => {
-                      setIsMobileMenuOpen(false);
-                      try {
+                  <div className="space-y-2">
+                    <motion.button
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        if (currentView === "main") return;
+                        setLoading(true)
+                        fetchRecentDebates(20).then(setRecentDebates).finally(() => {
+                          setLoading(false)
+                          setCurrentView("main")
+                        })
+                      }}
+                      className={`w-full flex items-center gap-4 px-4 py-3 rounded-2xl font-medium transition-all ${currentView === 'main' ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-600' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50'}`}
+                    >
+                      <BarChart3 className="w-5 h-5" />
+                      Dashboard
+                    </motion.button>
+
+                    <motion.button
+                      whileTap={{ scale: 0.98 }}
+                      onClick={async () => {
+                        setIsMobileMenuOpen(false);
                         setLoading(true)
                         const all = await fetchRecentDebates(100)
                         setRecentDebates(all)
-                      } catch (err) {
-                        console.error('Failed to load transcripts:', err)
-                      } finally {
                         setLoading(false)
                         setCurrentView("transcripts")
-                        setDisplayedCount(ITEMS_PER_PAGE)
-                        setSearchQuery("")
-                        setTranscriptIndex(0)
-                      }
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 active:from-blue-500/20 active:to-cyan-500/20 border border-blue-200/50 dark:border-blue-800/50 text-foreground font-medium group"
-                  >
-                    <div className="p-1.5 rounded-lg bg-blue-500/20 text-blue-600 dark:text-blue-400 group-active:scale-95 transition-transform">
+                      }}
+                      className={`w-full flex items-center gap-4 px-4 py-3 rounded-2xl font-medium transition-all ${currentView === 'transcripts' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50'}`}
+                    >
                       <History className="w-5 h-5" />
-                    </div>
-                    Transcripts
-                  </motion.button>
+                      Transcripts
+                    </motion.button>
 
-                  <motion.button
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.15 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={async () => {
-                      setIsMobileMenuOpen(false);
-                      setLoading(true)
-                      try {
+                    <motion.button
+                      whileTap={{ scale: 0.98 }}
+                      onClick={async () => {
+                        setIsMobileMenuOpen(false);
+                        setLoading(true)
                         const favs = await fetchFavorites()
                         setFavorites(favs)
-                      } catch (err) {
-                        console.error('Failed to refresh favorites:', err)
-                      } finally {
                         setLoading(false)
                         setCurrentView("favorites")
-                      }
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-red-500/10 to-pink-500/10 active:from-red-500/20 active:to-pink-500/20 border border-red-200/50 dark:border-red-800/50 text-foreground font-medium group"
-                  >
-                    <div className="p-1.5 rounded-lg bg-red-500/20 text-red-600 dark:text-red-400 group-active:scale-95 transition-transform">
+                      }}
+                      className={`w-full flex items-center gap-4 px-4 py-3 rounded-2xl font-medium transition-all ${currentView === 'favorites' ? 'bg-red-50 dark:bg-red-900/20 text-red-600' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50'}`}
+                    >
                       <Heart className="w-5 h-5" />
-                    </div>
-                    Favorites
-                  </motion.button>
+                      Favorites
+                    </motion.button>
 
-                  {currentView === "transcripts" && (
+                    <div className="h-px bg-slate-100 dark:bg-slate-800 my-2" />
+
                     <motion.button
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.2 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        if (user?.uid) {
+                          router.push(`/dashboard/profile/${user.uid}`)
+                        }
+                      }}
+                      className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 font-medium"
+                    >
+                      <User className="w-5 h-5" />
+                      My Profile
+                    </motion.button>
+
+                    <motion.button
                       whileTap={{ scale: 0.98 }}
                       onClick={async () => {
                         setIsMobileMenuOpen(false);
-                        try {
-                          setLoading(true)
-                          const recent = await fetchRecentDebates(2)
-                          setRecentDebates(recent)
-                        } catch (err) {
-                          console.error('Failed to load recent debates:', err)
-                        } finally {
-                          setLoading(false)
-                          setCurrentView("main")
-                        }
+                        await logout()
+                        router.push("/")
                       }}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium"
+                      className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl text-red-600 font-medium hover:bg-red-50"
                     >
-                      <ArrowRight className="w-5 h-5 rotate-180" />
-                      Back to Dashboard
+                      <ArrowLeftOnRectangleIcon className="w-5 h-5" />
+                      Sign Out
                     </motion.button>
-                  )}
-
-                  {currentView === "favorites" && (
-                    <motion.button
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.2 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={async () => {
-                        setIsMobileMenuOpen(false);
-                        try {
-                          setLoading(true)
-                          const recent = await fetchRecentDebates(2)
-                          setRecentDebates(recent)
-                        } catch (err) {
-                          console.error('Failed to load recent debates:', err)
-                        } finally {
-                          setLoading(false)
-                          setCurrentView("main")
-                        }
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium"
-                    >
-                      <ArrowRight className="w-5 h-5 rotate-180" />
-                      Back to Dashboard
-                    </motion.button>
-                  )}
-
-                  <motion.button
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.25 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={async () => {
-                      setIsMobileMenuOpen(false);
-                      await logout()
-                      router.push("/")
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium transition-colors"
-                  >
-                    <ArrowLeftOnRectangleIcon className="w-5 h-5" />
-                    Sign Out
-                  </motion.button>
+                  </div>
                 </motion.div>
               </motion.div>
             )}
