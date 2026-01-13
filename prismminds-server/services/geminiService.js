@@ -586,3 +586,92 @@ OUTPUT FORMAT (STRICT JSON ONLY):
     throw new Error("Failed to analyze debate")
   }
 }
+
+// 🔹 Context-Aware Customer Support Chat
+export async function chatWithSupport(history, userContext = {}) {
+  try {
+    console.log("💬 Generating Support Chat response...")
+
+    // Use specific support key if available, else fallback to main key
+    // implementation note: User requested "another api", so we prioritize a distinct key
+    const apiKey = process.env.GEMINI_SUPPORT_API_KEY || process.env.GEMINI_API_KEY
+    if (process.env.GEMINI_SUPPORT_API_KEY) {
+      console.log("✅ Using dedicated GEMINI_SUPPORT_API_KEY")
+    } else {
+      console.log("ℹ️ Using default GEMINI_API_KEY (GEMINI_SUPPORT_API_KEY not set)")
+    }
+
+    if (!apiKey) {
+      throw new Error("No API key configured for support chat.")
+    }
+
+    const genAI = new GoogleGenerativeAI(apiKey)
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
+
+    // Construct the system instruction (Context Injection)
+    const systemPrompt = `
+You are the **PrismMinds Customer Support Bot**, a helpful, friendly, and knowledgeable AI assistant.
+Your goal is to help users navigate the platform, understand features, and troubleshoot issues.
+
+🌍 **SITE KNOWLEDGE (Your Brain):**
+
+1.  **Dashboard** (\`/dashboard\`):
+    *   **Main Hub**: Where all the action happens.
+    *   **Create Debate (AI vs AI)**: User selects two personas (e.g., Einstein vs Newton) and a topic. The AI generates a debate transcript.
+    *   **Challenge Mode (Human vs AI)**: User debates *against* an AI persona directly.
+    *   **Daily Challenge**: A special, curated topic updated every 24 hours.
+    *   **Transcripts**: An archive of all past generated debates.
+    *   **Favorites**: Debates the user has saved.
+
+2.  **Profile** (\`/dashboard/profile/[uid]\`):
+    *   **Overview**: Shows the user's "Skill Breakdown" (Logic, Persuasion, Clarity, Emotional Intelligence) and an "Activity Heatmap".
+    *   **Leaderboard**: A global ranking of the top debaters based on their aggregate scores.
+    *   **Settings Tab**:
+        *   Change Display Name.
+        *   Change Password.
+        *   **Danger Zone**: This is where the **DELETE ACCOUNT** button is located. It is at the very bottom of the Settings tab.
+
+3.  **Knowledge Center** (\`/knowledgecenter\`):
+    *   Contains guides on "How to Debate", "Scoring System (0-100)", and "Platform Rules".
+
+4.  **Authentication**:
+    *   Login: \`/login\`
+    *   Register: \`/register\`
+    *   Forgot Password: \`/forgot-password\`
+
+5.  **General Info**:
+    *   **PrismMinds** is an AI-powered debate platform designed to improve critical thinking and consensus building.
+    *   We use Gemini 1.5 Pro/Flash models to power the personas and analysis.
+    *   **Base URL**: https://prismminds.vercel.app (Use this domain if absolute URLs are required, otherwise use relative paths).
+
+🛡️ **GUIDELINES:**
+*   **Be Concise**: Give short, direct answers. No walls of text.
+*   **Be Specific**: If asked "How do I delete my account?", say: *"Go to your [Profile](/dashboard/profile/${userContext.uid || 'me'}), click the **Settings** tab, and scroll to the bottom to find the **Delete Account** button."*
+*   **Use Links**: Always use Markdown links like \`[Label](url)\` to guide the user.
+*   **Tone**: Professional, warm, and encourage "Intellectual Consistency".
+*   **Unresolved Issues**: If the user is not satisfied with your answer or has a complex problem you can't solve, explicitly instruct them to: *"Please report this issue to the PrismMinds team via the **Contact Us** form. We will reach out back to you."*
+*   **Context**: The user is currently logged in as "${userContext.displayName || 'Guest'}".
+
+👇 **CONVERSATION HISTORY:**
+`
+
+    // Convert history to Gemini format (simplification for single-turn or simple memory)
+    // We just append the history to the prompt for simplicity with text-only models
+    const conversationText = history.map(msg =>
+      `${msg.role === 'user' ? 'User' : 'Support Bot'}: ${msg.content}`
+    ).join("\n")
+
+    const finalPrompt = `${systemPrompt}\n\n${conversationText}\n\nSupport Bot:`
+
+    const result = await model.generateContent(finalPrompt)
+    const response = await result.response.text()
+
+    return {
+      response: response.trim()
+    }
+
+  } catch (error) {
+    console.error("💥 Support Chat failed:", error.message)
+    throw new Error("I'm having trouble connecting to the support brain right now. Please try again later.")
+  }
+}
