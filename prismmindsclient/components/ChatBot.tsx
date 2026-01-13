@@ -14,6 +14,7 @@ type Message = {
 
 export default function ChatBot() {
     const { user } = useAuth()
+    const [isVisible, setIsVisible] = useState(true)
     const [isOpen, setIsOpen] = useState(false)
     const [messages, setMessages] = useState<Message[]>([])
     const [input, setInput] = useState("")
@@ -140,7 +141,7 @@ export default function ChatBot() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
-                        className="pointer-events-auto bg-white dark:bg-slate-900 w-[350px] sm:w-[380px] h-[500px] max-h-[80vh] rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden mb-4"
+                        className="pointer-events-auto bg-white dark:bg-slate-900 w-full h-[100dvh] fixed inset-0 sm:static sm:w-[380px] sm:h-[500px] sm:max-h-[80vh] rounded-none sm:rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden mb-0 sm:mb-4 z-50 sm:z-auto"
                     >
                         {/* Header */}
                         <div className="p-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white flex justify-between items-center shadow-sm">
@@ -159,8 +160,9 @@ export default function ChatBot() {
                             <button
                                 onClick={() => setIsOpen(false)}
                                 className="p-1 hover:bg-white/20 rounded-full transition-colors"
+                                title="Close"
                             >
-                                <ChevronDown className="w-5 h-5 text-white/90" />
+                                <X className="w-5 h-5 text-white/90" />
                             </button>
                         </div>
 
@@ -272,67 +274,78 @@ export default function ChatBot() {
             </AnimatePresence>
 
             {/* Floating Toggle Button */}
-            {/* Floating Toggle Button */}
-            <motion.div
-                className="pointer-events-auto relative group"
-                animate={!isOpen ? { y: [0, -6, 0] } : { y: 0 }}
-                transition={!isOpen ? { duration: 4, repeat: Infinity, ease: "easeInOut" } : {}}
-            >
-                {/* Subtle Breathing Glow (Behind) */}
-                <motion.div
-                    animate={{ opacity: [0.3, 0.6, 0.3] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute inset-1 bg-indigo-500 rounded-full blur-md"
-                />
+            <AnimatePresence>
+                {!isOpen && isVisible && (
+                    <motion.div
+                        className="pointer-events-auto relative group"
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        {/* Close/Minimize X Button (Attached) - Visible on Hover */}
+                        <div className="absolute -top-1 -right-1 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    setIsVisible(false)
+                                }}
+                                className="bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-300 rounded-full p-1 shadow-md hover:bg-red-100 hover:text-red-500 transition-colors border border-white dark:border-slate-800"
+                                title="Hide widget"
+                            >
+                                <X className="w-3 h-3" />
+                            </button>
+                        </div>
 
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setIsOpen(!isOpen)}
-                    className="relative z-10 h-14 w-14 rounded-full bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-xl flex items-center justify-center transition-all border border-indigo-400/30 overflow-hidden group"
-                >
-                    {/* Glint Effect (Sweeping Shine) */}
-                    {!isOpen && (
+                        {/* Subtle Breathing Glow (Behind) */}
                         <motion.div
-                            initial={{ x: "-100%", opacity: 0 }}
-                            animate={{ x: "200%", opacity: [0, 1, 0] }}
-                            transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
-                            className="absolute top-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12"
+                            animate={{ opacity: [0.3, 0.6, 0.3] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                            className="absolute inset-1 bg-indigo-500 rounded-full blur-md"
                         />
-                    )}
 
-                    <AnimatePresence mode="wait">
-                        {isOpen ? (
+                        <motion.button
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="relative z-10 h-14 w-14 rounded-full bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-xl flex items-center justify-center transition-all border border-indigo-400/30 overflow-hidden group"
+                        >
+                            {/* Glint Effect (Sweeping Shine) */}
                             <motion.div
-                                key="close"
-                                initial={{ rotate: -90, opacity: 0 }}
-                                animate={{ rotate: 0, opacity: 1 }}
-                                exit={{ rotate: 90, opacity: 0 }}
-                                transition={{ duration: 0.2 }}
-                            >
-                                <X className="w-7 h-7" />
-                            </motion.div>
-                        ) : (
-                            <motion.div
-                                key="open"
-                                initial={{ rotate: 90, opacity: 0 }}
-                                animate={{ rotate: 0, opacity: 1 }}
-                                exit={{ rotate: -90, opacity: 0 }}
-                                transition={{ duration: 0.2 }}
-                            >
-                                <Brain className="w-7 h-7" />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </motion.button>
+                                initial={{ x: "-100%", opacity: 0 }}
+                                animate={{ x: "200%", opacity: [0, 1, 0] }}
+                                transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
+                                className="absolute top-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12"
+                            />
 
-                {/* Tooltip hint on hover */}
-                <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-sm font-medium rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-0 translate-x-2 pointer-events-none whitespace-nowrap z-20">
-                    Need help?
-                    {/* Arrow */}
-                    <div className="absolute top-1/2 -right-1.5 -translate-y-1/2 border-8 border-transparent border-l-white dark:border-l-slate-800" />
-                </div>
-            </motion.div>
+                            <Brain className="w-7 h-7" />
+                        </motion.button>
+
+                        {/* Tooltip hint on hover */}
+                        <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-sm font-medium rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-0 translate-x-2 pointer-events-none whitespace-nowrap z-20">
+                            Need help?
+                            {/* Arrow */}
+                            <div className="absolute top-1/2 -right-1.5 -translate-y-1/2 border-8 border-transparent border-l-white dark:border-l-slate-800" />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Restore Tab (Visible when hidden) */}
+            <AnimatePresence>
+                {!isOpen && !isVisible && (
+                    <motion.button
+                        initial={{ x: "100%", opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: "100%", opacity: 0 }}
+                        whileHover={{ x: -5 }}
+                        onClick={() => setIsVisible(true)}
+                        className="pointer-events-auto fixed bottom-20 right-0 bg-indigo-600/20 backdrop-blur-sm text-indigo-600 dark:text-indigo-400 p-2 rounded-l-lg shadow-sm border-l border-t border-b border-indigo-400/20 z-40 hover:bg-indigo-600 hover:text-white transition-all opacity-50 hover:opacity-100"
+                        title="Show Support Bot"
+                    >
+                        <MessageCircle className="w-5 h-5" />
+                    </motion.button>
+                )}
+            </AnimatePresence>
         </div>
     )
 }

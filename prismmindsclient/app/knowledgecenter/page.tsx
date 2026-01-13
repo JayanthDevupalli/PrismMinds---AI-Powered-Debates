@@ -282,7 +282,15 @@ export default function KnowledgeCenter() {
                         </motion.div>
                     </div>
                 </section>
-            </div>
+
+                <footer className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center py-8 px-6 text-sm text-slate-500 border-t border-slate-200 dark:border-slate-800 mt-20">
+                    <p>&copy; {new Date().getFullYear()} PrismMinds</p>
+                    <div className="flex gap-6 mt-4 sm:mt-0">
+                        <Link href="/privacy" className="hover:text-purple-600 transition">Privacy Policy</Link>
+                        <Link href="/terms" className="hover:text-purple-600 transition">Terms of Service</Link>
+                    </div>
+                </footer>
+            </div >
         </>
     )
 }

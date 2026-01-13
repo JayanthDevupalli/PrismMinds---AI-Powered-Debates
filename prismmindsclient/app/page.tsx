@@ -334,11 +334,14 @@ export default function Home() {
           <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center text-sm text-slate-700 dark:text-slate-300 gap-3">
             <p>&copy; {new Date().getFullYear()} PrismMinds</p>
             <div className="flex gap-6">
-              <Link href="#" className="hover:text-sky-600 dark:hover:text-sky-400 transition">
+              <Link href="/contactus" className="hover:text-sky-600 dark:hover:text-sky-400 transition">
                 About
               </Link>
-              <Link href="#" className="hover:text-sky-600 dark:hover:text-sky-400 transition">
+              <Link href="/privacy" className="hover:text-sky-600 dark:hover:text-sky-400 transition">
                 Privacy
+              </Link>
+              <Link href="/terms" className="hover:text-sky-600 dark:hover:text-sky-400 transition">
+                Terms
               </Link>
               <Link href="/contactus" className="hover:text-sky-600 dark:hover:text-sky-400 transition">
                 Contact
