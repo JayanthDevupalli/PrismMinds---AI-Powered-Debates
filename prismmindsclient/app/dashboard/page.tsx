@@ -418,7 +418,7 @@ function DashboardContent() {
             </div>
 
             {/* Profile Dropdown */}
-            <div className="relative">
+            <div className="relative hidden md:block">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -543,6 +543,20 @@ function DashboardContent() {
                   className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl p-4 shadow-2xl border border-white/20 ring-1 ring-black/5"
                 >
                   <div className="space-y-2">
+                    {/* User Header for Mobile */}
+                    <div className="flex items-center gap-4 px-4 py-3 mb-2 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+                      {user?.photoURL ? (
+                        <img src={user.photoURL} alt="Profile" className="w-12 h-12 rounded-full object-cover ring-2 ring-white dark:ring-slate-700 shadow-sm" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                          {user?.displayName?.[0] || "U"}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{user?.displayName}</p>
+                        <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+                      </div>
+                    </div>
                     <motion.button
                       whileTap={{ scale: 0.98 }}
                       onClick={() => {

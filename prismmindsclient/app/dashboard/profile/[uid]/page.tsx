@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo } from "react"
 import { motion } from "framer-motion"
 import { useAuth } from "@/lib/auth-context"
-import { fetchRecentDebates } from "@/lib/api"
+import { fetchRecentDebates, fetchLeaderboard, forceRecalcStats, analyzeDebate } from "@/lib/api"
 import {
     Trophy,
     Target,
@@ -28,7 +28,11 @@ import {
     Lock,
     Eye,
     EyeOff,
-    Save
+    Save,
+    Crown,
+    Medal,
+    RefreshCcw,
+    Sparkles
 } from "lucide-react"
 
 import Link from "next/link"
@@ -48,6 +52,7 @@ type Debate = {
     topic: string
     createdAt: string
     duration: string
+    debateType?: string
     analysis?: {
         scores?: DebateScores
     }
@@ -248,10 +253,11 @@ export default function ProfilePage() {
     const router = useRouter()
     const [loading, setLoading] = useState(true)
     const [debates, setDebates] = useState<Debate[]>([])
+    const [leaderboard, setLeaderboard] = useState<any[]>([])
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
 
     // --- Data Fetching ---
-    const [viewMode, setViewMode] = useState<'overview' | 'settings'>('overview')
+    const [viewMode, setViewMode] = useState<'overview' | 'leaderboard' | 'settings'>('overview')
 
     // Edit Profile State
     const [newName, setNewName] = useState("")
@@ -329,6 +335,37 @@ export default function ProfilePage() {
         }
     }
 
+    const handleSyncStats = async () => {
+        const toastId = toast.loading("Syncing global stats...");
+        try {
+            await forceRecalcStats();
+            const newData = await fetchLeaderboard();
+            setLeaderboard(Array.isArray(newData) ? newData : []);
+            toast.success("Leaderboard updated!", { id: toastId });
+        } catch (error) {
+            console.error(error);
+            toast.error("Sync failed", { id: toastId });
+        }
+    }
+
+    const handleAnalyze = async (debateId: string) => {
+        const toastId = toast.loading("Generating analysis breakdown...");
+        try {
+            await analyzeDebate(debateId);
+            // Refresh logic
+            const updatedDebates = await fetchRecentDebates(100)
+            setDebates(Array.isArray(updatedDebates) ? updatedDebates.filter((d: any) => d.debateType === 'human-to-ai') : [])
+            await forceRecalcStats()
+            const newLeaderboard = await fetchLeaderboard();
+            setLeaderboard(Array.isArray(newLeaderboard) ? newLeaderboard : []);
+
+            toast.success("Analysis complete!", { id: toastId });
+        } catch (error) {
+            console.error(error);
+            toast.error("Analysis failed", { id: toastId });
+        }
+    }
+
     // --- Actions ---
     const handleDeleteAccount = async () => {
         if (!window.confirm("Are you sure you want to call this delete? This action cannot be undone.")) {
@@ -347,10 +384,13 @@ export default function ProfilePage() {
 
     useEffect(() => {
         if (user) {
-            fetchRecentDebates(100)
-                .then(data => {
-                    // Ensure data is array
-                    setDebates(Array.isArray(data) ? data : [])
+            Promise.all([
+                fetchRecentDebates(100),
+                fetchLeaderboard()
+            ])
+                .then(([debatesData, leaderboardData]) => {
+                    setDebates(Array.isArray(debatesData) ? debatesData.filter((d: any) => d.debateType === 'human-to-ai') : [])
+                    setLeaderboard(Array.isArray(leaderboardData) ? leaderboardData : [])
                 })
                 .catch(console.error)
                 .finally(() => setLoading(false))
@@ -412,11 +452,11 @@ export default function ProfilePage() {
 
         // Available Years
         const years = Array.from(new Set(debates.map(d => new Date(d.createdAt).getFullYear())))
-            .sort((a, b) => b - a)
+            .sort((a, b) => a - b) // Ascending: Old -> New (Right)
 
         // Ensure current year is in the list even if no debates
         if (!years.includes(new Date().getFullYear())) {
-            years.unshift(new Date().getFullYear())
+            years.push(new Date().getFullYear())
         }
 
         return {
@@ -505,11 +545,9 @@ export default function ProfilePage() {
                         <div className="w-px h-10 bg-slate-200 dark:bg-slate-800 hidden sm:block"></div>
                         <div className="text-center px-4 sm:px-0">
                             <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                                {stats.dates.length > 0 ?
-                                    Math.max(1, Math.floor((new Date().getTime() - new Date(stats.dates[stats.dates.length - 1]).getTime()) / (1000 * 3600 * 24)))
-                                    : 0}
+                                #{leaderboard.findIndex(u => u.uid === user?.uid) + 1 || "-"}
                             </div>
-                            <div className="text-xs text-slate-500 font-bold uppercase tracking-wider">Day Streak</div>
+                            <div className="text-xs text-slate-500 font-bold uppercase tracking-wider">Global Rank</div>
                         </div>
                     </div>
                 </motion.div>
@@ -523,6 +561,16 @@ export default function ProfilePage() {
                         <User className="w-4 h-4" />
                         Overview
                         {viewMode === 'overview' && (
+                            <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full" />
+                        )}
+                    </button>
+                    <button
+                        onClick={() => setViewMode('leaderboard')}
+                        className={`pb-3 text-sm font-bold flex items-center gap-2 transition-colors relative ${viewMode === 'leaderboard' ? 'text-orange-500' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                    >
+                        <Crown className="w-4 h-4" />
+                        Leaderboard
+                        {viewMode === 'leaderboard' && (
                             <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full" />
                         )}
                     </button>
@@ -570,7 +618,7 @@ export default function ProfilePage() {
                         {/* Right Col - Activity & History (8 cols) */}
                         <div className="lg:col-span-8 space-y-6">
 
-                            {/* Heatmap Card */}
+                            {/* Activity Heatmap (Restored) */}
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -582,15 +630,20 @@ export default function ProfilePage() {
                                         <Calendar className="w-4 h-4 text-orange-500" />
                                         Activity History
                                     </h3>
-                                    <select
-                                        value={selectedYear}
-                                        onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                                        className="text-xs font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md border-none focus:ring-1 focus:ring-orange-500 outline-none cursor-pointer"
-                                    >
+                                    <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
                                         {stats.years.map(year => (
-                                            <option key={year} value={year}>{year}</option>
+                                            <button
+                                                key={year}
+                                                onClick={() => setSelectedYear(year)}
+                                                className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${selectedYear === year
+                                                    ? 'bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-sm'
+                                                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                                    }`}
+                                            >
+                                                {year}
+                                            </button>
                                         ))}
-                                    </select>
+                                    </div>
                                 </div>
 
                                 <ActivityHeatmap dates={stats.dates} year={selectedYear} />
@@ -645,7 +698,13 @@ export default function ProfilePage() {
                                                         </div>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-xs font-medium text-slate-400 italic">Pending</span>
+                                                    <button
+                                                        onClick={() => handleAnalyze(debate.id)}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs font-bold rounded-lg hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors"
+                                                    >
+                                                        <Sparkles className="w-3 h-3" />
+                                                        Generate Score
+                                                    </button>
                                                 )}
                                             </div>
                                         ))}
@@ -666,6 +725,132 @@ export default function ProfilePage() {
                         </div>
 
                     </div>
+                ) : viewMode === 'leaderboard' ? (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="py-4"
+                    >
+                        <div className="max-w-4xl mx-auto space-y-6">
+
+                            {/* Header / Actions */}
+                            <div className="flex justify-between items-center bg-white dark:bg-slate-900 px-6 py-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                                <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                    <Target className="w-5 h-5 text-orange-500" />
+                                    Global Rankings
+                                </h2>
+                                <button
+                                    onClick={handleSyncStats}
+                                    className="text-sm font-medium text-slate-500 hover:text-orange-500 transition-colors flex items-center gap-2"
+                                >
+                                    <RefreshCcw className="w-4 h-4" />
+                                    Refresh
+                                </button>
+                            </div>
+
+                            {leaderboard.length > 0 ? (
+                                <>
+                                    {/* Hero Card - Rank 1 */}
+                                    {leaderboard[0] && (
+                                        <motion.div
+                                            initial={{ scale: 0.95, opacity: 0 }}
+                                            animate={{ scale: 1, opacity: 1 }}
+                                            className="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-8 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center gap-8"
+                                        >
+                                            <div className="absolute top-0 right-0 p-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+
+                                            <div className="relative">
+                                                <div className="w-24 h-24 rounded-full p-1 bg-gradient-to-br from-yellow-400 to-orange-500 shadow-xl">
+                                                    {leaderboard[0].photoURL ? (
+                                                        <img src={leaderboard[0].photoURL} className="w-full h-full rounded-full object-cover border-4 border-slate-900" />
+                                                    ) : (
+                                                        <div className="w-full h-full rounded-full bg-slate-800 flex items-center justify-center font-bold text-slate-400 border-4 border-slate-900">
+                                                            {leaderboard[0].name?.[0]}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="absolute -bottom-2 -right-2 bg-yellow-400 text-yellow-900 text-xs font-black px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
+                                                    <Crown className="w-3 h-3" /> #1
+                                                </div>
+                                            </div>
+
+                                            <div className="flex-1 text-center md:text-left z-10">
+                                                <div className="text-orange-400 font-bold tracking-wider text-xs uppercase mb-1">Current Champion</div>
+                                                <h3 className="text-3xl font-black mb-2">{leaderboard[0].name}</h3>
+                                                <div className="flex items-center justify-center md:justify-start gap-4 text-sm text-slate-300">
+                                                    <span className="flex items-center gap-1"><Medal className="w-4 h-4" /> {leaderboard[0].debates} debates</span>
+                                                    <span className="w-1 h-1 bg-slate-600 rounded-full" />
+                                                    <span>Top Human-AI Debater</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="text-center z-10 md:pr-8">
+                                                <div className="text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-yellow-300 to-orange-400">
+                                                    {Math.round(leaderboard[0].score)}
+                                                </div>
+                                                <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Total Points</div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+
+                                    {/* List - Rank 2+ */}
+                                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+                                        {/* Table Header */}
+                                        <div className="grid grid-cols-12 gap-4 p-4 border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                            <div className="col-span-2 md:col-span-1 text-center">Rank</div>
+                                            <div className="col-span-7 md:col-span-8">Debater</div>
+                                            <div className="col-span-3 text-right">Score</div>
+                                        </div>
+
+                                        {leaderboard.slice(1).map((player, index) => (
+                                            <motion.div
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                transition={{ delay: index * 0.03 }}
+                                                key={player.uid}
+                                                className={`grid grid-cols-12 gap-4 items-center p-4 border-b border-slate-50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${player.uid === user?.uid ? 'bg-orange-50/60 dark:bg-orange-900/10' : ''
+                                                    }`}
+                                            >
+                                                <div className="col-span-2 md:col-span-1 flex justify-center">
+                                                    <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold text-sm ${index === 0 ? 'bg-slate-200 text-slate-600' : // Rank 2
+                                                        index === 1 ? 'bg-orange-100 text-orange-700' : // Rank 3
+                                                            'text-slate-500'
+                                                        }`}>
+                                                        {index + 2}
+                                                    </div>
+                                                </div>
+                                                <div className="col-span-7 md:col-span-8 flex items-center gap-3">
+                                                    {player.photoURL ? (
+                                                        <img src={player.photoURL} className="w-8 h-8 rounded-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-500 text-xs">
+                                                            {player.name?.[0]}
+                                                        </div>
+                                                    )}
+                                                    <div className="min-w-0">
+                                                        <div className="font-bold text-sm text-slate-900 dark:text-white truncate flex items-center gap-2">
+                                                            {player.name}
+                                                            {player.uid === user?.uid && <span className="text-[10px] bg-orange-500 text-white px-1.5 py-0.5 rounded-md">YOU</span>}
+                                                        </div>
+                                                        <div className="text-xs text-slate-400">{player.debates} debates</div>
+                                                    </div>
+                                                </div>
+                                                <div className="col-span-3 text-right font-mono font-bold text-slate-700 dark:text-slate-300">
+                                                    {Math.round(player.score).toLocaleString()}
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-32 text-slate-400">
+                                    <Loader2 className="w-8 h-8 animate-spin mb-4 opacity-50" />
+                                    <p>Loading rankings...</p>
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
                 ) : (
                     <div className="max-w-3xl mx-auto space-y-6">
                         {/* Account Settings */}

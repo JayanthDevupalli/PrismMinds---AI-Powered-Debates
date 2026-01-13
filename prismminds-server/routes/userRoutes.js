@@ -192,4 +192,104 @@ router.post("/reset-password", async (req, res) => {
     }
 });
 
+// 🔹 Leaderboard Endpoint
+// 🔹 Recalculate Stats for Leaderboard
+router.post("/recalc-stats", verifyFirebaseToken, async (req, res) => {
+    try {
+        console.log("🔄 Recalculating global stats...");
+        const usersSnapshot = await db.collection("users").get();
+
+        const updates = [];
+
+        for (const userDoc of usersSnapshot.docs) {
+            const uid = userDoc.id;
+            // Get all debates for this user
+            const debatesSnapshot = await db.collection("debates").doc(uid).collection("userDebates").get();
+
+            let totalScore = 0;
+            let debateCount = debatesSnapshot.size;
+
+            debatesSnapshot.forEach(doc => {
+                const data = doc.data();
+                // ONLY count Human-to-AI debates for the leaderboard!
+                if (data.debateType === 'human-to-ai' && data.analysis && data.analysis.scores) {
+                    const s = data.analysis.scores;
+                    const avg = (s.logic + s.persuasion + s.clarity + s.emotional_intelligence) / 4;
+                    totalScore += avg;
+                    // Count only valid human debates with scores towards the total? 
+                    // Or count all human debates? Use debateCount logic below.
+                }
+            });
+
+            // Recount debateCount to only be human debates
+            debateCount = debatesSnapshot.docs.filter(d => d.data().debateType === 'human-to-ai').length;
+
+            // Update user doc w/ aggregated stats
+            updates.push(userDoc.ref.update({
+                debateCount: debateCount,
+                totalScore: Math.round(totalScore)
+            }));
+        }
+
+        await Promise.all(updates);
+        console.log("✅ Stats recalculated for all users");
+        res.json({ success: true, message: "Leaderboard stats updated" });
+
+    } catch (error) {
+        console.error("Recalc stats error:", error);
+        res.status(500).json({ error: "Failed to recalculate stats" });
+    }
+});
+
+// 🔹 Leaderboard Endpoint
+router.get("/leaderboard", async (req, res) => {
+    try {
+        console.log("🏆 Fetching leaderboard...");
+        // Fetch top 20 by score
+        // Fetch top 50 by score to include buffer for inactive users
+        let usersSnapshot = await db.collection("users").orderBy("totalScore", "desc").limit(50).get();
+
+        let leaderboard = [];
+
+        // Helper to process doc
+        const processDoc = (doc) => {
+            const data = doc.data();
+            // ONLY include users who have at least 1 debate
+            if ((data.debateCount || 0) > 0) {
+                return {
+                    uid: doc.id,
+                    name: data.displayName || data.name || "Anonymous",
+                    photoURL: data.photoURL || null,
+                    score: data.totalScore || 0,
+                    debates: data.debateCount || 0
+                };
+            }
+            return null;
+        };
+
+        if (usersSnapshot.empty) {
+            // Fallback: Fetch all if index unavailable or empty result
+            const allUsers = await db.collection("users").get();
+            allUsers.forEach(doc => {
+                const item = processDoc(doc);
+                if (item) leaderboard.push(item);
+            });
+            leaderboard.sort((a, b) => b.score - a.score);
+        } else {
+            usersSnapshot.forEach(doc => {
+                const item = processDoc(doc);
+                if (item) leaderboard.push(item);
+            });
+        }
+
+        // Return top 20
+        res.status(200).json(leaderboard.slice(0, 20));
+
+    } catch (error) {
+        console.error("❌ Leaderboard fetch error:", error);
+        // Fallback: Return empty or simple list
+        res.json([]);
+    }
+});
+
 export default router;

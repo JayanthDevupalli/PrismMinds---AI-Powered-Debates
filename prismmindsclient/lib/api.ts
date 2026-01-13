@@ -531,3 +531,71 @@ export async function acceptChallenge(id: string) {
     throw error;
   }
 }
+
+export async function fetchLeaderboard() {
+  try {
+    const userApiUrl = API_URL.replace("/api/debate", "/api/user");
+    console.log("🏆 Fetching leaderboard from:", `${userApiUrl}/leaderboard`);
+
+    const res = await fetch(`${userApiUrl}/leaderboard`);
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch leaderboard");
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("❌ Error fetching leaderboard:", error);
+    return [];
+  }
+}
+
+export async function forceRecalcStats() {
+  try {
+    const headers = await getAuthHeader();
+    const userApiUrl = API_URL.replace("/api/debate", "/api/user");
+    console.log("🔄 Requesting stats recalc...");
+
+    const res = await fetch(`${userApiUrl}/recalc-stats`, {
+      method: 'POST',
+      headers
+    });
+
+    if (!res.ok) throw new Error("Recalc failed");
+    return await res.json();
+  } catch (error) {
+    console.error("❌ Error recalc stats:", error);
+    throw error;
+  }
+}
+
+export async function analyzeDebate(debateId: string) {
+  try {
+    const headers = await getAuthHeader();
+    console.log("🧠 Triggering analysis for:", debateId);
+
+    const res = await fetch(`${API_URL}/${debateId}/analyze`, {
+      method: "POST",
+      headers
+    });
+
+    if (!res.ok) throw new Error("Analysis failed");
+    return await res.json();
+  } catch (error) {
+    console.error("❌ Error analyzing debate:", error);
+    throw error;
+  }
+}
+// 🔹 Fetch Title: Daily Challenge
+export async function fetchDailyChallenge() {
+  try {
+    const headers = await getAuthHeader();
+    const res = await fetch(`${API_URL}/daily`, { headers });
+
+    if (!res.ok) throw new Error("Failed to fetch daily challenge");
+    return await res.json();
+  } catch (error) {
+    console.error("❌ Daily challenge fetch error:", error);
+    return null;
+  }
+}
