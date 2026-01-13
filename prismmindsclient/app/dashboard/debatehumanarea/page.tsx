@@ -3,7 +3,7 @@
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState, useRef, Suspense } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Mic, Loader2, User, Bot, Square, Play, Sparkles, Zap } from "lucide-react"
+import { X, Mic, Loader2, User, Bot, Square, Play, Sparkles, Zap, Clock } from "lucide-react"
 import { fetchDebateById, sendHumanMessage, endHumanDebate } from "@/lib/api"
 import { downloadDebateTranscriptPDF } from "@/lib/pdf-generator"
 import { useAuth } from "@/lib/auth-context"
@@ -260,6 +260,43 @@ function DebateArenaContent() {
     const [liveAiText, setLiveAiText] = useState("")
     const transcriptRef = useRef<HTMLDivElement>(null)
 
+    // Daily Challenge Timer Logic
+    const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
+    const [timerActive, setTimerActive] = useState(false);
+    const mode = searchParams.get("mode");
+
+    useEffect(() => {
+        if (mode === "daily" && debateStarted && !debateEnded) {
+            setTimerActive(true);
+        }
+    }, [mode, debateStarted, debateEnded]);
+
+    // Timer Countdown
+    useEffect(() => {
+        if (!timerActive || timeLeft <= 0) return;
+        const timer = setInterval(() => setTimeLeft((t) => t - 1), 1000);
+        return () => clearInterval(timer);
+    }, [timerActive, timeLeft]);
+
+    // Auto-End Trigger
+    useEffect(() => {
+        if (timerActive && timeLeft <= 0) {
+            setTimerActive(false);
+            // Non-blocking alert or custom modal would be better, but we call handleEnd directly.
+            // We'll bypass the confirm dialog for auto-end to avoid blocking the UI thread loop messily?
+            // Actually handleEnd has a confirm(). We should probably creating a separate autoEnd function or modify handleEnd.
+            // For now, let's just alert and then end.
+            alert("Time's up! The debate is ending.");
+            handleEnd(true); // Pass true to skip confirm?
+        }
+    }, [timeLeft, timerActive]);
+
+    const formatTime = (seconds: number) => {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m}:${s.toString().padStart(2, "0")}`;
+    };
+
     const { isListening, transcript, error, start: startListening, stop: stopListening, reset: resetTranscript } = useSpeechRecognition()
 
     useEffect(() => {
@@ -353,8 +390,8 @@ function DebateArenaContent() {
     }
     const [endingAnimation, setEndingAnimation] = useState(false)
 
-    const handleEnd = async () => {
-        if (!confirm("End debate? Transcript will be saved.")) return
+    const handleEnd = async (skipConfirm = false) => {
+        if (!skipConfirm && !confirm("End debate? Transcript will be saved.")) return
         setEndingAnimation(true)
         stopListening()
         await endHumanDebate(debate!.id)
@@ -506,6 +543,16 @@ function DebateArenaContent() {
                             <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
                             <span className="text-xs font-bold uppercase tracking-widest text-slate-700">Live Session</span>
                         </div>
+
+                        {/* Daily Challenge Timer Display */}
+                        {mode === "daily" && (
+                            <div className={`px-4 py-1.5 rounded-full backdrop-blur-md border-[1.5px] shadow-sm flex items-center gap-2 transition-colors ${timeLeft < 60 ? "bg-red-50 border-red-500 text-red-600" : "bg-white/90 border-slate-300 text-slate-700"}`}>
+                                <Clock className="w-4 h-4" />
+                                <span className="text-xs font-bold uppercase tracking-widest font-mono">
+                                    {formatTime(timeLeft)}
+                                </span>
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -770,7 +817,7 @@ function DebateArenaContent() {
                                 <div className="w-[2px] h-8 bg-slate-200 mx-2" />
 
                                 <button
-                                    onClick={handleEnd}
+                                    onClick={() => handleEnd(false)}
                                     className="w-14 h-14 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-red-600 transition-colors border-2 border-slate-200"
                                     title="End Debate"
                                 >

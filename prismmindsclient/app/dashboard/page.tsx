@@ -4,10 +4,10 @@ import type React from "react"
 import { useState, useEffect, useRef, Suspense } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter, useSearchParams } from "next/navigation"
-import { fetchRecentDebates, createDebate, createHumanDebate, deleteDebate, fetchFavorites, addFavorite, removeFavorite } from "@/lib/api"
+import { fetchRecentDebates, createDebate, createHumanDebate, deleteDebate, fetchFavorites, addFavorite, removeFavorite, fetchDailyChallenge } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline"
-import { SparklesIcon, Trash2Icon, X, History, Download, ScrollText, Sparkles, Rocket, BookOpen, Mic2, MessageCircle, Target, BarChart3, Globe, Heart, ArrowRight, Loader2, Menu, User } from "lucide-react"
+import { SparklesIcon, Trash2Icon, X, History, Download, ScrollText, Sparkles, Rocket, BookOpen, Mic2, MessageCircle, Target, BarChart3, Globe, Heart, ArrowRight, Loader2, Menu, User, Clock, Zap } from "lucide-react"
 import { downloadDebateTranscriptPDF } from "@/lib/pdf-generator"
 
 type DebateMessage = {
@@ -71,6 +71,7 @@ function DashboardContent() {
   const modalContentRef = useRef<HTMLDivElement>(null)
   const [debateMode, setDebateMode] = useState<"ai" | "human">("ai");
   const [favorites, setFavorites] = useState<Debate[]>([])
+  const [showDailyModal, setShowDailyModal] = useState(false);
 
   const [form, setForm] = useState({
     topic: "",
@@ -104,7 +105,34 @@ function DashboardContent() {
   }, [initialTopic])
 
 
+  // Debate of the Day Logic
+  const [dailyTopic, setDailyTopic] = useState<{ topic: string, date: string } | null>(null);
+
+  useEffect(() => {
+    fetchDailyChallenge().then(setDailyTopic).catch(console.error);
+  }, []);
+
+  const handleDailyChallenge = async () => {
+    if (!dailyTopic) return;
+    setCreating(true);
+    setGenerating(true);
+    setStatusMessage("Preparing today's challenge...");
+
+    try {
+      const result = await createHumanDebate(dailyTopic.topic);
+      router.push(`dashboard/debatehumanarea?id=${result.id}&mode=daily`);
+    } catch (err: any) {
+      console.error("Daily challenge error:", err);
+      showToast("Failed to start daily challenge", "error");
+    } finally {
+      setCreating(false);
+      setGenerating(false);
+      setStatusMessage("");
+    }
+  };
+
   const filteredDebates = recentDebates.filter(
+
     (debate) =>
       debate.topic.toLowerCase().includes(searchQuery.toLowerCase()) ||
       debate.personaA.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -413,6 +441,8 @@ function DashboardContent() {
 
           {/* Right: Actions & Profile */}
           <div className="flex items-center gap-3">
+
+
             <div className="hidden md:flex items-center text-xs font-medium text-slate-500 bg-slate-50 dark:bg-slate-900 px-3 py-1.5 rounded-full border border-slate-200/60 dark:border-slate-800">
               {greeting}, {user?.displayName?.split(" ")[0]}
             </div>
@@ -640,10 +670,10 @@ function DashboardContent() {
             )}
           </AnimatePresence>
         </div>
-      </motion.header>
+      </motion.header >
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      < main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8" >
         {currentView === "transcripts" && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -826,128 +856,132 @@ function DashboardContent() {
         )
         }
 
-        {currentView === "favorites" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="space-y-6 sm:space-y-8"
-          >
+        {
+          currentView === "favorites" && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center justify-between"
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-6 sm:space-y-8"
             >
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-2 flex items-center gap-3">
-                  <Heart className="w-8 h-8 text-red-500" />
-                  Favorite Debates
-                </h2>
-                <p className="text-muted-foreground">Your bookmarked debates for quick access</p>
-              </div>
-            </motion.div>
-
-            {favorites.length === 0 ? (
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="text-center py-12"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center justify-between"
               >
-                <Heart className="w-16 h-16 text-red-200 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No favorites yet</h3>
-                <p className="text-muted-foreground">Click the heart icon on any debate to add it to favorites</p>
+                <div>
+                  <h2 className="text-2xl sm:text-3xl font-bold mb-2 flex items-center gap-3">
+                    <Heart className="w-8 h-8 text-red-500" />
+                    Favorite Debates
+                  </h2>
+                  <p className="text-muted-foreground">Your bookmarked debates for quick access</p>
+                </div>
               </motion.div>
-            ) : (
-              <motion.div
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
-                layout
-              >
-                <AnimatePresence mode="popLayout">
-                  {favorites.map((debate, idx) => (
-                    <motion.div
-                      key={debate.id}
-                      layout
-                      initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 300,
-                        damping: 25,
-                        delay: idx * 0.08
-                      }}
-                      className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 hover:shadow-lg hover:border-red-500/30 transition-all cursor-pointer group"
-                      onClick={() => setSelectedDebate(debate)}
-                    >
-                      <div className="flex items-start justify-between gap-2 sm:gap-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm sm:text-base font-bold text-foreground transition-colors mb-1 line-clamp-2 group-hover:text-orange-600">
-                            {debate.topic}
-                          </h3>
-                          <p className="text-xs text-muted-foreground mb-2 break-words">
-                            <span className="font-semibold text-orange-600">{debate.personaA}</span>
-                            <span className="mx-1">vs</span>
-                            <span className="font-semibold text-amber-600">{debate.personaB}</span>
-                          </p>
-                          <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                            <span className="text-xs text-muted-foreground whitespace-nowrap" suppressHydrationWarning>
-                              📅 {new Date(debate.createdAt).toLocaleDateString()}
-                            </span>
-                            <span className="text-xs bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
-                              ⏱️ {debate.duration}min
-                            </span>
+
+              {favorites.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center py-12"
+                >
+                  <Heart className="w-16 h-16 text-red-200 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No favorites yet</h3>
+                  <p className="text-muted-foreground">Click the heart icon on any debate to add it to favorites</p>
+                </motion.div>
+              ) : (
+                <motion.div
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+                  layout
+                >
+                  <AnimatePresence mode="popLayout">
+                    {favorites.map((debate, idx) => (
+                      <motion.div
+                        key={debate.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 25,
+                          delay: idx * 0.08
+                        }}
+                        className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 hover:shadow-lg hover:border-red-500/30 transition-all cursor-pointer group"
+                        onClick={() => setSelectedDebate(debate)}
+                      >
+                        <div className="flex items-start justify-between gap-2 sm:gap-3">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm sm:text-base font-bold text-foreground transition-colors mb-1 line-clamp-2 group-hover:text-orange-600">
+                              {debate.topic}
+                            </h3>
+                            <p className="text-xs text-muted-foreground mb-2 break-words">
+                              <span className="font-semibold text-orange-600">{debate.personaA}</span>
+                              <span className="mx-1">vs</span>
+                              <span className="font-semibold text-amber-600">{debate.personaB}</span>
+                            </p>
+                            <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                              <span className="text-xs text-muted-foreground whitespace-nowrap" suppressHydrationWarning>
+                                📅 {new Date(debate.createdAt).toLocaleDateString()}
+                              </span>
+                              <span className="text-xs bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
+                                ⏱️ {debate.duration}min
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-2">
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                toggleFavorite(debate)
+                              }}
+                              className="p-2 rounded-lg bg-red-100 text-red-500 hover:bg-red-200 transition-colors shadow-sm"
+                              title="Remove from favorites"
+                            >
+                              <Heart className="w-4 h-4 fill-current" />
+                            </motion.button>
+
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={async (e) => {
+                                e.stopPropagation()
+                                if (window.confirm("Delete this debate?")) {
+                                  try {
+                                    await deleteDebate(debate.id)
+                                    setFavorites(prev => prev.filter(f => f.id !== debate.id))
+                                    const all = await fetchRecentDebates(100)
+                                    setRecentDebates(all)
+                                  } catch (err) {
+                                    console.error("Failed to delete", err)
+                                    showToast("Failed to delete", "error")
+                                  }
+                                }
+                              }}
+                              className="p-2 rounded-lg bg-red-100 text-red-500 hover:bg-red-200 transition-colors shadow-sm"
+                              title="Delete Debate"
+                            >
+                              <Trash2Icon className="w-4 h-4" />
+                            </motion.button>
                           </div>
                         </div>
-
-                        <div className="flex flex-col gap-2">
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              toggleFavorite(debate)
-                            }}
-                            className="p-2 rounded-lg bg-red-100 text-red-500 hover:bg-red-200 transition-colors shadow-sm"
-                            title="Remove from favorites"
-                          >
-                            <Heart className="w-4 h-4 fill-current" />
-                          </motion.button>
-
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={async (e) => {
-                              e.stopPropagation()
-                              if (window.confirm("Delete this debate?")) {
-                                try {
-                                  await deleteDebate(debate.id)
-                                  setFavorites(prev => prev.filter(f => f.id !== debate.id))
-                                  const all = await fetchRecentDebates(100)
-                                  setRecentDebates(all)
-                                } catch (err) {
-                                  console.error("Failed to delete", err)
-                                  showToast("Failed to delete", "error")
-                                }
-                              }
-                            }}
-                            className="p-2 rounded-lg bg-red-100 text-red-500 hover:bg-red-200 transition-colors shadow-sm"
-                            title="Delete Debate"
-                          >
-                            <Trash2Icon className="w-4 h-4" />
-                          </motion.button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </motion.div>
-            )}
-          </motion.div>
-        )}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
+              )}
+            </motion.div>
+          )
+        }
 
         {
           currentView !== "transcripts" && currentView !== "favorites" && (
+
             <>
+
               {/* Debate Mode Selector */}
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -1276,6 +1310,21 @@ function DashboardContent() {
                           Human → AI Debate
                         </h2>
 
+                        {/* Daily Challenge - Moved Here */}
+                        <button
+                          onClick={() => setShowDailyModal(true)}
+                          className="absolute top-6 right-6 flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60 text-xs font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-all z-20"
+                        >
+                          <Zap className="w-3.5 h-3.5" />
+                          <span>Daily Challenge</span>
+                          {dailyTopic && (
+                            <span className="flex h-2 w-2 relative">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                            </span>
+                          )}
+                        </button>
+
                         {/* Info Note about Performance Audit */}
                         <motion.div
                           initial={{ opacity: 0, y: -5 }}
@@ -1296,6 +1345,8 @@ function DashboardContent() {
 
                         {/* FORM */}
                         <form onSubmit={handleHumanDebateSubmit} className="space-y-6">
+
+
 
                           {/* INPUT — CLEAN + PREMIUM + NO HOVER */}
                           <div className="relative">
@@ -1557,6 +1608,98 @@ function DashboardContent() {
           )
         }
       </main >
+
+
+
+      {/* DAILY CHALLENGE MODAL */}
+      <AnimatePresence>
+        {showDailyModal && dailyTopic && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowDailyModal(false)}
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-lg rounded-3xl bg-white dark:bg-slate-900 shadow-2xl overflow-hidden relative"
+            >
+              {/* Decorative Background */}
+              <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-br from-indigo-600 to-violet-700" />
+              <div className="absolute top-0 inset-x-0 h-32 opacity-20">
+                <div className="absolute top-[-50%] left-[-20%] w-[140%] h-[200%] bg-[radial-gradient(circle,rgba(255,255,255,0.8)_0%,transparent_60%)] rotate-12" />
+              </div>
+
+              <div className="relative pt-8 px-6 pb-6">
+                {/* Icon Badge */}
+                <div className="mx-auto w-16 h-16 rounded-2xl bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center mb-4 relative z-10">
+                  <Target className="w-8 h-8 text-indigo-600" />
+                </div>
+
+                <div className="text-center mb-6">
+                  <div className="inline-block px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 text-xs font-bold uppercase tracking-wider mb-2">
+                    Today's Official Topic
+                  </div>
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight mb-2">
+                    {dailyTopic.topic}
+                  </h2>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm">
+                    {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+                  </p>
+                </div>
+
+                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 mb-6 border border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span className="text-slate-500 font-medium">Format</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">Human vs AI</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span className="text-slate-500 font-medium">Time Limit</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" /> 5 Minutes
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-500 font-medium">Difficulty</span>
+                    <span className="font-bold text-emerald-600">Open/Standard</span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setShowDailyModal(false);
+                    handleDailyChallenge();
+                  }}
+                  disabled={creating}
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold shadow-lg shadow-indigo-500/25 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                >
+                  {creating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Initializing Arena...
+                    </>
+                  ) : (
+                    <>
+                      Accept Challenge <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => setShowDailyModal(false)}
+                  className="w-full mt-3 py-2 text-sm font-medium text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                >
+                  Maybe later
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Fullscreen Debate Modal */}
       <AnimatePresence>
@@ -1850,4 +1993,3 @@ function DashboardContent() {
     </div >
   )
 }
-

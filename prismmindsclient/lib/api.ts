@@ -589,8 +589,7 @@ export async function analyzeDebate(debateId: string) {
 // 🔹 Fetch Title: Daily Challenge
 export async function fetchDailyChallenge() {
   try {
-    const headers = await getAuthHeader();
-    const res = await fetch(`${API_URL}/daily`, { headers });
+    const res = await fetch(`${API_URL}/daily`);
 
     if (!res.ok) throw new Error("Failed to fetch daily challenge");
     return await res.json();

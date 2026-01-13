@@ -6,6 +6,34 @@ import { startDebate, startHumanDebate, generateAIResponse, analyzeDebate } from
 
 const router = express.Router();
 
+// 🔹 Get Daily Challenge Topic
+router.get("/daily", async (req, res) => {
+  try {
+    // List of high-quality debate topics
+    const topics = [
+      "Is privacy more important than national security?",
+      "Should AI replace human judges in courtrooms?",
+      "Is social media net positive or negative for society?",
+      "Should universal basic income be implemented globally?",
+      "Is space exploration a waste of resources?",
+      "Should gene editing be allowed on humans?",
+      "Is a 4-day work week better for productivity?",
+      "Should animal testing be banned completely?",
+      "Is free speech absolute?",
+      "Should cryptocurrencies be regulated globally?"
+    ];
+
+    // Pick a topic based on the day of the year to ensure it rotates daily
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+    const topic = topics[dayOfYear % topics.length];
+
+    res.json({ topic, date: new Date().toISOString() });
+  } catch (err) {
+    console.error("Daily challenge error:", err);
+    res.status(500).json({ error: "Failed to fetch daily challenge" });
+  }
+});
+
 // Create a new debate
 router.post("/create", verifyFirebaseToken, async (req, res) => {
   try {
@@ -371,7 +399,9 @@ router.delete("/favorite/:id", verifyFirebaseToken, async (req, res) => {
   }
 });
 
+
 export default router;
+
 
 // 🔹 Generate Analysis for a Debate
 router.post("/:id/analyze", verifyFirebaseToken, async (req, res) => {
