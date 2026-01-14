@@ -139,7 +139,7 @@ export function DebateSidebar({
           className="space-y-2"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] uppercase tracking-widest font-semibold text-accent">
+            <span className="text-[11px] uppercase tracking-widest font-semibold text-indigo-500 dark:text-indigo-400">
               Persona B
             </span>
             <span className="text-[10px] text-muted-foreground">
@@ -148,13 +148,13 @@ export function DebateSidebar({
           </div>
 
           <div className="flex items-start gap-2">
-            <Mic2 className="w-4 h-4 text-accent mt-0.5" />
+            <Mic2 className="w-4 h-4 text-indigo-500 dark:text-indigo-400 mt-0.5" />
             <p className="text-sm font-medium text-foreground leading-snug">
               {personaB}
             </p>
           </div>
 
-          <div className="h-px bg-accent/20" />
+          <div className="h-px bg-indigo-500/20" />
         </motion.div>
       </div>
     </motion.aside>

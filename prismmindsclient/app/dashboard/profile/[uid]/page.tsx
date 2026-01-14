@@ -58,6 +58,18 @@ type Debate = {
     }
 }
 
+const getRankInfo = (debates: number, rating: number) => {
+    if (rating >= 90 && debates >= 10) return { label: "Elite Philosopher", color: "bg-gradient-to-r from-amber-400 to-yellow-600 shadow-amber-500/50" }
+
+    if (debates >= 50) return { label: "Grandmaster", color: "bg-purple-600 shadow-purple-500/50" }
+    if (debates >= 30) return { label: "Expert", color: "bg-red-600 shadow-red-500/50" }
+    if (debates >= 15) return { label: "Challenger", color: "bg-orange-600 shadow-orange-500/50" }
+    if (debates >= 5) return { label: "Apprentice", color: "bg-blue-600 shadow-blue-500/50" }
+    if (debates >= 1) return { label: "Novice", color: "bg-emerald-600 shadow-emerald-500/50" }
+
+    return { label: "Newcomer", color: "bg-slate-500" }
+}
+
 // --- Components ---
 
 /**
@@ -249,7 +261,7 @@ import { useRouter } from "next/navigation"
 
 
 export default function ProfilePage() {
-    const { user, deleteUserAccount, updateDisplayName, updateUserPassword, reauthenticate } = useAuth()
+    const { user, deleteUserAccount, updateDisplayName, updateBio, updateUserPassword, reauthenticate } = useAuth()
     const router = useRouter()
     const [loading, setLoading] = useState(true)
     const [debates, setDebates] = useState<Debate[]>([])
@@ -263,6 +275,10 @@ export default function ProfilePage() {
     const [newName, setNewName] = useState("")
     const [isEditingName, setIsEditingName] = useState(false)
 
+    // Bio Update State
+    const [newBio, setNewBio] = useState("")
+    const [isEditingBio, setIsEditingBio] = useState(false)
+
     // Password Update State
     // Password Update State
     const [currentPassword, setCurrentPassword] = useState("")
@@ -272,14 +288,26 @@ export default function ProfilePage() {
     const [confirmPassword, setConfirmPassword] = useState("")
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-    // Set initial name when user loads
+    // Set initial name and bio when user loads
     useEffect(() => {
-        if (user?.displayName) {
-            setNewName(user.displayName)
+        if (user) {
+            setNewName(user.displayName || "")
+            setNewBio(user.bio || "")
         }
     }, [user])
 
     // --- Actions ---
+    const handleUpdateBio = async () => {
+        if (!newBio.trim()) return
+        try {
+            await updateBio(newBio)
+            toast.success("Bio updated successfully")
+            setIsEditingBio(false)
+        } catch (error) {
+            toast.error("Failed to update bio")
+        }
+    }
+
     const handleUpdateName = async () => {
         if (!newName.trim()) return
         try {
@@ -383,18 +411,27 @@ export default function ProfilePage() {
     }
 
     useEffect(() => {
-        if (user) {
-            Promise.all([
-                fetchRecentDebates(100),
-                fetchLeaderboard()
-            ])
-                .then(([debatesData, leaderboardData]) => {
+        // If auth is still loading, do nothing yet
+        // If auth is done and we have NO user, stop loading (or redirect elsewhere, effectively)
+        // If auth is done and we HAVE user, fetch data
+
+        const loadData = async () => {
+            if (user) {
+                try {
+                    const [debatesData, leaderboardData] = await Promise.all([
+                        fetchRecentDebates(100),
+                        fetchLeaderboard()
+                    ])
                     setDebates(Array.isArray(debatesData) ? debatesData.filter((d: any) => d.debateType === 'human-to-ai') : [])
                     setLeaderboard(Array.isArray(leaderboardData) ? leaderboardData : [])
-                })
-                .catch(console.error)
-                .finally(() => setLoading(false))
+                } catch (e) {
+                    console.error(e)
+                }
+            }
+            setLoading(false)
         }
+
+        loadData()
     }, [user])
 
     // --- Derived Stats ---
@@ -515,39 +552,56 @@ export default function ProfilePage() {
 
                         </div>
                         {/* Rank Badge */}
-                        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-orange-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm border border-white dark:border-slate-900 whitespace-nowrap">
-                            {stats.overallRating > 80 ? "Master Debater" : "Rising Star"}
+                        <div className={`absolute -bottom-3 left-1/2 -translate-x-1/2 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg border border-white dark:border-slate-900 whitespace-nowrap ${getRankInfo(stats.total, stats.overallRating).color}`}>
+                            {getRankInfo(stats.total, stats.overallRating).label}
                         </div>
                     </div>
 
                     {/* User Info */}
                     <div className="flex-1 text-center sm:text-left pt-2 sm:pt-0">
-                        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-1">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">
                             {user?.displayName || "Debater"}
                         </h1>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium flex items-center justify-center sm:justify-start gap-2">
-                            <Brain className="w-4 h-4 text-orange-500" />
-                            Debate Enthusiast
-                        </p>
+
+                        {user?.bio && (
+                            <p className="text-slate-600 dark:text-slate-300 text-sm mb-3 max-w-lg mx-auto sm:mx-0 font-medium italic leading-relaxed">
+                                "{user.bio}"
+                            </p>
+                        )}
+
+                        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-2">
+                            <div className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 rounded-full text-xs font-bold border border-orange-100 dark:border-orange-800 flex items-center gap-1.5">
+                                <Brain className="w-3.5 h-3.5" />
+                                Debate Enthusiast
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Stats - Right Aligned */}
-                    <div className="flex items-center gap-2 sm:gap-6 w-full sm:w-auto justify-center sm:justify-end border-t sm:border-t-0 border-slate-100 dark:border-slate-800 pt-6 sm:pt-0 mt-2 sm:mt-0">
-                        <div className="text-center px-4 sm:px-0">
-                            <div className="text-2xl font-bold text-slate-900 dark:text-white">{stats.overallRating}</div>
-                            <div className="text-xs text-slate-500 font-bold uppercase tracking-wider">Rating</div>
+                    {/* Stats - Right Aligned Cards */}
+                    <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-end border-t sm:border-t-0 border-slate-100 dark:border-slate-800 pt-6 sm:pt-0 mt-2 sm:mt-0">
+                        {/* Streak */}
+                        <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 min-w-[80px]">
+                            <div className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                                <Flame className={`w-4 h-4 ${user?.streak && user.streak > 0 ? "fill-orange-500 text-orange-500" : "text-slate-300"}`} />
+                                {user?.streak || 0}
+                            </div>
+                            <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">Streak</div>
                         </div>
-                        <div className="w-px h-10 bg-slate-200 dark:bg-slate-800 hidden sm:block"></div>
-                        <div className="text-center px-4 sm:px-0">
-                            <div className="text-2xl font-bold text-slate-900 dark:text-white">{stats.total}</div>
-                            <div className="text-xs text-slate-500 font-bold uppercase tracking-wider">Debates</div>
+
+                        {/* Rating */}
+                        <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 min-w-[80px]">
+                            <div className="text-xl font-bold text-slate-900 dark:text-white">
+                                {Number(stats.overallRating).toFixed(1)}
+                            </div>
+                            <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">Rating</div>
                         </div>
-                        <div className="w-px h-10 bg-slate-200 dark:bg-slate-800 hidden sm:block"></div>
-                        <div className="text-center px-4 sm:px-0">
-                            <div className="text-2xl font-bold text-slate-900 dark:text-white">
+
+                        {/* Rank */}
+                        <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/30 min-w-[80px]">
+                            <div className="text-xl font-bold text-orange-600 dark:text-orange-400">
                                 #{leaderboard.findIndex(u => u.uid === user?.uid) + 1 || "-"}
                             </div>
-                            <div className="text-xs text-slate-500 font-bold uppercase tracking-wider">Global Rank</div>
+                            <div className="text-[10px] text-orange-600/70 dark:text-orange-400/70 font-bold uppercase tracking-wider mt-1">Rank</div>
                         </div>
                     </div>
                 </motion.div>
@@ -592,11 +646,13 @@ export default function ProfilePage() {
 
                         {/* Left Col - Skills (4 cols) */}
                         <div className="lg:col-span-4 space-y-6">
+
+
                             <motion.div
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.1 }}
-                                className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-800 p-6 h-full"
+                                className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-800 p-6"
                             >
                                 <h3 className="text-base font-bold flex items-center gap-2 mb-6 text-slate-800 dark:text-slate-200">
                                     <Target className="w-4 h-4 text-orange-500" />
@@ -866,6 +922,44 @@ export default function ProfilePage() {
                             </h3>
 
                             <div className="space-y-6">
+                                {/* Bio Update */}
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Your Bio</label>
+                                    <div className="relative group">
+                                        <textarea
+                                            value={newBio}
+                                            onChange={(e) => setNewBio(e.target.value)}
+                                            disabled={!isEditingBio}
+                                            placeholder="Tell us a bit about yourself..."
+                                            rows={3}
+                                            maxLength={150}
+                                            className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 disabled:opacity-70 resize-none transition-all"
+                                        />
+                                        <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                                            <span className="text-[10px] text-slate-400 font-medium px-2 py-1 bg-white/50 dark:bg-slate-900/50 rounded-md backdrop-blur-sm">
+                                                {newBio.length}/150
+                                            </span>
+                                            {isEditingBio ? (
+                                                <button
+                                                    onClick={handleUpdateBio}
+                                                    className="p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors shadow-md hover:shadow-lg active:scale-95"
+                                                    title="Save Bio"
+                                                >
+                                                    <Save className="w-3.5 h-3.5" />
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    onClick={() => setIsEditingBio(true)}
+                                                    className="p-2 bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors shadow-sm border border-slate-200 dark:border-slate-600 hover:border-slate-300"
+                                                    title="Edit Bio"
+                                                >
+                                                    <Edit2 className="w-3.5 h-3.5" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
                                 {/* Name Update */}
                                 <div>
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Display Name</label>

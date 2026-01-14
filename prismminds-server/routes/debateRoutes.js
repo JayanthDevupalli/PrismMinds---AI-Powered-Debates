@@ -27,7 +27,45 @@ router.get("/daily", async (req, res) => {
     const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
     const topic = topics[dayOfYear % topics.length];
 
-    res.json({ topic, date: new Date().toISOString() });
+    let participationData = { participated: false, score: null };
+
+    // Check Authorization header manually since middleware isn't used globally here
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      try {
+        const idToken = authHeader.split("Bearer ")[1];
+        // lazy import admin to avoid top-level await issues if any, though db is already imported
+        const { getAuth } = await import("firebase-admin/auth");
+        const decodedToken = await getAuth().verifyIdToken(idToken);
+        const uid = decodedToken.uid;
+
+        // Check for existing human-to-ai debate on this topic
+        const snapshot = await db.collection("debates")
+          .doc(uid)
+          .collection("userDebates")
+          .where("topic", "==", topic)
+          .where("debateType", "==", "human-to-ai")
+          .orderBy("createdAt", "desc") // Get latest attempt
+          .limit(1)
+          .get();
+
+        if (!snapshot.empty) {
+          const debateDoc = snapshot.docs[0].data();
+          participationData.participated = true;
+
+          if (debateDoc.analysis && debateDoc.analysis.scores) {
+            const { logic, persuasion, clarity, emotional_intelligence } = debateDoc.analysis.scores;
+            // Calculate average score
+            const avg = Math.round((logic + persuasion + clarity + emotional_intelligence) / 4);
+            participationData.score = avg;
+          }
+        }
+      } catch (authErr) {
+        console.warn("Daily challenge auth check failed (ignoring):", authErr.message);
+      }
+    }
+
+    res.json({ topic, date: new Date().toISOString(), ...participationData });
   } catch (err) {
     console.error("Daily challenge error:", err);
     res.status(500).json({ error: "Failed to fetch daily challenge" });
@@ -65,6 +103,61 @@ router.post("/create", verifyFirebaseToken, async (req, res) => {
   }
 });
 
+
+// ... existing imports
+
+// Helper: Check and update streak
+async function updateUserStreak(uid) {
+  try {
+    const userRef = db.collection("users").doc(uid);
+    const userDoc = await userRef.get();
+    const userData = userDoc.exists ? userDoc.data() : {};
+
+    const lastActivity = userData.lastActivityDate ? new Date(userData.lastActivityDate) : null;
+    const now = new Date();
+    let streak = userData.streak || 0;
+
+    // Normalize to midnight
+    const todayMidnight = new Date(now);
+    todayMidnight.setHours(0, 0, 0, 0);
+
+    if (lastActivity) {
+      const lastMidnight = new Date(lastActivity);
+      lastMidnight.setHours(0, 0, 0, 0);
+
+      const diffTime = Math.abs(todayMidnight - lastMidnight);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 1) {
+        streak += 1; // Consecutive day
+      } else if (diffDays > 1) {
+        streak = 1; // Broken streak
+      }
+      // If diffDays === 0, same day, do nothing (keep streak)
+    } else {
+      streak = 1; // First activity
+    }
+
+    // Basic Badges Logic (Example)
+    let badges = userData.badges || [];
+    if (streak >= 7 && !badges.includes("streak_master")) badges.push("streak_master");
+    // Note: "first_blood" is hard to check here without debat count, assuming front-end handles or separate check
+
+    await userRef.set({
+      lastActivityDate: now.toISOString(),
+      streak: streak,
+      badges: badges
+    }, { merge: true });
+
+    return { streak, badges };
+  } catch (e) {
+    console.error("Error updating streak:", e);
+    return null;
+  }
+}
+
+// ...
+
 // 🔹 Create a new human-to-AI debate
 router.post("/create-human", verifyFirebaseToken, async (req, res) => {
   try {
@@ -94,12 +187,18 @@ router.post("/create-human", verifyFirebaseToken, async (req, res) => {
         createdAt: new Date().toISOString(),
       });
 
+    // UPDATE STREAK
+    await updateUserStreak(uid);
+
     res.json({ success: true, id: debateRef.id });
   } catch (err) {
     console.error("Human debate creation error:", err);
     res.status(500).json({ error: "Failed to create human debate" });
   }
 });
+
+// ...
+
 
 // 🔹 Get recent debates (supports optional ?limit=50)
 router.get("/recent", verifyFirebaseToken, async (req, res) => {

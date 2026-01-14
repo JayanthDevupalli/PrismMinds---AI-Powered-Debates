@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { fetchRecentDebates, createDebate, createHumanDebate, deleteDebate, fetchFavorites, addFavorite, removeFavorite, fetchDailyChallenge } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline"
-import { SparklesIcon, Trash2Icon, X, History, Download, ScrollText, Sparkles, Rocket, BookOpen, Mic2, MessageCircle, Target, BarChart3, Globe, Heart, ArrowRight, Loader2, Menu, User, Clock, Zap } from "lucide-react"
+import { SparklesIcon, Trash2Icon, X, History, Download, ScrollText, Sparkles, Rocket, BookOpen, Mic2, MessageCircle, Target, BarChart3, Globe, Heart, ArrowRight, Loader2, Menu, User, Clock, Zap, Flame } from "lucide-react"
 import { downloadDebateTranscriptPDF } from "@/lib/pdf-generator"
 
 type DebateMessage = {
@@ -106,7 +106,8 @@ function DashboardContent() {
 
 
   // Debate of the Day Logic
-  const [dailyTopic, setDailyTopic] = useState<{ topic: string, date: string } | null>(null);
+  // Debate of the Day Logic
+  const [dailyTopic, setDailyTopic] = useState<{ topic: string, date: string, participated?: boolean, score?: number } | null>(null);
 
   useEffect(() => {
     fetchDailyChallenge().then(setDailyTopic).catch(console.error);
@@ -443,8 +444,13 @@ function DashboardContent() {
           <div className="flex items-center gap-3">
 
 
-            <div className="hidden md:flex items-center text-xs font-medium text-slate-500 bg-slate-50 dark:bg-slate-900 px-3 py-1.5 rounded-full border border-slate-200/60 dark:border-slate-800">
-              {greeting}, {user?.displayName?.split(" ")[0]}
+
+            <div className="hidden md:flex items-center text-xs font-medium text-slate-500 bg-slate-50 dark:bg-slate-900 px-3 py-1.5 rounded-full border border-slate-200/60 dark:border-slate-800 gap-3">
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800/50" title="Daily Streak">
+                <Flame className={`w-3.5 h-3.5 ${user?.streak && user.streak > 0 ? "fill-orange-500 text-orange-500" : "text-slate-400"}`} />
+                <span className="font-bold tabular-nums">{user?.streak || 0}</span>
+              </div>
+              <span>{greeting}, {user?.displayName?.split(" ")[0]}</span>
             </div>
 
             {/* Profile Dropdown */}
@@ -1312,12 +1318,30 @@ function DashboardContent() {
 
                         {/* Daily Challenge - Moved Here */}
                         <button
-                          onClick={() => setShowDailyModal(true)}
-                          className="absolute top-6 right-6 flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60 text-xs font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-all z-20"
+                          onClick={() => {
+                            if (dailyTopic?.participated) {
+                              // If already participated, maybe show a toast or just let them see the score
+                              // For now, let's allow them to click again if they really want, or maybe disable it?
+                              // The requirements said "show the latest score", implies it's a display state.
+                              // We can allow re-entry if they want to try again, but let's just update the visual.
+                              setShowDailyModal(true)
+                            } else {
+                              setShowDailyModal(true)
+                            }
+                          }}
+                          className={`absolute top-6 right-6 flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold transition-all z-20 
+                            ${dailyTopic?.participated
+                              ? "bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border-purple-200/60 dark:border-purple-800/60 hover:bg-purple-100 dark:hover:bg-purple-900/30"
+                              : "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200/60 dark:border-emerald-800/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/30"
+                            }`}
                         >
                           <Zap className="w-3.5 h-3.5" />
-                          <span>Daily Challenge</span>
-                          {dailyTopic && (
+                          <span>
+                            {dailyTopic?.participated
+                              ? `Score: ${dailyTopic.score || 0}/100`
+                              : "Daily Challenge"}
+                          </span>
+                          {!dailyTopic?.participated && dailyTopic && (
                             <span className="flex h-2 w-2 relative">
                               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>

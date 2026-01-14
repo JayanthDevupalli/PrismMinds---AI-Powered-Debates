@@ -589,7 +589,20 @@ export async function analyzeDebate(debateId: string) {
 // 🔹 Fetch Title: Daily Challenge
 export async function fetchDailyChallenge() {
   try {
-    const res = await fetch(`${API_URL}/daily`);
+    let headers = {};
+    try {
+      // Optimistically try to get auth header if user is logged in
+      const authHeader = await getAuthHeader();
+      headers = { ...authHeader };
+    } catch (e) {
+      // User likely not logged in, proceed with public fetch
+      console.log("Fetching daily challenge as guest (no auth)");
+    }
+
+    const res = await fetch(`${API_URL}/daily`, {
+      method: 'GET',
+      headers
+    });
 
     if (!res.ok) throw new Error("Failed to fetch daily challenge");
     return await res.json();

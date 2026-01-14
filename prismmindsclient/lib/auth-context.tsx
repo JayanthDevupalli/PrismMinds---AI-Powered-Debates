@@ -21,7 +21,15 @@ type User = {
   email: string | null
   displayName: string | null
   photoURL: string | null
+  // Gamification fields
+  xp: number
+  level: number
+  streak: number
+  badges: string[] // REMOVED but keeping type definition safe if needed, though we removed it from logic. Actually, let's keep it clean.
+  lastActivityDate: string | null
+  bio?: string
 }
+
 
 type AuthContextType = {
   user: User | null
@@ -31,38 +39,61 @@ type AuthContextType = {
   googleSignIn: () => Promise<void>
   logout: () => Promise<void>
   updateDisplayName: (name: string) => Promise<void>
+  updateBio: (bio: string) => Promise<void>
   deleteUserAccount: () => Promise<void>
   updateUserPassword: (password: string) => Promise<void>
   reauthenticate: (password: string) => Promise<void>
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
-  register: async () => { },
-  login: async () => { },
-  googleSignIn: async () => { },
-  logout: async () => { },
-  updateDisplayName: async () => { },
-  deleteUserAccount: async () => { },
-  updateUserPassword: async () => { },
-  reauthenticate: async () => { },
-})
+
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
   // 🔹 Track user state
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser({
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL,
-        })
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // Fetch extended data from Firestore
+        try {
+          // Import dynamic to avoid circular dep issues if any, or just use db from outer scope
+          const { doc, getDoc } = await import("firebase/firestore")
+          const { db } = await import("./firebase") // Ensure correct path
+
+          const userDoc = await getDoc(doc(db, "users", firebaseUser.uid))
+          const userData = userDoc.exists() ? userDoc.data() : {}
+
+          setUser({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName,
+            photoURL: firebaseUser.photoURL,
+            xp: userData.xp || 0,
+            level: userData.level || 1,
+            streak: userData.streak || 0,
+            badges: userData.badges || [],
+            lastActivityDate: userData.lastActivityDate || null,
+            bio: userData.bio || ""
+          })
+        } catch (error) {
+          console.error("Error fetching user data:", error)
+          // Fallback minimal user if firestore fails
+          setUser({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName,
+            photoURL: firebaseUser.photoURL,
+            xp: 0,
+            level: 1,
+            streak: 0,
+            badges: [],
+            lastActivityDate: null
+          })
+        }
       } else {
         setUser(null)
       }
@@ -134,6 +165,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             // Update Firestore as well
             await setDoc(doc(db, "users", user.uid), { name }, { merge: true });
+          }
+        },
+        updateBio: async (bio: string) => {
+          if (user) {
+            // Update local state
+            setUser(prev => prev ? { ...prev, bio } : null);
+            // Update Firestore
+            await setDoc(doc(db, "users", user.uid), { bio }, { merge: true });
           }
         },
         deleteUserAccount: async () => {
