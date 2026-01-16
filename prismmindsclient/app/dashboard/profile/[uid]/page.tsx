@@ -579,14 +579,7 @@ export default function ProfilePage() {
 
                     {/* Stats - Right Aligned Cards */}
                     <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-end border-t sm:border-t-0 border-slate-100 dark:border-slate-800 pt-6 sm:pt-0 mt-2 sm:mt-0">
-                        {/* Streak */}
-                        <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 min-w-[80px]">
-                            <div className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-1">
-                                <Flame className={`w-4 h-4 ${user?.streak && user.streak > 0 ? "fill-orange-500 text-orange-500" : "text-slate-300"}`} />
-                                {user?.streak || 0}
-                            </div>
-                            <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">Streak</div>
-                        </div>
+
 
                         {/* Rating */}
                         <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 min-w-[80px]">

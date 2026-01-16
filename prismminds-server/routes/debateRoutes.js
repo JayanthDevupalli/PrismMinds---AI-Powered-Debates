@@ -107,56 +107,7 @@ router.post("/create", verifyFirebaseToken, async (req, res) => {
 // ... existing imports
 
 // Helper: Check and update streak
-async function updateUserStreak(uid) {
-  try {
-    const userRef = db.collection("users").doc(uid);
-    const userDoc = await userRef.get();
-    const userData = userDoc.exists ? userDoc.data() : {};
 
-    const lastActivity = userData.lastActivityDate ? new Date(userData.lastActivityDate) : null;
-    const now = new Date();
-    let streak = userData.streak || 0;
-
-    // Normalize to midnight
-    const todayMidnight = new Date(now);
-    todayMidnight.setHours(0, 0, 0, 0);
-
-    if (lastActivity) {
-      const lastMidnight = new Date(lastActivity);
-      lastMidnight.setHours(0, 0, 0, 0);
-
-      const diffTime = Math.abs(todayMidnight - lastMidnight);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 1) {
-        streak += 1; // Consecutive day
-      } else if (diffDays > 1) {
-        streak = 1; // Broken streak
-      }
-      // If diffDays === 0, same day, do nothing (keep streak)
-    } else {
-      streak = 1; // First activity
-    }
-
-    // Basic Badges Logic (Example)
-    let badges = userData.badges || [];
-    if (streak >= 7 && !badges.includes("streak_master")) badges.push("streak_master");
-    // Note: "first_blood" is hard to check here without debat count, assuming front-end handles or separate check
-
-    await userRef.set({
-      lastActivityDate: now.toISOString(),
-      streak: streak,
-      badges: badges
-    }, { merge: true });
-
-    return { streak, badges };
-  } catch (e) {
-    console.error("Error updating streak:", e);
-    return null;
-  }
-}
-
-// ...
 
 // 🔹 Create a new human-to-AI debate
 router.post("/create-human", verifyFirebaseToken, async (req, res) => {
@@ -187,8 +138,7 @@ router.post("/create-human", verifyFirebaseToken, async (req, res) => {
         createdAt: new Date().toISOString(),
       });
 
-    // UPDATE STREAK
-    await updateUserStreak(uid);
+
 
     res.json({ success: true, id: debateRef.id });
   } catch (err) {

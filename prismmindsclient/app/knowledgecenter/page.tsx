@@ -153,7 +153,7 @@ export default function KnowledgeCenter() {
                                 Icon: Video,
                                 href: "/knowledgecenter/videos",
                                 cta: "Watch Videos",
-                                status: "soon",
+                                status: "live",
                             },
                             {
                                 title: "Public Debates",

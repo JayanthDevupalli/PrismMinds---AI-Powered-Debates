@@ -446,10 +446,7 @@ function DashboardContent() {
 
 
             <div className="hidden md:flex items-center text-xs font-medium text-slate-500 bg-slate-50 dark:bg-slate-900 px-3 py-1.5 rounded-full border border-slate-200/60 dark:border-slate-800 gap-3">
-              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800/50" title="Daily Streak">
-                <Flame className={`w-3.5 h-3.5 ${user?.streak && user.streak > 0 ? "fill-orange-500 text-orange-500" : "text-slate-400"}`} />
-                <span className="font-bold tabular-nums">{user?.streak || 0}</span>
-              </div>
+
               <span>{greeting}, {user?.displayName?.split(" ")[0]}</span>
             </div>
 

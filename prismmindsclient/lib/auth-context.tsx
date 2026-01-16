@@ -24,7 +24,6 @@ type User = {
   // Gamification fields
   xp: number
   level: number
-  streak: number
   badges: string[] // REMOVED but keeping type definition safe if needed, though we removed it from logic. Actually, let's keep it clean.
   lastActivityDate: string | null
   bio?: string
@@ -74,7 +73,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             photoURL: firebaseUser.photoURL,
             xp: userData.xp || 0,
             level: userData.level || 1,
-            streak: userData.streak || 0,
             badges: userData.badges || [],
             lastActivityDate: userData.lastActivityDate || null,
             bio: userData.bio || ""
@@ -89,7 +87,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             photoURL: firebaseUser.photoURL,
             xp: 0,
             level: 1,
-            streak: 0,
             badges: [],
             lastActivityDate: null
           })
