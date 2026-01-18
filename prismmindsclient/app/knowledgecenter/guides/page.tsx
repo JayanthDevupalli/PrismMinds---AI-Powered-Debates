@@ -93,11 +93,11 @@ export default function GuidesPage() {
                     className="mb-8"
                 >
                     <Link
-                        href="/"
+                        href="/knowledgecenter"
                         className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
                     >
                         <ArrowLeftIcon className="w-4 h-4" />
-                        Back to Home
+                        Back to Knowledge Center
                     </Link>
                 </motion.div>
 
