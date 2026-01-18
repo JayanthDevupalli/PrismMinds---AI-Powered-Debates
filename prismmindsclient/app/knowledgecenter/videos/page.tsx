@@ -18,6 +18,8 @@ export default function VideosPage() {
     // Find Julian Treasure's video for Hero, or fallback to first
     const featuredVideo = videos.find(v => v.id === "powerful-listening") || videos[0]
 
+
+
     return (
         <main className="min-h-screen bg-[#FAFAFA] text-slate-900 font-sans selection:bg-indigo-500 selection:text-white">
 
