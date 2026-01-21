@@ -192,17 +192,38 @@ export default function Home() {
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ margin: "-100px" }}
-            className="max-w-4xl mx-auto"
+            className="max-w-6xl mx-auto"
           >
-            <div className="relative bg-white/80 backdrop-blur-md rounded-[3rem] p-12 sm:p-20 shadow-[0_20px_60px_rgba(0,0,0,0.05)] text-center border-[3px] border-slate-200/80">
-              <div className="absolute top-10 left-10 text-6xl text-slate-200 font-serif">"</div>
-              <blockquote className="text-2xl sm:text-4xl font-light text-slate-800 leading-relaxed font-serif relative z-10">
-                True intelligence isn't about having all the answers. It's about asking the <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-600 font-medium">right questions</span>.
-              </blockquote>
-              <div className="mt-10 flex items-center justify-center gap-4">
-                <div className="h-px w-12 bg-slate-300"></div>
-                <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">PrismMinds Philosophy</span>
-                <div className="h-px w-12 bg-slate-300"></div>
+            <div className="relative bg-white rounded-[3rem] p-0 shadow-xl border border-slate-100 overflow-hidden">
+              <div className="grid lg:grid-cols-2 gap-0 items-center">
+
+                {/* Image Side */}
+                <div className="relative h-full min-h-[500px] bg-gradient-to-br from-blue-50 to-slate-50 flex items-center justify-center overflow-hidden p-10">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,white,transparent)] opacity-40"></div>
+                  <img
+                    src="/Bulb_AI1.png"
+                    alt="AI Brain Visualization"
+                    className="relative z-10 w-full max-w-sm object-contain drop-shadow-2xl mix-blend-multiply hover:scale-105 transition-transform duration-700"
+                  />
+                </div>
+
+                {/* Text Side */}
+                <div className="p-12 sm:p-16 lg:p-20 relative z-10 flex flex-col justify-center h-full">
+                  {/* Voice Bubble Tail */}
+                  <div className="hidden lg:block absolute top-1/2 -left-6 w-12 h-12 bg-white transform -translate-y-1/2 rotate-45 z-0"></div>
+
+                  <div className="absolute top-12 left-12 text-6xl text-slate-200 font-serif opacity-50">"</div>
+
+                  <blockquote className="text-3xl sm:text-4xl/snug font-normal text-slate-800 font-serif relative z-10 tracking-tight">
+                    True intelligence is rarely black and white. It lies in exploring the full <span className="italic font-medium text-orange-500">spectrum of thoughts</span> where every perspective matters.
+                  </blockquote>
+
+                  <div className="mt-12 flex items-center gap-4">
+                    <div className="h-px w-16 bg-slate-200"></div>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">PrismMinds Philosophy</span>
+                  </div>
+                </div>
+
               </div>
             </div>
           </motion.div>
