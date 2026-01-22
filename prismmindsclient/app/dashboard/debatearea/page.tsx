@@ -175,50 +175,128 @@ function QuantumAvatar({ name, isActive, isThinking, emotion, color }: AvatarPro
   const theme =
     color === "cyan"
       ? {
+        // Deep, rich gradients for 3D depth
+        coreGradient: "radial-gradient(circle at 35% 35%, #e0f2fe 0%, #38bdf8 30%, #0284c7 60%, #0c4a6e 100%)",
         lens: "bg-sky-400/10",
-        activeGlow: "shadow-[0_0_100px_rgba(14,165,233,0.6)]",
-        glow: "shadow-[0_0_60px_rgba(14,165,233,0.2)]",
+        ring1: "border-sky-300/60 shadow-[0_0_15px_rgba(56,189,248,0.3)]",
+        ring2: "border-cyan-300/40",
+        bracket: "border-blue-400 video-shadow",
+        text: "text-sky-100 drop-shadow-[0_0_10px_rgba(14,165,233,0.8)]",
+        glow: "shadow-[0_0_60px_rgba(14,165,233,0.4)]",
+        activeGlow: "shadow-[0_0_100px_rgba(14,165,233,0.8)]",
       }
       : {
+        coreGradient: "radial-gradient(circle at 35% 35%, #fff7ed 0%, #fb923c 30%, #ea580c 60%, #7c2d12 100%)",
         lens: "bg-orange-400/10",
-        activeGlow: "shadow-[0_0_100px_rgba(249,115,22,0.6)]",
-        glow: "shadow-[0_0_60px_rgba(249,115,22,0.2)]",
+        ring1: "border-orange-300/60 shadow-[0_0_15px_rgba(251,146,60,0.3)]",
+        ring2: "border-amber-300/40",
+        bracket: "border-red-400",
+        text: "text-orange-100 drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]",
+        glow: "shadow-[0_0_60px_rgba(249,115,22,0.4)]",
+        activeGlow: "shadow-[0_0_100px_rgba(249,115,22,0.8)]",
       }
 
-  const avatarSrc = color === "cyan" ? "/bot1r.png" : "/bot2r.png"
+  // Animation variants for specific states
+  const coreAnim = isActive
+    ? { scale: [1, 1.05, 1], filter: "brightness(1.3)" }
+    : { scale: 1, filter: "brightness(1)" }
 
   return (
-    <div className="relative w-64 h-64 flex items-center justify-center">
+    <div className="relative w-48 h-48 flex items-center justify-center perspective-[1200px] transform-style-3d">
 
-      {/* MAIN AVATAR */}
+      {/* 1. PRIMARY GYROSCOPE (The "Stabilizer") */}
+      {/* A single, elegant ring rotating slowly to define the space */}
       <motion.div
-        className="
-            relative z-10 w-56 h-56 rounded-full
-            flex items-center justify-center
-            overflow-hidden
-        "
+        className={`absolute inset-[10%] rounded-full border-[1.5px] ${theme.ring1} opacity-60`}
+        style={{ rotateX: 70 }}
+        animate={{ rotateZ: 360 }}
+        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+      />
+
+      {/* 2. SECONDARY ORBIT (Counter-rotation) */}
+      <motion.div
+        className={`absolute inset-[15%] rounded-full border-[1px] ${theme.ring2} opacity-40`}
+        style={{ rotateY: 65 }}
+        animate={{ rotateZ: -360 }}
+        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+      />
+
+      {/* 3. ACTIVE ENERGY DISCHARGE (The "Aurora") */}
+      {isActive && (
+        <motion.div
+          className={`absolute inset-6 rounded-full opacity-30 blur-2xl ${theme.lens}`}
+          animate={{ scale: [0.9, 1.3, 0.9], opacity: [0.2, 0.5, 0.2] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        />
+      )}
+
+      {/* 4. 4D HYPER-CORE (The Sphere) */}
+      <motion.div
+        className={`
+            relative z-10 w-24 h-24 rounded-full 
+            flex items-center justify-center 
+            transition-shadow duration-500
+            ${isActive ? theme.activeGlow : theme.glow}
+        `}
         style={{
-          // Transparent background to let image shine, standard scale
-          backgroundColor: 'transparent'
+          background: theme.coreGradient,
+          boxShadow: `inset -10px -10px 20px rgba(0,0,0,0.5), inset 10px 10px 20px rgba(255,255,255,0.4)` // Deep 3D Sphere effect
         }}
-        animate={isActive ? { scale: 1.1 } : { scale: 1 }}
-        transition={{ duration: 0.8, ease: "easeInOut" }}
+        variants={{
+          active: { scale: 1.05 },
+          idle: { scale: 1 }
+        }}
+        animate={isActive ? "active" : "idle"}
+        transition={{ duration: 1.2, ease: "easeInOut", repeat: isActive ? Infinity : 0, repeatType: "reverse" }}
       >
-        <motion.img
-          src={avatarSrc}
-          alt={name}
-          className="w-full h-full object-contain drop-shadow-2xl"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
+        {/* Holographic Surface Texture */}
+        <motion.div
+          className="absolute inset-0 rounded-full opacity-30 mix-blend-overlay"
+          style={{
+            backgroundImage: "linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.4) 50%, transparent 60%)"
+          }}
+          animate={{ backgroundPosition: ["100% 100%", "0% 0%"] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
         />
 
-        {/* Thinking Pulse Overlay */}
+        {/* Specular Highlight (The "Glass" look) */}
+        <div className="absolute top-[8%] left-[12%] w-[30%] h-[15%] bg-white rounded-full blur-[2px] opacity-70" />
+
+        {/* Thinking Pulse */}
         {isThinking && isActive && (
-          <div className="absolute inset-0 rounded-full bg-white/20 animate-pulse mix-blend-overlay" />
+          <div className="absolute inset-0 rounded-full bg-white/60 animate-pulse mix-blend-overlay" />
         )}
 
+        {/* Avatar Character */}
+        <div className="relative z-20 flex flex-col items-center justify-center transform translate-z-10">
+          <span className={`text-2xl font-bold tracking-widest ${theme.text}`}>
+            {name.slice(0, 2).toUpperCase()}
+          </span>
+          {/* Audio Bars simulation */}
+          {isActive && (
+            <div className="flex gap-[3px] mt-1 h-3 items-end">
+              {[1, 2, 3].map(i => (
+                <motion.div
+                  key={i}
+                  className={`w-1 rounded-full ${color === 'cyan' ? 'bg-sky-100' : 'bg-orange-100'}`}
+                  animate={{ height: [4, 12, 4] }}
+                  transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.15 }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </motion.div>
+
+      {/* 5. FLOATING SATELLITE (Single Electron) */}
+      <motion.div
+        className="absolute w-full h-full"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+      >
+        <div className={`absolute top-[4%] left-1/2 w-2.5 h-2.5 -ml-1 rounded-full ${color === 'cyan' ? 'bg-sky-200 shadow-[0_0_8px_#38bdf8]' : 'bg-orange-200 shadow-[0_0_8px_#fb923c]'}`} />
+      </motion.div>
+
     </div>
   )
 }

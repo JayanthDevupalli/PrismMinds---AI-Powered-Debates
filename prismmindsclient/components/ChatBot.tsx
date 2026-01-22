@@ -241,7 +241,7 @@ export default function ChatBot() {
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
                                     onKeyDown={handleKeyDown}
-                                    placeholder={isListening ? "" : "Type your question..."}
+                                    placeholder={isListening ? "" : "Tell us what you want to know..."}
                                     className={`w-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm rounded-xl py-3 pl-4 pr-20 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-slate-400 ${isListening ? "ring-2 ring-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/20" : ""}`}
                                 />
                                 <div className="absolute right-2 flex items-center gap-1">
