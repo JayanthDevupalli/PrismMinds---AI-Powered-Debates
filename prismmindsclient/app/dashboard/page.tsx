@@ -360,9 +360,9 @@ function DashboardContent() {
                 onClick={() => {
                   if (currentView === "main") return;
                   setLoading(true)
+                  setCurrentView("main")
                   fetchRecentDebates(20).then(setRecentDebates).finally(() => {
                     setLoading(false)
-                    setCurrentView("main")
                   })
                 }}
                 className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${currentView === "main"
@@ -383,6 +383,10 @@ function DashboardContent() {
                 onClick={async () => {
                   if (currentView === "transcripts") return;
                   setLoading(true)
+                  setCurrentView("transcripts")
+                  setDisplayedCount(ITEMS_PER_PAGE)
+                  setSearchQuery("")
+                  setTranscriptIndex(0)
                   try {
                     const all = await fetchRecentDebates(100)
                     setRecentDebates(all)
@@ -390,10 +394,6 @@ function DashboardContent() {
                     console.error(err)
                   } finally {
                     setLoading(false)
-                    setCurrentView("transcripts")
-                    setDisplayedCount(ITEMS_PER_PAGE)
-                    setSearchQuery("")
-                    setTranscriptIndex(0)
                   }
                 }}
                 className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${currentView === "transcripts"
@@ -414,6 +414,7 @@ function DashboardContent() {
                 onClick={async () => {
                   if (currentView === "favorites") return;
                   setLoading(true)
+                  setCurrentView("favorites")
                   try {
                     const favs = await fetchFavorites()
                     setFavorites(favs)
@@ -421,7 +422,6 @@ function DashboardContent() {
                     console.error(err)
                   } finally {
                     setLoading(false)
-                    setCurrentView("favorites")
                   }
                 }}
                 className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${currentView === "favorites"
@@ -596,9 +596,9 @@ function DashboardContent() {
                         setIsMobileMenuOpen(false);
                         if (currentView === "main") return;
                         setLoading(true)
+                        setCurrentView("main")
                         fetchRecentDebates(20).then(setRecentDebates).finally(() => {
                           setLoading(false)
-                          setCurrentView("main")
                         })
                       }}
                       className={`w-full flex items-center gap-4 px-4 py-3 rounded-2xl font-medium transition-all ${currentView === 'main' ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-600' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50'}`}
@@ -612,10 +612,10 @@ function DashboardContent() {
                       onClick={async () => {
                         setIsMobileMenuOpen(false);
                         setLoading(true)
+                        setCurrentView("transcripts")
                         const all = await fetchRecentDebates(100)
                         setRecentDebates(all)
                         setLoading(false)
-                        setCurrentView("transcripts")
                       }}
                       className={`w-full flex items-center gap-4 px-4 py-3 rounded-2xl font-medium transition-all ${currentView === 'transcripts' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50'}`}
                     >
@@ -628,10 +628,10 @@ function DashboardContent() {
                       onClick={async () => {
                         setIsMobileMenuOpen(false);
                         setLoading(true)
+                        setCurrentView("favorites")
                         const favs = await fetchFavorites()
                         setFavorites(favs)
                         setLoading(false)
-                        setCurrentView("favorites")
                       }}
                       className={`w-full flex items-center gap-4 px-4 py-3 rounded-2xl font-medium transition-all ${currentView === 'favorites' ? 'bg-red-50 dark:bg-red-900/20 text-red-600' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50'}`}
                     >
@@ -710,7 +710,16 @@ function DashboardContent() {
             />
 
             {/* Transcripts Pagination */}
-            {filteredDebates.length === 0 ? (
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div
+                    key={i}
+                    className="h-40 rounded-2xl bg-gradient-to-br from-muted to-muted/50 animate-pulse border border-slate-200/50 dark:border-slate-800"
+                  />
+                ))}
+              </div>
+            ) : filteredDebates.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -881,7 +890,16 @@ function DashboardContent() {
                 </div>
               </motion.div>
 
-              {favorites.length === 0 ? (
+              {loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div
+                      key={i}
+                      className="h-40 rounded-2xl bg-gradient-to-br from-muted to-muted/50 animate-pulse border border-slate-200/50 dark:border-slate-800"
+                    />
+                  ))}
+                </div>
+              ) : favorites.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}

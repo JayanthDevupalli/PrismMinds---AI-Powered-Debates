@@ -419,88 +419,33 @@ function DebateArenaContent() {
 
     if (endingAnimation) {
         return (
-            <div className="flex flex-col items-center justify-center h-screen bg-[#F0F2F5] relative overflow-hidden">
-                {/* Background Grid & Particles */}
-                <div className="absolute inset-0 opacity-20 pointer-events-none">
-                    <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-blue-400/30 blur-[150px] animate-pulse" />
-                    <div className="absolute bottom-0 -right-1/4 w-1/2 h-1/2 bg-orange-400/30 blur-[150px] animate-pulse" style={{ animationDelay: "1s" }} />
-                </div>
-
+            <div className="flex flex-col items-center justify-center h-screen bg-[#F0F2F5] font-sans">
                 <motion.div
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="relative z-10 flex flex-col items-center"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="flex flex-col items-center max-w-sm w-full px-8"
                 >
-                    {/* --- THE 'BRAIN' CORE ANIMATION --- */}
-                    <div className="relative w-48 h-48 flex items-center justify-center mb-10">
-                        {/* Core Pulse */}
-                        <motion.div
-                            animate={{ scale: [1, 1.2, 1], opacity: [0.8, 1, 0.8] }}
-                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                            className="absolute w-20 h-20 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 blur-md"
-                        />
-                        <div className="absolute w-16 h-16 rounded-full bg-white z-20 shadow-[0_0_40px_rgba(59,130,246,0.6)]" />
-
-                        {/* Orbiting Ring 1 */}
-                        <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                            className="absolute w-32 h-32 rounded-full border-[3px] border-transparent border-t-blue-500 border-l-blue-400/50"
-                        />
-                        {/* Orbiting Ring 2 (Counter-rotate) */}
-                        <motion.div
-                            animate={{ rotate: -360 }}
-                            transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-                            className="absolute w-40 h-40 rounded-full border-[2px] border-slate-200 border-b-orange-500 border-r-orange-400/50"
-                        />
-
-                        {/* Orbiting Ring 3 (Tilt) */}
-                        <motion.div
-                            animate={{ rotate: 360, scale: [1, 1.1, 1] }}
-                            transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-                            className="absolute w-48 h-48 rounded-full border border-dashed border-slate-300/50"
-                        />
-
-                        {/* Floating Particles */}
-                        {[...Array(6)].map((_, i) => (
-                            <motion.div
-                                key={i}
-                                className="absolute w-3 h-3 bg-gradient-to-br from-orange-400 to-pink-500 rounded-full shadow-sm"
-                                animate={{
-                                    y: [0, -60, 0],
-                                    x: [0, (i % 2 === 0 ? 30 : -30), 0],
-                                    opacity: [0, 1, 0],
-                                    scale: [0.5, 1, 0.5]
-                                }}
-                                transition={{
-                                    duration: 3,
-                                    repeat: Infinity,
-                                    delay: i * 0.4,
-                                    ease: "easeInOut"
-                                }}
-                            />
-                        ))}
+                    {/* Consistent Professional Loader */}
+                    <div className="w-14 h-14 mb-8 rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-100 flex items-center justify-center">
+                        <Loader2 className="w-6 h-6 text-orange-600 animate-spin" />
                     </div>
 
-                    <h2 className="text-4xl font-black text-slate-800 tracking-tighter mb-2">
-                        ANALYZING DEBATE
-                    </h2>
-                    <div className="flex items-center gap-1.5 h-6">
-                        <span className="text-slate-500 font-bold uppercase tracking-widest text-sm">Synthesizing Results</span>
-                        <motion.span
-                            animate={{ opacity: [0, 1, 0] }}
-                            transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 0.1 }}
-                            className="w-1.5 h-1.5 bg-orange-500 rounded-full"
-                        />
-                        <motion.span
-                            animate={{ opacity: [0, 1, 0] }}
-                            transition={{ duration: 1.5, repeat: Infinity, delay: 0.2, repeatDelay: 0.1 }}
-                            className="w-1.5 h-1.5 bg-orange-500 rounded-full"
-                        />
-                        <motion.span
-                            animate={{ opacity: [0, 1, 0] }}
-                            transition={{ duration: 1.5, repeat: Infinity, delay: 0.4, repeatDelay: 0.1 }}
-                            className="w-1.5 h-1.5 bg-orange-500 rounded-full"
+                    <h3 className="text-slate-800 font-bold text-lg mb-2 tracking-tight">
+                        Redirecting to analysis...
+                    </h3>
+
+                    <p className="text-slate-500 text-sm font-medium mb-8 text-center leading-relaxed">
+                        Finalizing your debate performance metrics and generating AI insights.
+                    </p>
+
+                    {/* Minimal Progress Bar */}
+                    <div className="w-full h-1.5 bg-slate-200/60 rounded-full overflow-hidden">
+                        <motion.div
+                            initial={{ width: "0%" }}
+                            animate={{ width: "100%" }}
+                            transition={{ duration: 1.8, ease: "easeInOut" }}
+                            className="h-full bg-gradient-to-r from-orange-500 to-orange-600 rounded-full"
                         />
                     </div>
                 </motion.div>

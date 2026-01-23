@@ -128,88 +128,67 @@ function AnalysisContent() {
 
                 {/* State: No Analysis (Pre-generation) */}
                 {!analysis ? (
-                    <div className="flex flex-col justify-center min-h-[60vh] w-full px-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                        <div className="max-w-4xl mx-auto w-full grid grid-cols-1 md:grid-cols-5 gap-6">
+                    <div className="flex flex-col items-center justify-center min-h-[60vh] w-full px-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        {/* Compact, Refined Card */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.4, ease: "easeOut" }}
+                            className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] border border-slate-100/80 w-full max-w-xl flex flex-col items-center text-center relative overflow-hidden ring-1 ring-slate-400/5"
+                        >
+                            {/* Simple Top Decoration */}
+                            <div className="w-16 h-1.5 bg-slate-100 rounded-full mb-8"></div>
 
-                            {/* Left Panel: Session Receipt (Dark) */}
-                            <motion.div
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.1 }}
-                                className="md:col-span-2 bg-slate-900 rounded-3xl p-8 text-white relative overflow-hidden flex flex-col justify-between min-h-[320px] shadow-2xl"
+                            {/* Icon */}
+                            <div className="mb-6 p-4 bg-slate-50 rounded-full border border-slate-100 shadow-sm">
+                                <Sparkles className="w-6 h-6 text-slate-400" />
+                            </div>
+
+                            {/* Hero Text */}
+                            <h1 className="text-2xl font-bold text-slate-800 mb-2 tracking-tight">
+                                Analysis Ready
+                            </h1>
+                            <p className="text-slate-500 text-sm font-medium leading-relaxed mb-8 max-w-sm">
+                                Debate on <span className="text-slate-700 font-semibold">"{debate?.topic}"</span> is complete. Generate your performance report.
+                            </p>
+
+                            {/* Minimal Stats */}
+                            <div className="flex items-center justify-center gap-6 mb-8 w-full border-t border-b border-slate-50 py-4">
+                                <div className="text-center">
+                                    <div className="text-lg font-bold text-slate-800">{debate?.transcript?.length || 0}</div>
+                                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Exchanges</div>
+                                </div>
+                                <div className="w-px h-8 bg-slate-100"></div>
+                                <div className="text-center">
+                                    <div className="text-lg font-bold text-slate-800">
+                                        {new Date(debate?.createdAt).getDate()}
+                                    </div>
+                                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                        {new Date(debate?.createdAt).toLocaleString('default', { month: 'short' })}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Action Button */}
+                            <button
+                                onClick={handleGenerate}
+                                disabled={generating}
+                                className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm rounded-xl shadow-lg shadow-slate-200 transition-all hover:translate-y-[-1px] flex items-center justify-center gap-2.5 disabled:opacity-80 disabled:cursor-not-allowed"
                             >
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-                                <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -ml-16 -mb-16"></div>
+                                {generating ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
+                                        <span>Processing...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>Generate Report</span>
+                                        <ArrowLeft className="w-4 h-4 rotate-180" />
+                                    </>
+                                )}
+                            </button>
 
-                                <div>
-                                    <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-widest mb-6">
-                                        <CheckCircle2 className="w-4 h-4" /> Session Complete
-                                    </div>
-                                    <h2 className="text-xl font-bold text-slate-200 mb-1">Topic</h2>
-                                    <p className="text-white font-medium leading-relaxed opacity-90">
-                                        "{debate?.topic}"
-                                    </p>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                                        <span className="text-slate-400 text-sm">Exchanges</span>
-                                        <span className="text-white font-mono font-bold">{debate?.transcript?.length || 0}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                                        <span className="text-slate-400 text-sm">Date</span>
-                                        <span className="text-white font-mono font-bold">{new Date(debate?.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
-                                    </div>
-                                    <div className="pt-2">
-                                        <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Status</div>
-                                        <div className="text-emerald-400 font-medium text-sm flex items-center gap-1.5 mt-1">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                            Ready for Review
-                                        </div>
-                                    </div>
-                                </div>
-                            </motion.div>
-
-                            {/* Right Panel: Action (Light) */}
-                            <motion.div
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.2 }}
-                                className="md:col-span-3 bg-white rounded-3xl p-8 md:p-12 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-slate-100 flex flex-col justify-center items-start relative overflow-hidden"
-                            >
-                                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-50"></div>
-
-                                <div className="p-3 bg-indigo-50 rounded-2xl mb-6">
-                                    <Sparkles className="w-8 h-8 text-indigo-600" />
-                                </div>
-
-                                <h1 className="text-3xl font-black text-slate-900 mb-4">
-                                    Let's analyze your performance.
-                                </h1>
-                                <p className="text-slate-500 text-lg mb-8 leading-relaxed">
-                                    Our AI coach has processed the transcript. Generate your report to get scored on Logic, Persuasion, and Clarity.
-                                </p>
-
-                                <button
-                                    onClick={handleGenerate}
-                                    disabled={generating}
-                                    className="w-full sm:w-auto px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:translate-y-[-2px] transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed group"
-                                >
-                                    {generating ? (
-                                        <>
-                                            <Loader2 className="w-5 h-5 animate-spin text-indigo-300" />
-                                            <span>Building Report...</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Zap className="w-5 h-5 text-emerald-400 group-hover:fill-emerald-400 transition-colors" />
-                                            Generate Analysis
-                                        </>
-                                    )}
-                                </button>
-                            </motion.div>
-
-                        </div>
+                        </motion.div>
                     </div>
                 ) : (
                     // State: Analysis Results
