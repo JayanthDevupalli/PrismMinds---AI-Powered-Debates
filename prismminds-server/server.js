@@ -5,6 +5,7 @@ import challengeRoutes from "./routes/challengeRoutes.js";
 import debateRoutes from "./routes/debateRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
+import annotationRoutes from "./routes/annotationRoutes.js";
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use("/api/debate", debateRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/challenge", challengeRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/annotations", annotationRoutes);
 
 app.get("/", (req, res) => res.send("PrismMinds Server is on AIR Jayanth, Rock the show!"));
 

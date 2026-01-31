@@ -7,8 +7,13 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { fetchRecentDebates, createDebate, createHumanDebate, deleteDebate, fetchFavorites, addFavorite, removeFavorite, fetchDailyChallenge } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline"
-import { SparklesIcon, Trash2Icon, X, History, Download, ScrollText, Sparkles, Rocket, BookOpen, Mic2, MessageCircle, Target, BarChart3, Globe, Heart, ArrowRight, Loader2, Menu, User, Clock, Zap, Flame } from "lucide-react"
+import { SparklesIcon, Trash2Icon, X, History, Download, ScrollText, Sparkles, Rocket, BookOpen, Mic2, MessageCircle, Target, BarChart3, Globe, Heart, ArrowRight, Loader2, Menu, User, Clock, Zap, Flame, StickyNote } from "lucide-react"
 import { downloadDebateTranscriptPDF } from "@/lib/pdf-generator"
+import { useAnnotations } from "@/hooks/useAnnotations"
+import AnnotationPopover from "@/components/AnnotationPopover"
+import AnnotationSidebar from "@/components/AnnotationSidebar"
+import AnnotationHighlight from "@/components/AnnotationHighlight"
+import { Annotation } from "@/lib/api/annotations"
 
 type DebateMessage = {
   speaker: string
@@ -68,6 +73,18 @@ function DashboardContent() {
   const [transcriptIndex, setTranscriptIndex] = useState(0)
   const [scrollProgress, setScrollProgress] = useState(0)
   const transcriptEndRef = useRef<HTMLDivElement>(null)
+
+  // Annotation state
+  const [showAnnotationSidebar, setShowAnnotationSidebar] = useState(false)
+  const [annotationPopover, setAnnotationPopover] = useState<{
+    selectedText: string;
+    messageIndex: number;
+    position: { x: number; y: number };
+    startOffset: number;
+    endOffset: number;
+  } | null>(null)
+  const [editingAnnotation, setEditingAnnotation] = useState<Annotation | null>(null)
+  const { annotations, addAnnotation, editAnnotation, removeAnnotation } = useAnnotations(selectedDebate?.id || null)
   const modalContentRef = useRef<HTMLDivElement>(null)
   const [debateMode, setDebateMode] = useState<"ai" | "human">("ai");
   const [favorites, setFavorites] = useState<Debate[]>([])
@@ -1757,273 +1774,431 @@ function DashboardContent() {
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                 transition={{ type: "spring", damping: 25, stiffness: 300 }}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-4xl max-h-[90vh] rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col"
+                className={`w-full ${showAnnotationSidebar ? "max-w-7xl" : "max-w-4xl"
+                  } max-h-[90vh] rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col transition-all duration-300`}
               >
-                {/* Modal Header */}
-                <div className="sticky top-0 z-10 relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border-b border-black/5 dark:border-white/5 p-4 sm:p-6 transition-all duration-300">
-                  {/* LEFT CONTENT */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="w-full"
-                  >
-                    <div className="pt-10 sm:pt-0 sm:pr-0"> {/* Space for absolute buttons on mobile */}
-                      <h2 className="text-lg sm:text-2xl font-semibold text-slate-900 dark:text-white mb-2 leading-tight tracking-tight">
-                        {selectedDebate.topic}
-                      </h2>
-
-                      <div className="flex flex-wrap items-center gap-2 mb-4">
-                        <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-orange-50/50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20">
-                          <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
-                          <span className="text-[11px] sm:text-xs font-semibold text-orange-600 dark:text-orange-300 truncate max-w-[100px] sm:max-w-none">
-                            {selectedDebate.personaA}
-                          </span>
-                        </div>
-
-                        <span className="text-slate-300 dark:text-slate-600 text-[10px] font-medium">VS</span>
-
-                        <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-teal-50/50 dark:bg-teal-500/10 border border-teal-100 dark:border-teal-500/20">
-                          <span className="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
-                          <span className="text-[11px] sm:text-xs font-semibold text-teal-600 dark:text-teal-300 truncate max-w-[100px] sm:max-w-none">
-                            {selectedDebate.personaB}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* STATS - Clear & Aligned */}
-                    <div className="flex items-center gap-6 sm:gap-8 mb-4 sm:mb-6 pt-2">
-                      <div className="flex flex-col">
-                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Duration</span>
-                        <span className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 leading-none">{selectedDebate.duration}m</span>
-                      </div>
-                      <div className="w-px h-10 bg-slate-200 dark:bg-slate-700"></div>
-                      <div className="flex flex-col">
-                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Exchanges</span>
-                        <span className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 leading-none">{selectedDebate.transcript?.length || 0}</span>
-                      </div>
-                      <div className="w-px h-10 bg-slate-200 dark:bg-slate-700"></div>
-                      <div className="flex flex-col">
-                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Date</span>
-                        <span className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 leading-none">
-                          {new Date(selectedDebate.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* PROGRESS - Detailed & Slim */}
-                    {selectedDebate.transcript && selectedDebate.transcript.length > 0 && (
-                      <div className="w-full mt-3 group">
-                        <div className="w-full h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                          <motion.div
-                            className="h-full bg-gradient-to-r from-orange-500 via-purple-500 to-teal-500 opacity-80 group-hover:opacity-100 transition-opacity"
-                            style={{ width: `${scrollProgress}%` }}
-                            transition={{ type: "tween", duration: 0.2 }}
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {generating && statusMessage && (
-                      <motion.div className="mt-2 text-[10px] font-medium text-orange-600 flex items-center gap-2 bg-orange-50 dark:bg-orange-900/10 px-2 py-1 rounded-md w-fit">
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                        {statusMessage}
-                      </motion.div>
-                    )}
-                  </motion.div>
-
-                  {/* ACTION BUTTONS (FLOATING) */}
-                  <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-2 sm:gap-3">
-                    {/* Analytics Button - Green Palette */}
-                    {(selectedDebate.debateType === "human-to-ai" || selectedDebate.personaA === "You") && (
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          router.push(`/dashboard/debatehumanarea/analysis/${selectedDebate.id}`)
-                        }}
-                        className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 flex items-center gap-2 transition-all shadow-sm"
-                        title="View Analytics"
+                {/* Main Content Area: Split-pane from top of modal */}
+                <div className="flex-1 flex overflow-hidden">
+                  {/* Left Side: Header + Transcript */}
+                  <div className="flex-1 flex flex-col overflow-hidden">
+                    {/* Modal Header */}
+                    <div className="sticky top-0 z-10 relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border-b border-black/5 dark:border-white/5 p-4 sm:p-6 transition-all duration-300">
+                      {/* LEFT CONTENT */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="w-full"
                       >
-                        <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        <span className="hidden sm:inline text-sm font-semibold">View Analytics</span>
-                      </motion.button>
-                    )}
+                        <div className="pt-10 sm:pt-0 sm:pr-0"> {/* Space for absolute buttons on mobile */}
+                          <h2 className="text-lg sm:text-2xl font-semibold text-slate-900 dark:text-white mb-2 leading-tight tracking-tight">
+                            {selectedDebate.topic}
+                          </h2>
 
-                    {/* Download Button - Larger Size */}
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={async (e) => {
-                        e.stopPropagation()
-                        if (!selectedDebate) return
-                        try {
-                          setStatusMessage("Generating PDF...")
-                          await downloadDebateTranscriptPDF(selectedDebate.topic, selectedDebate.personaA, selectedDebate.personaB, selectedDebate.transcript, selectedDebate.createdAt, selectedDebate.summary);
-                        } catch (err) { showToast("Download failed", "error"); }
-                        finally { setStatusMessage(""); }
-                      }}
-                      className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white border border-slate-200 dark:border-slate-700 transition-all shadow-sm"
-                      title="Download PDF"
-                    >
-                      <Download className="w-4 h-4 sm:w-4 sm:h-4" />
-                    </motion.button>
+                          <div className="flex flex-wrap items-center gap-2 mb-4">
+                            <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-orange-50/50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20">
+                              <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                              <span className="text-[11px] sm:text-xs font-semibold text-orange-600 dark:text-orange-300 truncate max-w-[100px] sm:max-w-none">
+                                {selectedDebate.personaA}
+                              </span>
+                            </div>
 
-                    {/* Close Button - Green Palette */}
-                    <motion.button
-                      whileHover={{ scale: 1.05, rotate: 90 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setSelectedDebate(null)}
-                      className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-emerald-50 dark:bg-emerald-500/10 hover:bg-red-50 dark:hover:bg-red-900/20 text-emerald-600 dark:text-emerald-400 hover:text-red-600 dark:hover:text-red-400 border border-emerald-200 dark:border-emerald-500/20 hover:border-red-200 dark:hover:border-red-500/20 transition-all shadow-sm"
-                    >
-                      <X className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </motion.button>
-                  </div>
-                </div>
+                            <span className="text-slate-300 dark:text-slate-600 text-[10px] font-medium">VS</span>
+
+                            <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-teal-50/50 dark:bg-teal-500/10 border border-teal-100 dark:border-teal-500/20">
+                              <span className="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
+                              <span className="text-[11px] sm:text-xs font-semibold text-teal-600 dark:text-teal-300 truncate max-w-[100px] sm:max-w-none">
+                                {selectedDebate.personaB}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* STATS - Clear & Aligned */}
+                        <div className="flex items-center gap-6 sm:gap-8 mb-4 sm:mb-6 pt-2">
+                          <div className="flex flex-col">
+                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Duration</span>
+                            <span className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 leading-none">{selectedDebate.duration}m</span>
+                          </div>
+                          <div className="w-px h-10 bg-slate-200 dark:bg-slate-700"></div>
+                          <div className="flex flex-col">
+                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Exchanges</span>
+                            <span className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 leading-none">{selectedDebate.transcript?.length || 0}</span>
+                          </div>
+                          <div className="w-px h-10 bg-slate-200 dark:bg-slate-700"></div>
+                          <div className="flex flex-col">
+                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Date</span>
+                            <span className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 leading-none">
+                              {new Date(selectedDebate.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* PROGRESS - Detailed & Slim */}
+                        {selectedDebate.transcript && selectedDebate.transcript.length > 0 && (
+                          <div className="w-full mt-3 group">
+                            <div className="w-full h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                              <motion.div
+                                className="h-full bg-gradient-to-r from-orange-500 via-purple-500 to-teal-500 opacity-80 group-hover:opacity-100 transition-opacity"
+                                style={{ width: `${scrollProgress}%` }}
+                                transition={{ type: "tween", duration: 0.2 }}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {generating && statusMessage && (
+                          <motion.div className="mt-2 text-[10px] font-medium text-orange-600 flex items-center gap-2 bg-orange-50 dark:bg-orange-900/10 px-2 py-1 rounded-md w-fit">
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            {statusMessage}
+                          </motion.div>
+                        )}
+                      </motion.div>
+
+                      {/* ACTION BUTTONS (FLOATING) */}
+                      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-2 sm:gap-3">
+                        {/* Analytics Button - Green Palette */}
+                        {(selectedDebate.debateType === "human-to-ai" || selectedDebate.personaA === "You") && (
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              router.push(`/dashboard/debatehumanarea/analysis/${selectedDebate.id}`)
+                            }}
+                            className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 flex items-center gap-2 transition-all shadow-sm"
+                            title="View Analytics"
+                          >
+                            <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            <span className="hidden sm:inline text-sm font-semibold">View Analytics</span>
+                          </motion.button>
+                        )}
+
+                        {/* Annotations Button */}
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setShowAnnotationSidebar(!showAnnotationSidebar)
+                          }}
+                          className={`p-2 sm:p-3 rounded-lg sm:rounded-xl transition-all shadow-sm border ${showAnnotationSidebar
+                            ? "bg-orange-100 dark:bg-orange-900/30 text-orange-600 border-orange-300 dark:border-orange-700"
+                            : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white border-slate-200 dark:border-slate-700"
+                            }`}
+                          title="Annotations"
+                        >
+                          <StickyNote className="w-4 h-4 sm:w-4 sm:h-4" />
+                        </motion.button>
+
+                        {/* Download Button - Larger Size */}
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={async (e) => {
+                            e.stopPropagation()
+                            if (!selectedDebate) return
+                            try {
+                              setStatusMessage("Generating PDF...")
+                              await downloadDebateTranscriptPDF(selectedDebate.topic, selectedDebate.personaA, selectedDebate.personaB, selectedDebate.transcript, selectedDebate.createdAt, selectedDebate.summary);
+                            } catch (err) { showToast("Download failed", "error"); }
+                            finally { setStatusMessage(""); }
+                          }}
+                          className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white border border-slate-200 dark:border-slate-700 transition-all shadow-sm"
+                          title="Download PDF"
+                        >
+                          <Download className="w-4 h-4 sm:w-4 sm:h-4" />
+                        </motion.button>
+
+                        {/* Close Button - Green Palette */}
+                        <motion.button
+                          whileHover={{ scale: 1.05, rotate: 90 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => setSelectedDebate(null)}
+                          className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-emerald-50 dark:bg-emerald-500/10 hover:bg-red-50 dark:hover:bg-red-900/20 text-emerald-600 dark:text-emerald-400 hover:text-red-600 dark:hover:text-red-400 border border-emerald-200 dark:border-emerald-500/20 hover:border-red-200 dark:hover:border-red-500/20 transition-all shadow-sm"
+                        >
+                          <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                        </motion.button>
+                      </div>
+                    </div>
+
+                    {/* Modal Content - Transcript */}
+                    <div ref={modalContentRef} className="modal-content flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border p-4 sm:p-6">
+                      <div className="space-y-3 sm:space-y-4">
+                        <AnimatePresence>
+                          {selectedDebate.transcript?.map((message, i, arr) => {
+                            const showPhaseHeader = i === 0 || message.phase !== arr[i - 1]?.phase
+
+                            return (
+                              <motion.div
+                                key={i}
+                                data-message-index={i}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0 }}
+                              >
+                                {showPhaseHeader && (
+                                  <motion.div
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="flex items-center gap-3 sm:gap-4 my-4 sm:my-8"
+                                  >
+                                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent"></div>
+                                    <span className="text-xs font-bold text-purple-600/70 uppercase tracking-widest px-2.5 sm:px-3 py-1 sm:py-1.5 bg-purple-500/5 rounded-full border border-purple-500/20 whitespace-nowrap flex items-center gap-1.5">
+                                      {message.phase === "opening" ? (
+                                        <>
+                                          <Mic2 className="w-3.5 h-3.5" />
+                                          Opening
+                                        </>
+                                      ) : message.phase === "discussion" ? (
+                                        <>
+                                          <MessageCircle className="w-3.5 h-3.5" />
+                                          Discussion
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Target className="w-3.5 h-3.5" />
+                                          Closing
+                                        </>
+                                      )}
+                                    </span>
+                                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent"></div>
+                                  </motion.div>
+                                )}
 
 
-                {/* Modal Content */}
-                <div ref={modalContentRef} className="modal-content flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border p-4 sm:p-6">
-                  <div className="space-y-3 sm:space-y-4">
-                    <AnimatePresence>
-                      {selectedDebate.transcript?.map((message, i, arr) => {
-                        const showPhaseHeader = i === 0 || message.phase !== arr[i - 1]?.phase
 
-                        return (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  className={`flex gap-3 ${message.speaker === selectedDebate.personaA ? "justify-start" : "justify-end"}`}
+                                >
+                                  {message.speaker === selectedDebate.personaA && (
+                                    <div className="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-600 flex items-center justify-center flex-shrink-0 font-bold text-xs">P1</div>
+                                  )}
+                                  <div
+                                    className={`max-w-xs sm:max-w-sm p-3 sm:p-4 rounded-lg sm:rounded-2xl ${message.speaker === selectedDebate.personaA
+                                      ? "bg-white dark:bg-slate-800 text-foreground rounded-tl-none border border-orange-500/20"
+                                      : "bg-gradient-to-br from-teal-500 to-cyan-500 text-white rounded-tr-none shadow-lg"
+                                      }`}
+                                  >
+                                    <div className="flex items-center justify-between mb-1 sm:mb-2 pb-1 sm:pb-2 border-b border-current/10">
+                                      <p className="text-xs font-bold">{message.speaker}</p>
+                                      {message.timestamp && (
+                                        <span
+                                          className={`text-xs ml-2 ${message.speaker === selectedDebate.personaA
+                                            ? "text-muted-foreground"
+                                            : "text-white/60"
+                                            }`}
+                                        >
+                                          {message.timestamp}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p
+                                      className="text-xs sm:text-sm leading-relaxed select-text"
+                                      onMouseUp={(e) => {
+                                        const selection = window.getSelection()
+                                        const selectedText = selection?.toString().trim()
+
+                                        if (selectedText && selectedText.length > 0) {
+                                          const range = selection?.getRangeAt(0)
+                                          const rect = range?.getBoundingClientRect()
+
+                                          if (rect) {
+                                            // Calculate offsets within the message text
+                                            const messageText = message.message
+                                            const startOffset = messageText.indexOf(selectedText)
+                                            const endOffset = startOffset + selectedText.length
+
+                                            setAnnotationPopover({
+                                              selectedText,
+                                              messageIndex: i,
+                                              position: { x: rect.left, y: rect.bottom },
+                                              startOffset,
+                                              endOffset,
+                                            })
+                                          }
+                                        }
+                                      }}
+                                    >
+                                      <AnnotationHighlight
+                                        text={message.message}
+                                        annotations={annotations}
+                                        messageIndex={i}
+                                        onAnnotationClick={(annotation) => {
+                                          setEditingAnnotation(annotation)
+                                          setAnnotationPopover({
+                                            selectedText: annotation.selectedText,
+                                            messageIndex: annotation.messageIndex,
+                                            position: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
+                                            startOffset: annotation.startOffset,
+                                            endOffset: annotation.endOffset,
+                                          })
+                                        }}
+                                      />
+                                    </p>
+                                  </div>
+                                  {message.speaker === selectedDebate.personaB && (
+                                    <div className="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-600 flex items-center justify-center flex-shrink-0 font-bold text-xs">P2</div>
+                                  )}
+                                </motion.div>
+                              </motion.div>
+                            )
+                          })}
+                        </AnimatePresence>
+
+                        {/* Summary */}
+                        {selectedDebate.summary && (
                           <motion.div
-                            key={i}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0 }}
+                            className="mt-8 p-4 sm:p-6 rounded-lg sm:rounded-2xl bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-blue-500/5 border border-blue-500/30 dark:border-purple-500/30 shadow-lg"
                           >
-                            {showPhaseHeader && (
-                              <motion.div
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="flex items-center gap-3 sm:gap-4 my-4 sm:my-8"
-                              >
-                                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent"></div>
-                                <span className="text-xs font-bold text-purple-600/70 uppercase tracking-widest px-2.5 sm:px-3 py-1 sm:py-1.5 bg-purple-500/5 rounded-full border border-purple-500/20 whitespace-nowrap flex items-center gap-1.5">
-                                  {message.phase === "opening" ? (
-                                    <>
-                                      <Mic2 className="w-3.5 h-3.5" />
-                                      Opening
-                                    </>
-                                  ) : message.phase === "discussion" ? (
-                                    <>
-                                      <MessageCircle className="w-3.5 h-3.5" />
-                                      Discussion
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Target className="w-3.5 h-3.5" />
-                                      Closing
-                                    </>
-                                  )}
-                                </span>
-                                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent"></div>
-                              </motion.div>
+                            <div className="flex items-start gap-3 mb-3">
+                              <BarChart3 className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                              <h3 className="text-sm sm:text-base font-bold text-foreground">Debate Summary</h3>
+                            </div>
+                            <p className="text-xs sm:text-sm leading-relaxed text-foreground/85 mb-4">{selectedDebate.summary}</p>
+
+                            {/* Key Takeaways */}
+                            {selectedDebate.debate_metrics?.key_themes && selectedDebate.debate_metrics.key_themes.length > 0 && (
+                              <div className="mt-4 pt-4 border-t border-orange-500/20">
+                                <h4 className="text-xs font-bold text-orange-600 mb-3 uppercase tracking-widest">Key Themes</h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {selectedDebate.debate_metrics.key_themes.slice(0, 5).map((theme, i) => (
+                                    <motion.div
+                                      key={i}
+                                      initial={{ opacity: 0, scale: 0.9 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      transition={{ delay: i * 0.1 }}
+                                      className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-500/20 border border-orange-500/30 rounded-full text-xs font-medium text-orange-600"
+                                    >
+                                      <span className="w-1.5 h-1.5 bg-orange-600 rounded-full" />
+                                      {theme}
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </div>
                             )}
 
-
-
-                            <motion.div
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className={`flex gap-3 ${message.speaker === selectedDebate.personaA ? "justify-start" : "justify-end"}`}
-                            >
-                              {message.speaker === selectedDebate.personaA && (
-                                <div className="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-600 flex items-center justify-center flex-shrink-0 font-bold text-xs">P1</div>
-                              )}
-                              <div
-                                className={`max-w-xs sm:max-w-sm p-3 sm:p-4 rounded-lg sm:rounded-2xl ${message.speaker === selectedDebate.personaA
-                                  ? "bg-white dark:bg-slate-800 text-foreground rounded-tl-none border border-orange-500/20"
-                                  : "bg-gradient-to-br from-teal-500 to-cyan-500 text-white rounded-tr-none shadow-lg"
-                                  }`}
-                              >
-                                <div className="flex items-center justify-between mb-1 sm:mb-2 pb-1 sm:pb-2 border-b border-current/10">
-                                  <p className="text-xs font-bold">{message.speaker}</p>
-                                  {message.timestamp && (
-                                    <span
-                                      className={`text-xs ml-2 ${message.speaker === selectedDebate.personaA
-                                        ? "text-muted-foreground"
-                                        : "text-white/60"
-                                        }`}
-                                    >
-                                      {message.timestamp}
-                                    </span>
-                                  )}
+                            {/* Phase Statistics */}
+                            {selectedDebate.debate_metrics?.exchanges_per_phase && (
+                              <div className="mt-4 pt-4 border-t border-orange-500/20">
+                                <h4 className="text-xs font-bold text-orange-600 mb-3 uppercase tracking-widest">Exchanges by Phase</h4>
+                                <div className="grid grid-cols-3 gap-2">
+                                  <div className="text-center p-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-primary/20">
+                                    <div className="text-xs text-muted-foreground">Opening</div>
+                                    <div className="text-base font-bold text-primary">{selectedDebate.debate_metrics.exchanges_per_phase.opening}</div>
+                                  </div>
+                                  <div className="text-center p-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-accent/20">
+                                    <div className="text-xs text-muted-foreground">Discussion</div>
+                                    <div className="text-base font-bold text-accent">{selectedDebate.debate_metrics.exchanges_per_phase.discussion}</div>
+                                  </div>
+                                  <div className="text-center p-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-secondary/20">
+                                    <div className="text-xs text-muted-foreground">Closing</div>
+                                    <div className="text-base font-bold text-secondary">{selectedDebate.debate_metrics.exchanges_per_phase.closing}</div>
+                                  </div>
                                 </div>
-                                <p className="text-xs sm:text-sm leading-relaxed">{message.message}</p>
                               </div>
-                              {message.speaker === selectedDebate.personaB && (
-                                <div className="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-600 flex items-center justify-center flex-shrink-0 font-bold text-xs">P2</div>
-                              )}
-                            </motion.div>
+                            )}
                           </motion.div>
-                        )
-                      })}
-                    </AnimatePresence>
-
-                    {/* Summary */}
-                    {selectedDebate.summary && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mt-8 p-4 sm:p-6 rounded-lg sm:rounded-2xl bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-blue-500/5 border border-blue-500/30 dark:border-purple-500/30 shadow-lg"
-                      >
-                        <div className="flex items-start gap-3 mb-3">
-                          <BarChart3 className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                          <h3 className="text-sm sm:text-base font-bold text-foreground">Debate Summary</h3>
-                        </div>
-                        <p className="text-xs sm:text-sm leading-relaxed text-foreground/85 mb-4">{selectedDebate.summary}</p>
-
-                        {/* Key Takeaways */}
-                        {selectedDebate.debate_metrics?.key_themes && selectedDebate.debate_metrics.key_themes.length > 0 && (
-                          <div className="mt-4 pt-4 border-t border-orange-500/20">
-                            <h4 className="text-xs font-bold text-orange-600 mb-3 uppercase tracking-widest">Key Themes</h4>
-                            <div className="flex flex-wrap gap-2">
-                              {selectedDebate.debate_metrics.key_themes.slice(0, 5).map((theme, i) => (
-                                <motion.div
-                                  key={i}
-                                  initial={{ opacity: 0, scale: 0.9 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  transition={{ delay: i * 0.1 }}
-                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-500/20 border border-orange-500/30 rounded-full text-xs font-medium text-orange-600"
-                                >
-                                  <span className="w-1.5 h-1.5 bg-orange-600 rounded-full" />
-                                  {theme}
-                                </motion.div>
-                              ))}
-                            </div>
-                          </div>
                         )}
-
-                        {/* Phase Statistics */}
-                        {selectedDebate.debate_metrics?.exchanges_per_phase && (
-                          <div className="mt-4 pt-4 border-t border-orange-500/20">
-                            <h4 className="text-xs font-bold text-orange-600 mb-3 uppercase tracking-widest">Exchanges by Phase</h4>
-                            <div className="grid grid-cols-3 gap-2">
-                              <div className="text-center p-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-primary/20">
-                                <div className="text-xs text-muted-foreground">Opening</div>
-                                <div className="text-base font-bold text-primary">{selectedDebate.debate_metrics.exchanges_per_phase.opening}</div>
-                              </div>
-                              <div className="text-center p-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-accent/20">
-                                <div className="text-xs text-muted-foreground">Discussion</div>
-                                <div className="text-base font-bold text-accent">{selectedDebate.debate_metrics.exchanges_per_phase.discussion}</div>
-                              </div>
-                              <div className="text-center p-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-secondary/20">
-                                <div className="text-xs text-muted-foreground">Closing</div>
-                                <div className="text-base font-bold text-secondary">{selectedDebate.debate_metrics.exchanges_per_phase.closing}</div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </motion.div>
-                    )}
+                      </div>
+                    </div>
                   </div>
+
+                  {/* Annotation Sidebar - Integrated Panel (Desktop) / Overlay (Mobile) */}
+                  {showAnnotationSidebar && (
+                    <>
+                      {/* Mobile Backdrop */}
+                      <div
+                        className="lg:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-[60]"
+                        onClick={() => setShowAnnotationSidebar(false)}
+                      />
+
+                      {/* Sidebar Container */}
+                      <div className={`
+                        ${showAnnotationSidebar ? "lg:w-96" : "lg:w-0"}
+                        lg:relative lg:z-auto
+                        fixed lg:static right-0 top-0 bottom-0 w-80 z-[61]
+                        transition-all duration-300
+                      `}>
+                        <AnnotationSidebar
+                          annotations={annotations}
+                          isOpen={showAnnotationSidebar}
+                          onClose={() => setShowAnnotationSidebar(false)}
+                          onAnnotationClick={(annotation) => {
+                            // Scroll to the annotation in the transcript
+                            const messageElements = modalContentRef.current?.querySelectorAll('[data-message-index]')
+                            if (messageElements && messageElements[annotation.messageIndex]) {
+                              messageElements[annotation.messageIndex].scrollIntoView({ behavior: 'smooth', block: 'center' })
+                            }
+                          }}
+                          onEdit={(annotation) => {
+                            setEditingAnnotation(annotation)
+                            setAnnotationPopover({
+                              selectedText: annotation.selectedText,
+                              messageIndex: annotation.messageIndex,
+                              position: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
+                              startOffset: annotation.startOffset,
+                              endOffset: annotation.endOffset,
+                            })
+                          }}
+                          onDelete={async (annotationId) => {
+                            try {
+                              await removeAnnotation(annotationId)
+                              showToast("Annotation deleted", "success")
+                            } catch (err) {
+                              showToast("Failed to delete annotation", "error")
+                            }
+                          }}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
+
+                {/* Annotation Popover */}
+                {annotationPopover && (
+                  <AnnotationPopover
+                    selectedText={annotationPopover.selectedText}
+                    position={annotationPopover.position}
+                    initialNote={editingAnnotation?.note}
+                    initialColor={editingAnnotation?.color}
+                    onSave={async (note, color) => {
+                      try {
+                        if (editingAnnotation) {
+                          // Update existing annotation
+                          await editAnnotation(editingAnnotation.id, { note, color })
+                          showToast("Annotation updated", "success")
+                        } else {
+                          // Create new annotation
+                          await addAnnotation({
+                            messageIndex: annotationPopover.messageIndex,
+                            selectedText: annotationPopover.selectedText,
+                            note,
+                            color: color as any,
+                            startOffset: annotationPopover.startOffset,
+                            endOffset: annotationPopover.endOffset,
+                          })
+                          showToast("Annotation created", "success")
+                        }
+                        setAnnotationPopover(null)
+                        setEditingAnnotation(null)
+
+                        // Clear text selection
+                        window.getSelection()?.removeAllRanges()
+                      } catch (err) {
+                        showToast("Failed to save annotation", "error")
+                      }
+                    }}
+                    onCancel={() => {
+                      setAnnotationPopover(null)
+                      setEditingAnnotation(null)
+                      window.getSelection()?.removeAllRanges()
+                    }}
+                  />
+                )}
               </motion.div>
             </motion.div >
           )
