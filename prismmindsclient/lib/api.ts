@@ -15,16 +15,13 @@ async function getAuthHeader() {
   }));
 
   if (!user) {
-    console.error("❌ No user logged in - cannot make authenticated request");
     throw new Error("User not authenticated. Please log in.");
   }
 
   try {
     const token = await user.getIdToken(true); // Force refresh token
-    console.log("✅ Got auth token for user:", user.uid);
     return { Authorization: `Bearer ${token}` };
-  } catch (error) {
-    console.error("❌ Failed to get auth token:", error);
+  } catch {
     throw new Error("Failed to get authentication token");
   }
 }
@@ -32,7 +29,6 @@ async function getAuthHeader() {
 export async function fetchRecentDebates(limit = 100) {
   try {
     const headers = await getAuthHeader();
-    console.log("🔍 Fetching recent debates from:", `${API_URL}/recent?limit=${limit}`);
     const res = await fetch(`${API_URL}/recent?limit=${limit}`, {
       headers,
       method: 'GET'
@@ -46,15 +42,11 @@ export async function fetchRecentDebates(limit = 100) {
         body = await res.text().catch(() => null);
       }
       const msg = body?.error || body?.message || res.statusText || "Unknown error";
-      console.error("❌ Fetch debates failed:", { status: res.status, body });
       throw new Error(`Failed to fetch debates (${res.status}): ${msg}`);
     }
 
-    const data = await res.json();
-    console.log("✅ Fetched debates:", data);
-    return data;
+    return await res.json();
   } catch (error) {
-    console.error("❌ Error in fetchRecentDebates:", error);
     throw error;
   }
 }
@@ -62,7 +54,6 @@ export async function fetchRecentDebates(limit = 100) {
 export async function deleteDebate(debateId: string) {
   try {
     const headers = await getAuthHeader();
-    console.log("🗑️ Deleting debate:", debateId);
 
     const res = await fetch(`${API_URL}/${debateId}`, {
       method: "DELETE",
@@ -77,14 +68,11 @@ export async function deleteDebate(debateId: string) {
         body = await res.text().catch(() => null);
       }
       const msg = body?.error || body?.message || res.statusText || "Unknown error";
-      console.error("❌ Delete debate failed:", { status: res.status, body });
       throw new Error(`Failed to delete debate (${res.status}): ${msg}`);
     }
 
-    console.log("✅ Debate deleted successfully");
     return true;
   } catch (error) {
-    console.error("❌ Error in deleteDebate:", error);
     throw error;
   }
 }
@@ -93,28 +81,22 @@ export async function fetchDebateById(id: string) {
   try {
     const headers = await getAuthHeader()
     const url = `${API_URL}/${id}`
-    console.log("🔍 Fetching debate by ID from:", url)
 
     const res = await fetch(url, { headers })
 
     if (!res.ok) {
-      const msg = `Backend responded with ${res.status}: ${res.statusText}`
-      console.error(msg)
-      throw new Error(msg)
+      throw new Error(`Backend responded with ${res.status}: ${res.statusText}`)
     }
 
     const data = await res.json()
-    console.log("📦 Backend returned:", data)
 
-    // ✅ Defensive check
+    // Defensive check
     if (!data || !data.id || !data.topic) {
-      console.warn("⚠️ Backend returned empty or invalid debate:", data)
       throw new Error("Debate not found or still generating.")
     }
 
     return data
   } catch (err) {
-    console.error("❌ fetchDebateById error:", err)
     throw err
   }
 }
@@ -128,9 +110,6 @@ export async function createDebate(data: any) {
       ...authHeaders,
       "Content-Type": "application/json",
     };
-
-    console.log("🚀 Creating debate with data:", data);
-    console.log("📡 Sending to:", `${API_URL}/create`);
 
     const res = await fetch(`${API_URL}/create`, {
       method: "POST",
@@ -146,7 +125,6 @@ export async function createDebate(data: any) {
         body = await res.text().catch(() => null);
       }
       const msg = body?.error || body?.message || res.statusText || "Unknown error";
-      console.error("❌ Create debate failed:", { status: res.status, body });
 
       const err: any = new Error(`Failed to create debate (${res.status}): ${msg}`);
       err.status = res.status;
@@ -154,11 +132,8 @@ export async function createDebate(data: any) {
       throw err;
     }
 
-    const result = await res.json();
-    console.log("✅ Debate created successfully:", result);
-    return result;
+    return await res.json();
   } catch (error) {
-    console.error("❌ Error in createDebate:", error);
     throw error;
   }
 }
@@ -170,9 +145,6 @@ export async function createHumanDebate(topic: string) {
       ...authHeaders,
       "Content-Type": "application/json",
     };
-
-    console.log("🚀 Creating human-to-AI debate with topic:", topic);
-    console.log("📡 Sending to:", `${API_URL}/create-human`);
 
     const res = await fetch(`${API_URL}/create-human`, {
       method: "POST",
@@ -188,18 +160,14 @@ export async function createHumanDebate(topic: string) {
         body = await res.text().catch(() => null);
       }
       const msg = body?.error || body?.message || res.statusText || "Unknown error";
-      console.error("❌ Create human debate failed:", { status: res.status, body });
       const err: any = new Error(`Failed to create human debate (${res.status}): ${msg}`);
       err.status = res.status;
       err.body = body;
       throw err;
     }
 
-    const result = await res.json();
-    console.log("✅ Human debate created successfully:", result);
-    return result;
+    return await res.json();
   } catch (error) {
-    console.error("❌ Error in createHumanDebate:", error);
     throw error;
   }
 }
@@ -211,9 +179,6 @@ export async function sendHumanMessage(debateId: string, message: string) {
       ...authHeaders,
       "Content-Type": "application/json",
     };
-
-    console.log("💬 Sending human message:", message);
-    console.log("📡 Sending to:", `${API_URL}/${debateId}/message`);
 
     const res = await fetch(`${API_URL}/${debateId}/message`, {
       method: "POST",
@@ -229,7 +194,6 @@ export async function sendHumanMessage(debateId: string, message: string) {
         body = await res.text().catch(() => null);
       }
       const msg = body?.error || body?.message || res.statusText || "Unknown error";
-      console.error("❌ Send message failed:", { status: res.status, body });
 
       const err: any = new Error(`Failed to send message (${res.status}): ${msg}`);
       err.status = res.status;
@@ -237,11 +201,8 @@ export async function sendHumanMessage(debateId: string, message: string) {
       throw err;
     }
 
-    const result = await res.json();
-    console.log("✅ AI response received:", result);
-    return result;
+    return await res.json();
   } catch (error) {
-    console.error("❌ Error in sendHumanMessage:", error);
     throw error;
   }
 }
@@ -253,9 +214,6 @@ export async function endHumanDebate(debateId: string) {
       ...authHeaders,
       "Content-Type": "application/json",
     };
-
-    console.log("🛑 Ending human debate:", debateId);
-    console.log("📡 Sending to:", `${API_URL}/${debateId}/end`);
 
     const res = await fetch(`${API_URL}/${debateId}/end`, {
       method: "POST",
@@ -270,7 +228,6 @@ export async function endHumanDebate(debateId: string) {
         body = await res.text().catch(() => null);
       }
       const msg = body?.error || body?.message || res.statusText || "Unknown error";
-      console.error("❌ End debate failed:", { status: res.status, body });
 
       const err: any = new Error(`Failed to end debate (${res.status}): ${msg}`);
       err.status = res.status;
@@ -278,11 +235,8 @@ export async function endHumanDebate(debateId: string) {
       throw err;
     }
 
-    const result = await res.json();
-    console.log("✅ Debate ended successfully:", result);
-    return result;
+    return await res.json();
   } catch (error) {
-    console.error("❌ Error in endHumanDebate:", error);
     throw error;
   }
 }
@@ -291,7 +245,6 @@ export async function endHumanDebate(debateId: string) {
 export async function fetchFavorites() {
   try {
     const headers = await getAuthHeader();
-    console.log("🔍 Fetching user favorites from backend");
 
     const res = await fetch(`${API_URL}/favorites/all`, {
       method: "GET",
@@ -299,17 +252,13 @@ export async function fetchFavorites() {
     });
 
     if (!res.ok) {
-      console.error("❌ Failed to fetch favorites:", res.status, res.statusText);
-      // Fallback to empty array if backend fails, or throw
+      // Fallback to empty array if backend fails
       return [];
     }
 
-    const favorites = await res.json();
-    console.log("✅ Fetched favorites:", favorites);
-    return favorites;
-  } catch (error) {
-    console.error("❌ Error in fetchFavorites:", error);
-    throw error;
+    return await res.json();
+  } catch {
+    return [];
   }
 }
 
@@ -317,8 +266,6 @@ export async function addFavorite(debateId: string) {
   try {
     const headers = await getAuthHeader();
     const payload = { debateId };
-
-    console.log("❤️ Adding favorite to backend:", debateId);
 
     const res = await fetch(`${API_URL}/favorite`, {
       method: "POST",
@@ -331,10 +278,8 @@ export async function addFavorite(debateId: string) {
       throw new Error(`Failed to add favorite: ${msg}`);
     }
 
-    console.log("✅ Favorite added successfully");
     return true;
   } catch (error) {
-    console.error("❌ Error in addFavorite:", error);
     throw error;
   }
 }
@@ -342,7 +287,6 @@ export async function addFavorite(debateId: string) {
 export async function removeFavorite(debateId: string) {
   try {
     const headers = await getAuthHeader();
-    console.log("💔 Removing favorite from backend:", debateId);
 
     const res = await fetch(`${API_URL}/favorite/${debateId}`, {
       method: "DELETE",
@@ -354,10 +298,8 @@ export async function removeFavorite(debateId: string) {
       throw new Error(`Failed to remove favorite: ${msg}`);
     }
 
-    console.log("✅ Favorite removed successfully");
     return true;
   } catch (error) {
-    console.error("❌ Error in removeFavorite:", error);
     throw error;
   }
 }
@@ -375,7 +317,6 @@ export async function generateAnalysis(debateId: string) {
 
     return await res.json()
   } catch (err) {
-    console.error("Analysis error:", err)
     throw err
   }
 }
@@ -385,13 +326,12 @@ export async function sendWelcomeEmail(email: string, name: string) {
     let headers = {};
     try {
       headers = await getAuthHeader();
-    } catch (e) {
-      console.log("No auth header available for welcome email");
+    } catch {
+      // No auth header available for welcome email - proceed without
     }
 
     const userApiUrl = API_URL.replace("/api/debate", "/api/user");
 
-    console.log("📧 Sending welcome email to:", email);
     const res = await fetch(`${userApiUrl}/welcome`, {
       method: "POST",
       headers: {
@@ -402,12 +342,10 @@ export async function sendWelcomeEmail(email: string, name: string) {
     });
 
     if (!res.ok) {
-      console.warn("⚠️ Failed to send welcome email");
       return false;
     }
     return true;
-  } catch (error) {
-    console.error("❌ Error sending welcome email:", error);
+  } catch {
     return false;
   }
 }
@@ -416,7 +354,6 @@ export async function sendWelcomeEmail(email: string, name: string) {
 export async function sendForgotPasswordEmail(email: string) {
   try {
     const userApiUrl = API_URL.replace("/api/debate", "/api/user");
-    console.log("📧 Requesting password reset OTP for:", email);
 
     const res = await fetch(`${userApiUrl}/forgot-password`, {
       method: "POST",
@@ -431,7 +368,6 @@ export async function sendForgotPasswordEmail(email: string) {
 
     return true;
   } catch (error) {
-    console.error("❌ Error requesting password reset:", error);
     throw error;
   }
 }
@@ -439,7 +375,6 @@ export async function sendForgotPasswordEmail(email: string) {
 export async function verifyOTP(email: string, otp: string) {
   try {
     const userApiUrl = API_URL.replace("/api/debate", "/api/user");
-    console.log("🔐 Verifying OTP for:", email);
 
     const res = await fetch(`${userApiUrl}/verify-otp`, {
       method: "POST",
@@ -454,7 +389,6 @@ export async function verifyOTP(email: string, otp: string) {
 
     return true;
   } catch (error) {
-    console.error("❌ Error verifying OTP:", error);
     throw error;
   }
 }
@@ -462,7 +396,6 @@ export async function verifyOTP(email: string, otp: string) {
 export async function resetPasswordWithOtp(email: string, otp: string, newPassword: string) {
   try {
     const userApiUrl = API_URL.replace("/api/debate", "/api/user");
-    console.log("🔄 Resetting password for:", email);
 
     const res = await fetch(`${userApiUrl}/reset-password`, {
       method: "POST",
@@ -477,12 +410,11 @@ export async function resetPasswordWithOtp(email: string, otp: string, newPasswo
 
     return true;
   } catch (error) {
-    console.error("❌ Error resetting password:", error);
     throw error;
   }
 }
 
-// 🔹 Challenge API
+// Challenge API
 export async function createChallenge(data: { topic: string, score: number, challengerName: string, challengerId?: string }) {
   try {
     const headers = await getAuthHeader();
@@ -495,20 +427,16 @@ export async function createChallenge(data: { topic: string, score: number, chal
     if (!res.ok) throw new Error("Failed to create challenge");
     return await res.json();
   } catch (error) {
-    console.error("Create challenge error:", error);
     throw error;
   }
 }
 
 export async function getChallenge(id: string) {
   try {
-    // Public endpoint, no auth header needed for GET (usually)
-    // But if your server requires it, add it. The route definition above didn't use `verifyFirebaseToken` for GET.
     const res = await fetch(`${API_URL}/../challenge/${id}`);
     if (!res.ok) throw new Error("Challenge not found");
     return await res.json();
   } catch (error) {
-    console.error("Get challenge error:", error);
     throw error;
   }
 }
@@ -527,7 +455,6 @@ export async function acceptChallenge(id: string) {
     }
     return await res.json();
   } catch (error) {
-    console.error("Accept challenge error:", error);
     throw error;
   }
 }
@@ -535,7 +462,6 @@ export async function acceptChallenge(id: string) {
 export async function fetchLeaderboard() {
   try {
     const userApiUrl = API_URL.replace("/api/debate", "/api/user");
-    console.log("🏆 Fetching leaderboard from:", `${userApiUrl}/leaderboard`);
 
     const res = await fetch(`${userApiUrl}/leaderboard`);
 
@@ -544,8 +470,7 @@ export async function fetchLeaderboard() {
     }
 
     return await res.json();
-  } catch (error) {
-    console.error("❌ Error fetching leaderboard:", error);
+  } catch {
     return [];
   }
 }
@@ -554,7 +479,6 @@ export async function forceRecalcStats() {
   try {
     const headers = await getAuthHeader();
     const userApiUrl = API_URL.replace("/api/debate", "/api/user");
-    console.log("🔄 Requesting stats recalc...");
 
     const res = await fetch(`${userApiUrl}/recalc-stats`, {
       method: 'POST',
@@ -564,7 +488,6 @@ export async function forceRecalcStats() {
     if (!res.ok) throw new Error("Recalc failed");
     return await res.json();
   } catch (error) {
-    console.error("❌ Error recalc stats:", error);
     throw error;
   }
 }
@@ -572,7 +495,6 @@ export async function forceRecalcStats() {
 export async function analyzeDebate(debateId: string) {
   try {
     const headers = await getAuthHeader();
-    console.log("🧠 Triggering analysis for:", debateId);
 
     const res = await fetch(`${API_URL}/${debateId}/analyze`, {
       method: "POST",
@@ -582,11 +504,11 @@ export async function analyzeDebate(debateId: string) {
     if (!res.ok) throw new Error("Analysis failed");
     return await res.json();
   } catch (error) {
-    console.error("❌ Error analyzing debate:", error);
     throw error;
   }
 }
-// 🔹 Fetch Title: Daily Challenge
+
+// Fetch Daily Challenge
 export async function fetchDailyChallenge() {
   try {
     let headers = {};
@@ -594,9 +516,8 @@ export async function fetchDailyChallenge() {
       // Optimistically try to get auth header if user is logged in
       const authHeader = await getAuthHeader();
       headers = { ...authHeader };
-    } catch (e) {
+    } catch {
       // User likely not logged in, proceed with public fetch
-      console.log("Fetching daily challenge as guest (no auth)");
     }
 
     const res = await fetch(`${API_URL}/daily`, {
@@ -606,8 +527,7 @@ export async function fetchDailyChallenge() {
 
     if (!res.ok) throw new Error("Failed to fetch daily challenge");
     return await res.json();
-  } catch (error) {
-    console.error("❌ Daily challenge fetch error:", error);
+  } catch {
     return null;
   }
 }

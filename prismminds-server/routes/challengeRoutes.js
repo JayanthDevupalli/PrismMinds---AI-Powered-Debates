@@ -25,8 +25,7 @@ router.post("/create", verifyFirebaseToken, async (req, res) => {
         });
 
         res.json({ success: true, id: challengeRef.id });
-    } catch (err) {
-        console.error("Create challenge error:", err);
+    } catch {
         res.status(500).json({ error: "Failed to create challenge" });
     }
 });
@@ -51,8 +50,7 @@ router.get("/:id", async (req, res) => {
         }
 
         res.json({ id: doc.id, ...data });
-    } catch (err) {
-        console.error("Get challenge error:", err);
+    } catch {
         res.status(500).json({ error: "Failed to load challenge" });
     }
 });
@@ -92,7 +90,6 @@ router.post("/:id/accept", verifyFirebaseToken, async (req, res) => {
 
         res.json({ success: true });
     } catch (err) {
-        console.error("Accept challenge error:", err);
         res.status(400).json({ error: err.message });
     }
 });

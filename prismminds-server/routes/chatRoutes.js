@@ -14,8 +14,7 @@ router.post("/", async (req, res) => {
 
         const result = await chatWithSupport(history, userContext);
         res.json(result);
-    } catch (error) {
-        console.error("Chat route error:", error);
+    } catch {
         res.status(500).json({ error: "Failed to generate response" });
     }
 });

@@ -49,8 +49,6 @@ router.post("/:debateId", verifyFirebaseToken, async (req, res) => {
                 updatedAt: new Date().toISOString(),
             });
 
-        console.log(`Created annotation ${annotationRef.id} for debate ${debateId}`);
-
         res.json({
             success: true,
             id: annotationRef.id,
@@ -66,8 +64,7 @@ router.post("/:debateId", verifyFirebaseToken, async (req, res) => {
                 updatedAt: new Date().toISOString(),
             }
         });
-    } catch (err) {
-        console.error("Create annotation error:", err);
+    } catch {
         res.status(500).json({ error: "Failed to create annotation" });
     }
 });
@@ -110,8 +107,7 @@ router.get("/:debateId", verifyFirebaseToken, async (req, res) => {
         }));
 
         res.json({ success: true, annotations });
-    } catch (err) {
-        console.error("Get annotations error:", err);
+    } catch {
         res.status(500).json({ error: "Failed to fetch annotations" });
     }
 });
@@ -166,8 +162,6 @@ router.put("/:debateId/:annotationId", verifyFirebaseToken, async (req, res) => 
 
         await annotationRef.update(updateData);
 
-        console.log(`Updated annotation ${annotationId} for debate ${debateId}`);
-
         res.json({
             success: true,
             annotation: {
@@ -176,8 +170,7 @@ router.put("/:debateId/:annotationId", verifyFirebaseToken, async (req, res) => 
                 ...updateData,
             }
         });
-    } catch (err) {
-        console.error("Update annotation error:", err);
+    } catch {
         res.status(500).json({ error: "Failed to update annotation" });
     }
 });
@@ -220,11 +213,8 @@ router.delete("/:debateId/:annotationId", verifyFirebaseToken, async (req, res) 
 
         await annotationRef.delete();
 
-        console.log(`Deleted annotation ${annotationId} for debate ${debateId}`);
-
         res.json({ success: true });
-    } catch (err) {
-        console.error("Delete annotation error:", err);
+    } catch {
         res.status(500).json({ error: "Failed to delete annotation" });
     }
 });

@@ -5,10 +5,6 @@ import { GoogleGenerativeAI } from "@google/generative-ai"
 
 export async function startDebate(topic, personaA, personaB, duration) {
   try {
-    console.log("🔍 Starting debate generation...")
-    console.log("Topic:", topic)
-    console.log("Personas:", personaA, "vs", personaB)
-    console.log("Duration:", duration, "minutes")
 
     // Check if API key exists
     if (!process.env.GEMINI_API_KEY) {
@@ -27,18 +23,15 @@ export async function startDebate(topic, personaA, personaB, duration) {
 
     for (const modelName of modelNames) {
       try {
-        console.log(`Trying model: ${modelName}...`)
         model = genAI.getGenerativeModel({ model: modelName })
 
         // Test with a simple prompt
         const testResult = await model.generateContent("Say 'OK'")
         await testResult.response.text()
 
-        console.log(`✅ Model ${modelName} works!`)
         workingModel = modelName
         break
-      } catch (e) {
-        console.log(`❌ Model ${modelName} failed:`, e.message)
+      } catch {
         model = null
       }
     }
@@ -131,11 +124,9 @@ Return ONLY valid JSON (no markdown, no code fences) in this shape:
 }
 `
 
-    console.log("📤 Sending prompt to Gemini...")
     const result = await model.generateContent(prompt)
 
     let text = result.response.text()
-    console.log("📥 Received response from Gemini")
 
     // Clean up the response
     let cleanText = text.trim()
@@ -148,29 +139,22 @@ Return ONLY valid JSON (no markdown, no code fences) in this shape:
 
     try {
       const parsed = JSON.parse(cleanText)
-      console.log("✅ Successfully parsed JSON response")
-      console.log("Transcript entries:", parsed.transcript?.length || 0)
 
       return {
         transcript: parsed.transcript || [],
         moderator_summary:
           parsed.moderator_summary || parsed.summary || "Debate completed successfully.",
       }
-    } catch (e) {
-      console.error("❌ Failed to parse JSON response from Gemini API")
+    } catch {
       throw new Error("Invalid response from AI service. Please try again.")
     }
   } catch (error) {
-    console.error("💥 Debate creation error:", error.message)
     throw new Error(`Failed to generate debate: ${error.message}`)
   }
 }
 
 export async function generateAIResponse(topic, conversationHistory) {
   try {
-    console.log("🤖 Generating AI response for human-to-AI debate...")
-    console.log("Topic:", topic)
-    console.log("Conversation history length:", conversationHistory.length)
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_HUMAN_API_KEY)
 
@@ -187,23 +171,19 @@ export async function generateAIResponse(topic, conversationHistory) {
 
     for (const modelName of modelNames) {
       try {
-        console.log(`Trying model: ${modelName}...`)
         model = genAI.getGenerativeModel({ model: modelName })
 
         // Test with a simple prompt
         const testResult = await model.generateContent("Say 'OK'")
         await testResult.response.text()
 
-        console.log(`✅ Model ${modelName} works!`)
         break
-      } catch (e) {
-        console.log(`❌ Model ${modelName} failed:`, e.message)
+      } catch {
         model = null
       }
     }
 
     if (!model) {
-      console.warn("⚠️ All Gemini models failed, using mock response")
       return {
         message:
           "I get where you're coming from, and it's an interesting angle. Can you say a bit more about why you see it that way?",
@@ -280,11 +260,9 @@ ABSOLUTELY NO:
 
 Just reply with raw spoken text — short, strong, natural, and SIMPLE. Ready to be spoken aloud right now.
 `;
-    console.log("📤 Sending prompt to Gemini for AI response...")
     const result = await model.generateContent(prompt)
 
     let text = result.response.text()
-    console.log("📥 Received response from Gemini")
 
     // Clean up the response
     let cleanText = text.trim()
@@ -312,22 +290,17 @@ Just reply with raw spoken text — short, strong, natural, and SIMPLE. Ready to
       message: cleanText,
     }
   } catch (error) {
-    console.error("💥 AI response generation error:", error.message)
     throw new Error(`Failed to generate AI response: ${error.message}`)
   }
 }
 
-// Human-to-AI Debate: Generate initial AI response to start the debate
 export async function startHumanDebate(topic) {
   try {
-    console.log("🔍 Starting human-to-AI debate generation...")
-    console.log("Topic:", topic)
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_HUMAN_API_KEY)
 
     // Check if API key exists
     if (!process.env.GEMINI_HUMAN_API_KEY) {
-      console.warn("⚠️ No GEMINI_HUMAN_API_KEY found, using mock human debate")
       return {
         transcript: [
           {
@@ -351,24 +324,20 @@ export async function startHumanDebate(topic) {
 
     for (const modelName of modelNames) {
       try {
-        console.log(`Trying model: ${modelName}...`)
         model = genAI.getGenerativeModel({ model: modelName })
 
         // Test with a simple prompt
         const testResult = await model.generateContent("Say 'OK'")
         await testResult.response.text()
 
-        console.log(`✅ Model ${modelName} works!`)
         workingModel = modelName
         break
-      } catch (e) {
-        console.log(`❌ Model ${modelName} failed:`, e.message)
+      } catch {
         model = null
       }
     }
 
     if (!model) {
-      console.warn("⚠️ All Gemini models failed, using mock human debate")
       return {
         transcript: [
           {
@@ -414,11 +383,9 @@ Return ONLY valid JSON in this exact format (no markdown, no code blocks):
 }
 `
 
-    console.log("📤 Sending prompt to Gemini for human debate...")
     const result = await model.generateContent(prompt)
 
     let text = result.response.text()
-    console.log("📥 Received response from Gemini")
 
     // Clean up the response
     let cleanText = text.trim()
@@ -431,7 +398,7 @@ Return ONLY valid JSON in this exact format (no markdown, no code blocks):
 
     try {
       const parsed = JSON.parse(cleanText)
-      console.log("✅ Successfully parsed JSON response for human debate")
+
 
       return {
         transcript:
@@ -448,8 +415,7 @@ Return ONLY valid JSON in this exact format (no markdown, no code blocks):
           parsed.moderator_summary ||
           `A human-to-AI debate has been initiated on the topic: "${topic}".`,
       }
-    } catch (e) {
-      console.error("❌ Failed to parse JSON, using default human debate")
+    } catch {
       return {
         transcript: [
           {
@@ -463,15 +429,13 @@ Return ONLY valid JSON in this exact format (no markdown, no code blocks):
       }
     }
   } catch (error) {
-    console.error("💥 Human debate creation error:", error.message)
     throw new Error(`Failed to start human debate: ${error.message}`)
   }
 }
 
-// 🔹 Analyze a debate (On-Demand)
+// Analyze a debate (On-Demand)
 export async function analyzeDebate(transcript) {
   try {
-    console.log("📊 Starting debate analysis...")
 
     // 1. First, separate Human vs AI messages to check participation levels
     // We assume the AI is "AI Debater" (from startHumanDebate).
@@ -483,13 +447,10 @@ export async function analyzeDebate(transcript) {
       return acc + (msg.message || "").trim().split(/\s+/).length;
     }, 0);
 
-    console.log(`🔍 Human Participation Check: ${humanTurnCount} turns, ~${humanTotalWords} words.`);
-
     // 2. IMMEDIATE FAIL CONDITION
     // If the human didn't speak (0 turns), return 0.
     // We ALLOW short inputs now (e.g. "ok") to go to Gemini for a fair (low) score and feedback.
     if (humanTurnCount === 0) {
-      console.warn("⚠️ Human participation check: 0 turns. Returning 0 scores.");
       return {
         scores: {
           logic: 0,
@@ -581,25 +542,17 @@ OUTPUT FORMAT (STRICT JSON ONLY):
 
     return JSON.parse(text)
 
-  } catch (error) {
-    console.error("💥 Analysis failed:", error)
+  } catch {
     throw new Error("Failed to analyze debate")
   }
 }
 
-// 🔹 Context-Aware Customer Support Chat
+// Context-Aware Customer Support Chat
 export async function chatWithSupport(history, userContext = {}) {
   try {
-    console.log("💬 Generating Support Chat response...")
 
     // Use specific support key if available, else fallback to main key
-    // implementation note: User requested "another api", so we prioritize a distinct key
     const apiKey = process.env.GEMINI_SUPPORT_API_KEY || process.env.GEMINI_API_KEY
-    if (process.env.GEMINI_SUPPORT_API_KEY) {
-      console.log("✅ Using dedicated GEMINI_SUPPORT_API_KEY")
-    } else {
-      console.log("ℹ️ Using default GEMINI_API_KEY (GEMINI_SUPPORT_API_KEY not set)")
-    }
 
     if (!apiKey) {
       throw new Error("No API key configured for support chat.")

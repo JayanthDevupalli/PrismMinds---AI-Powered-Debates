@@ -54,7 +54,7 @@ function RegisterContent() {
       })
 
       // Send welcome email (non-blocking)
-      sendWelcomeEmail(form.email, form.name).catch(console.error)
+      sendWelcomeEmail(form.email, form.name).catch(() => { })
 
 
       router.push(redirectUrl)
@@ -81,7 +81,7 @@ function RegisterContent() {
 
       const details = getAdditionalUserInfo(res)
       if (details?.isNewUser) {
-        sendWelcomeEmail(res.user.email || "", res.user.displayName || "User").catch(console.error)
+        sendWelcomeEmail(res.user.email || "", res.user.displayName || "User").catch(() => { })
       }
 
       router.push(redirectUrl)

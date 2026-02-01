@@ -24,11 +24,13 @@ app.use(cors({
 
 app.use(express.json());
 
-// Add request logging for debugging
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-  next();
-});
+// Only log requests in development
+if (process.env.NODE_ENV !== "production") {
+  app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+    next();
+  });
+}
 
 // app.use("/api/test", testRoutes);
 app.use("/api/debate", debateRoutes);
@@ -53,11 +55,13 @@ app.get("/api/health", (req, res) => {
 
 // Global error handler
 app.use((err, req, res, next) => {
-  console.error("💥 Unhandled error:", err);
+  // Only log errors in development
+  if (process.env.NODE_ENV !== "production") {
+    console.error("Unhandled error:", err.message);
+  }
   res.status(500).json({
     error: "Internal server error",
-    message: err.message,
-    ...(process.env.NODE_ENV === "production" && { stack: err.stack })
+    message: process.env.NODE_ENV !== "production" ? err.message : "An error occurred"
   });
 });
 

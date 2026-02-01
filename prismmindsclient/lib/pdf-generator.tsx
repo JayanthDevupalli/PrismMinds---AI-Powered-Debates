@@ -241,8 +241,7 @@ export async function downloadDebateTranscriptPDF(
     const safeTopic = topic.substring(0, 30).trim().replace(/[^a-z0-9]/gi, "_") || "debate"
     pdf.save(`${safeTopic}_PrismMinds.pdf`)
 
-  } catch (err) {
-    console.error("PDF Generation Failed:", err)
+  } catch {
     alert("Failed to generate PDF. Please try again.")
   }
 }
@@ -423,8 +422,7 @@ export async function downloadAnalysisReportPDF(debate: any, analysis: any, user
     const safeTopic = debate.topic.substring(0, 20).replace(/[^a-z0-9]/gi, "_")
     pdf.save(`Analysis_${safeTopic}.pdf`)
 
-  } catch (e) {
-    console.error("PDF Report Gen Failed", e)
+  } catch {
     alert("Could not generate report PDF.")
   }
 }

@@ -13,7 +13,6 @@ const router = express.Router();
 // 🔹 Delete User Account & All Data
 router.delete("/profile", verifyFirebaseToken, async (req, res) => {
     const uid = req.user.uid;
-    console.log(`⚠️ Request to delete account for user: ${uid}`);
 
     try {
         // 1. Delete all user debates
@@ -26,7 +25,6 @@ router.delete("/profile", verifyFirebaseToken, async (req, res) => {
                 batch.delete(doc.ref);
             });
             await batch.commit();
-            console.log(`🗑️ Deleted ${snapshot.size} debates for user ${uid}`);
         }
 
         // 2. Delete the parent debate doc
@@ -35,18 +33,16 @@ router.delete("/profile", verifyFirebaseToken, async (req, res) => {
         // 3. Delete user profile doc
         await db.collection("users").doc(uid).delete();
 
-        // 4. Delete Auth User (Optional: Client might do it, but good to ensure)
+        // 4. Delete Auth User
         try {
             await admin.auth().deleteUser(uid);
-            console.log(`✅ Deleted Firebase Auth user ${uid}`);
-        } catch (authError) {
-            console.warn("⚠️ Could not delete auth user (might already be deleted):", authError.message);
+        } catch {
+            // Auth user might already be deleted
         }
 
         res.status(200).json({ message: "Account and all data deleted successfully" });
 
-    } catch (error) {
-        console.error("❌ Delete account error:", error);
+    } catch {
         res.status(500).json({ error: "Failed to delete account data" });
     }
 });
@@ -67,12 +63,10 @@ router.post("/welcome", async (req, res) => {
 
     try {
         const info = await sendWelcomeEmail(email, userName);
-        console.log("✅ Welcome email sent: %s", info.messageId);
 
         res.status(200).json({ message: "Welcome email sent successfully", messageId: info.messageId });
 
     } catch (error) {
-        console.error("Error sending welcome email:", error);
         res.status(500).json({ error: "Failed to send email", details: error.message });
     }
 });
@@ -105,11 +99,9 @@ router.post("/forgot-password", async (req, res) => {
         });
 
         await sendOTPEmail(email, otp);
-        console.log(`OTP sent to ${email}`);
         res.status(200).json({ message: "OTP sent successfully" });
 
     } catch (error) {
-        console.error("Forgot password error:", error);
         res.status(500).json({ error: error.message || "Failed to process request" });
     }
 });
@@ -140,8 +132,7 @@ router.post("/verify-otp", async (req, res) => {
         }
 
         res.status(200).json({ message: "OTP verified successfully" });
-    } catch (error) {
-        console.error("Verify OTP error:", error);
+    } catch {
         res.status(500).json({ error: "Failed to verify OTP" });
     }
 });
@@ -183,11 +174,9 @@ router.post("/reset-password", async (req, res) => {
 
         await docRef.delete();
 
-        console.log(`✅ Password reset successfully for ${email}`);
         res.status(200).json({ message: "Password reset successfully" });
 
     } catch (error) {
-        console.error("❌ Reset password error:", error);
         res.status(500).json({ error: error.message || "Failed to reset password" });
     }
 });
@@ -196,7 +185,6 @@ router.post("/reset-password", async (req, res) => {
 // 🔹 Recalculate Stats for Leaderboard
 router.post("/recalc-stats", verifyFirebaseToken, async (req, res) => {
     try {
-        console.log("🔄 Recalculating global stats...");
         const usersSnapshot = await db.collection("users").get();
 
         const updates = [];
@@ -232,11 +220,9 @@ router.post("/recalc-stats", verifyFirebaseToken, async (req, res) => {
         }
 
         await Promise.all(updates);
-        console.log("✅ Stats recalculated for all users");
         res.json({ success: true, message: "Leaderboard stats updated" });
 
-    } catch (error) {
-        console.error("Recalc stats error:", error);
+    } catch {
         res.status(500).json({ error: "Failed to recalculate stats" });
     }
 });
@@ -244,8 +230,6 @@ router.post("/recalc-stats", verifyFirebaseToken, async (req, res) => {
 // 🔹 Leaderboard Endpoint
 router.get("/leaderboard", async (req, res) => {
     try {
-        console.log("🏆 Fetching leaderboard...");
-        // Fetch top 20 by score
         // Fetch top 50 by score to include buffer for inactive users
         let usersSnapshot = await db.collection("users").orderBy("totalScore", "desc").limit(50).get();
 
@@ -285,9 +269,8 @@ router.get("/leaderboard", async (req, res) => {
         // Return top 20
         res.status(200).json(leaderboard.slice(0, 20));
 
-    } catch (error) {
-        console.error("❌ Leaderboard fetch error:", error);
-        // Fallback: Return empty or simple list
+    } catch {
+        // Fallback: Return empty list
         res.json([]);
     }
 });

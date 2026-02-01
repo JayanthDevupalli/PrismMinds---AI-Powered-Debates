@@ -56,8 +56,7 @@ export default function ChatBot() {
                     const transcript = event.results[0][0].transcript
                     setInput(prev => prev + (prev ? " " : "") + transcript)
                 }
-                recognition.onerror = (event: any) => {
-                    console.error("Speech recognition error", event.error)
+                recognition.onerror = () => {
                     setIsListening(false)
                     toast.error("Could not recognize voice. Please try again.")
                 }
@@ -116,8 +115,7 @@ export default function ChatBot() {
             const botMsg: Message = { role: "assistant", content: data.response }
             setMessages(prev => [...prev, botMsg])
 
-        } catch (error) {
-            console.error("Chat error:", error)
+        } catch {
             toast.error("Failed to connect to support bot.")
             setMessages(prev => [...prev, { role: "assistant", content: "I'm having trouble connecting right now. Please try again later." }])
         } finally {

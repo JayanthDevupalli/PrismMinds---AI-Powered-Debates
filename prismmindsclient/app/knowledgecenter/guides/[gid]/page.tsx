@@ -97,8 +97,8 @@ export default function GuideDetailPage({
                         text: text,
                         url: url,
                     })
-                } catch (err) {
-                    console.error("Error sharing:", err)
+                } catch {
+                    // Sharing was cancelled or not supported
                 }
             } else {
                 // Fallback if native share not supported

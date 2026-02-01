@@ -138,7 +138,7 @@ export default function ContactPage() {
         "GPglvP4vgVbAQ5kKU"
       );
 
-      console.log("Email sent:", result.text);
+
       setSuccessMessage("Your message has been sent successfully!");
       setIsSuccess(true);
       setFormData({ name: "", email: "", subject: "", message: "" });
@@ -147,8 +147,7 @@ export default function ContactPage() {
         setSuccessMessage("");
         setIsSuccess(false);
       }, 5000);
-    } catch (error) {
-      console.error("Error sending email:", error);
+    } catch {
       setSuccessMessage("Failed to send message. Please try again later.");
       setIsSuccess(false);
       setTimeout(() => setSuccessMessage(""), 4000);

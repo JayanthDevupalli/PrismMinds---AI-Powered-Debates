@@ -60,14 +60,13 @@ router.get("/daily", async (req, res) => {
             participationData.score = avg;
           }
         }
-      } catch (authErr) {
-        console.warn("Daily challenge auth check failed (ignoring):", authErr.message);
+      } catch {
+        // Auth check failed silently
       }
     }
 
     res.json({ topic, date: new Date().toISOString(), ...participationData });
-  } catch (err) {
-    console.error("Daily challenge error:", err);
+  } catch {
     res.status(500).json({ error: "Failed to fetch daily challenge" });
   }
 });
@@ -77,7 +76,6 @@ router.post("/create", verifyFirebaseToken, async (req, res) => {
   try {
     const { topic, personaA, personaB, duration } = req.body;
     const uid = req.user.uid;
-    console.log("Creating debate for user:", uid);
 
     const debateData = await startDebate(topic, personaA, personaB, duration);
 
@@ -97,8 +95,7 @@ router.post("/create", verifyFirebaseToken, async (req, res) => {
       });
 
     res.json({ success: true, id: debateRef.id });
-  } catch (err) {
-    console.error("Debate creation error:", err);
+  } catch {
     res.status(500).json({ error: "Failed to create debate" });
   }
 });
@@ -114,8 +111,6 @@ router.post("/create-human", verifyFirebaseToken, async (req, res) => {
   try {
     const { topic } = req.body;
     const uid = req.user.uid;
-    console.log("Creating human-to-AI debate for user:", uid);
-    console.log("Topic:", topic);
 
     if (!topic || !topic.trim()) {
       return res.status(400).json({ error: "Topic is required" });
@@ -141,8 +136,7 @@ router.post("/create-human", verifyFirebaseToken, async (req, res) => {
 
 
     res.json({ success: true, id: debateRef.id });
-  } catch (err) {
-    console.error("Human debate creation error:", err);
+  } catch {
     res.status(500).json({ error: "Failed to create human debate" });
   }
 });
@@ -168,8 +162,7 @@ router.get("/recent", verifyFirebaseToken, async (req, res) => {
 
     const debates = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     res.json(debates);
-  } catch (err) {
-    console.error("Fetch debates error:", err);
+  } catch {
     res.status(500).json({ error: "Failed to fetch debates" });
   }
 });
@@ -203,10 +196,8 @@ router.delete("/:id", verifyFirebaseToken, async (req, res) => {
       .doc(debateId)
       .delete();
 
-    console.log(`Deleted debate ${debateId} for user ${uid}`);
     res.json({ success: true });
-  } catch (err) {
-    console.error("Delete debate error:", err);
+  } catch {
     res.status(500).json({ error: "Failed to delete debate" });
   }
 });
@@ -237,8 +228,7 @@ router.get("/:id", verifyFirebaseToken, async (req, res) => {
     // Return debate data with ID
     const debateData = { id: docSnap.id, ...docSnap.data() };
     res.json(debateData);
-  } catch (err) {
-    console.error("Get debate by ID error:", err);
+  } catch {
     res.status(500).json({ error: "Failed to fetch debate by ID" });
   }
 });
@@ -305,8 +295,7 @@ router.post("/:id/message", verifyFirebaseToken, async (req, res) => {
     });
 
     res.json({ success: true, message: aiResponse.message });
-  } catch (err) {
-    console.error("Send message error:", err);
+  } catch {
     res.status(500).json({ error: "Failed to send message and get AI response" });
   }
 });
@@ -343,7 +332,6 @@ router.post("/:id/end", verifyFirebaseToken, async (req, res) => {
       summary = `Human-to-AI debate on "${debateData.topic}" with ${transcript.length} exchanges. The debate has been completed.`;
     }
 
-    // Mark debate as ended and update with final transcript
     await debateRef.update({
       transcript: transcript,
       summary: summary,
@@ -352,10 +340,8 @@ router.post("/:id/end", verifyFirebaseToken, async (req, res) => {
       updatedAt: new Date().toISOString(),
     });
 
-    console.log(`Debate ${debateId} ended and saved for user ${uid}`);
     res.json({ success: true, message: "Debate ended and transcript saved successfully" });
-  } catch (err) {
-    console.error("End debate error:", err);
+  } catch {
     res.status(500).json({ error: "Failed to end debate" });
   }
 });
@@ -375,8 +361,7 @@ router.get("/favorites/all", verifyFirebaseToken, async (req, res) => {
 
     const favorites = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     res.json(favorites);
-  } catch (err) {
-    console.error("Fetch favorites error:", err);
+  } catch {
     res.status(500).json({ error: "Failed to fetch favorites" });
   }
 });
@@ -418,8 +403,7 @@ router.post("/favorite", verifyFirebaseToken, async (req, res) => {
       });
 
     res.json({ success: true });
-  } catch (err) {
-    console.error("Add favorite error:", err);
+  } catch {
     res.status(500).json({ error: "Failed to add favorite" });
   }
 });
@@ -442,8 +426,7 @@ router.delete("/favorite/:id", verifyFirebaseToken, async (req, res) => {
       .delete();
 
     res.json({ success: true });
-  } catch (err) {
-    console.error("Remove favorite error:", err);
+  } catch {
     res.status(500).json({ error: "Failed to remove favorite" });
   }
 });
@@ -478,8 +461,7 @@ router.post("/:id/analyze", verifyFirebaseToken, async (req, res) => {
 
     res.json({ success: true, analysis, cached: false });
 
-  } catch (err) {
-    console.error("Analysis error:", err);
+  } catch {
     res.status(500).json({ error: "Failed to generate analysis" });
   }
 });

@@ -77,8 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             lastActivityDate: userData.lastActivityDate || null,
             bio: userData.bio || ""
           })
-        } catch (error) {
-          console.error("Error fetching user data:", error)
+        } catch {
           // Fallback minimal user if firestore fails
           setUser({
             uid: firebaseUser.uid,

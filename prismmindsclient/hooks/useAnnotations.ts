@@ -29,7 +29,6 @@ export function useAnnotations(debateId: string | null) {
                 const data = await getAnnotations(debateId);
                 setAnnotations(data);
             } catch (err) {
-                console.error("Failed to fetch annotations:", err);
                 setError(err instanceof Error ? err.message : "Failed to fetch annotations");
             } finally {
                 setLoading(false);
@@ -47,7 +46,6 @@ export function useAnnotations(debateId: string | null) {
             setAnnotations((prev) => [...prev, newAnnotation]);
             return newAnnotation;
         } catch (err) {
-            console.error("Failed to create annotation:", err);
             throw err;
         }
     };
@@ -65,7 +63,6 @@ export function useAnnotations(debateId: string | null) {
             );
             return updatedAnnotation;
         } catch (err) {
-            console.error("Failed to update annotation:", err);
             throw err;
         }
     };
@@ -77,7 +74,6 @@ export function useAnnotations(debateId: string | null) {
             await deleteAnnotation(debateId, annotationId);
             setAnnotations((prev) => prev.filter((ann) => ann.id !== annotationId));
         } catch (err) {
-            console.error("Failed to delete annotation:", err);
             throw err;
         }
     };

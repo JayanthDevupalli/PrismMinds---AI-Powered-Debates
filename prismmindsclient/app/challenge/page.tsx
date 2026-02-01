@@ -28,8 +28,7 @@ function ChallengeContent() {
                     setChallenge(data)
                     if (data.status === 'expired') setError("This challenge link has expired.")
                     if (data.status === 'accepted') setError("This challenge has already been accepted.")
-                } catch (e) {
-                    console.error(e)
+                } catch {
                     setError("Invalid or expired challenge link.")
                 } finally {
                     setLoading(false)
@@ -73,8 +72,7 @@ function ChallengeContent() {
                 await acceptChallenge(challenge.id)
             }
             router.push(targetUrl)
-        } catch (e) {
-            console.error("Failed to accept challenge", e)
+        } catch {
             // Even if server accept fails (maybe already accepted), likely still want to let them play? 
             // Or block them? Requirement says "link should expire", implies strictness.
             // But if I am the one who accepted it, I should be able to continue?

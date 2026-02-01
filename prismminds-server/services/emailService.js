@@ -14,7 +14,6 @@ export const sendEmail = async (templateParams) => {
     const privateKey = process.env.EMAILJS_PRIVATE_KEY;
 
     if (!serviceId || !templateId || !publicKey || !privateKey) {
-        console.error("❌ EmailJS Environment variables missing.");
         throw new Error("EmailJS configuration is incomplete in .env");
     }
 
@@ -37,15 +36,12 @@ export const sendEmail = async (templateParams) => {
 
         if (response.ok) {
             const text = await response.text();
-            console.log("✅ Email sent successfully via EmailJS:", text);
             return text;
         } else {
             const errorText = await response.text();
-            console.error("❌ EmailJS Error:", errorText);
             throw new Error(`EmailJS failed: ${errorText}`);
         }
     } catch (error) {
-        console.error("❌ Error sending email:", error);
         throw error;
     }
 };
@@ -59,10 +55,8 @@ export const verifyEmailConnection = async () => {
         process.env.EMAILJS_TEMPLATE_ID &&
         process.env.EMAILJS_PUBLIC_KEY &&
         process.env.EMAILJS_PRIVATE_KEY) {
-        console.log('✅ Email service configured (EmailJS)');
         return true;
     } else {
-        console.error('❌ Email service missing configuration in .env');
         return false;
     }
 };
