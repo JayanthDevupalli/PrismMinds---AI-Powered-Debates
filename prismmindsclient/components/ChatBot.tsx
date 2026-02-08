@@ -23,6 +23,12 @@ export default function ChatBot() {
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const recognitionRef = useRef<any>(null)
 
+    // Reset chat when user changes (login/logout)
+    useEffect(() => {
+        setMessages([])
+        setInput("")
+    }, [user?.uid])
+
     // Auto-scroll to bottom
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
