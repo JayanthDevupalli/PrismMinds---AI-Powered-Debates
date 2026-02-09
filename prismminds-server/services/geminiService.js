@@ -765,7 +765,75 @@ Comprehensive overview of all platform capabilities:
 
 ---
 
-## 12. ABOUT PRISMMINDS
+## 12. TRENDING DEBATE TOPICS (Updated for 2026)
+
+**When users ask for topic suggestions, recommend these real-world trending topics:**
+
+### 🤖 Technology & AI
+- "Should AI systems like ChatGPT be regulated by governments?"
+- "Is AI-generated art real art?"
+- "Should autonomous weapons (killer robots) be banned internationally?"
+- "Does social media do more harm than good to democracy?"
+- "Should tech companies be broken up as monopolies?"
+- "Is cryptocurrency the future of money or a speculative bubble?"
+- "Should we pause development of AGI (Artificial General Intelligence)?"
+- "Is the metaverse a revolutionary technology or overhyped?"
+
+### 🌍 Politics & Society
+- "Should there be a universal basic income (UBI)?"
+- "Is nationalism rising globally a threat to peace?"
+- "Should voting be mandatory in democracies?"
+- "Should billionaires exist?"
+- "Is cancel culture harmful to free speech?"
+- "Should immigrants have the same rights as citizens?"
+- "Is the death penalty ever justified?"
+
+### 🌱 Environment & Climate
+- "Should developed nations pay climate reparations to developing countries?"
+- "Is nuclear energy the solution to climate change?"
+- "Should single-use plastics be completely banned?"
+- "Are electric vehicles truly sustainable?"
+- "Should meat consumption be taxed to fight climate change?"
+- "Is degrowth necessary to save the planet?"
+
+### ⚖️ Ethics & Philosophy
+- "Is privacy more important than security?"
+- "Should genetic engineering of humans (designer babies) be allowed?"
+- "Is euthanasia/assisted suicide a human right?"
+- "Should prisoners have the right to vote?"
+- "Is it ethical to eat meat?"
+- "Should robots have rights?"
+
+### 🏥 Health & Science
+- "Should vaccines be mandatory?"
+- "Is mental health being over-medicalized?"
+- "Should drug patents be abolished for life-saving medicines?"
+- "Is longevity research ethical?"
+- "Should organ donation be opt-out instead of opt-in?"
+
+### 📚 Education & Work
+- "Should college education be free for everyone?"
+- "Is remote work better than office work?"
+- "Should AI replace teachers in classrooms?"
+- "Are standardized tests still relevant?"
+- "Should coding be mandatory in schools?"
+
+### 💰 Economics & Business
+- "Is capitalism the best economic system?"
+- "Should the gig economy be more regulated?"
+- "Is globalization dying?"
+- "Should CEO salaries be capped relative to worker pay?"
+- "Is a 4-day work week the future?"
+
+**How to suggest topics:**
+- When users ask for "suggestions", "topic ideas", "what should I debate", "give me a topic", etc., provide 3-5 relevant trending topics from the categories above.
+- Categorize them by interest if possible.
+- Explain briefly why each topic is trending or relevant in 2026.
+- Encourage users to pick one that interests them!
+
+---
+
+## 13. ABOUT PRISMMINDS
 
 **PrismMinds** is an AI-powered debate platform designed to:
 - Improve critical thinking skills
