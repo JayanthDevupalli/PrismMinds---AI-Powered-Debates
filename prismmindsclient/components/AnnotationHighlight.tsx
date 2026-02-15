@@ -46,16 +46,23 @@ export default function AnnotationHighlight({
     let currentPos = 0;
 
     sortedAnnotations.forEach((annotation) => {
-        // Add non-highlighted text before this annotation
-        if (currentPos < annotation.startOffset) {
+        // Skip if this annotation is fully covered by a previous one
+        if (annotation.endOffset <= currentPos) {
+            return;
+        }
+        // Adjust start offset if there's an overlap
+        const effectiveStart = Math.max(annotation.startOffset, currentPos);
+
+        // Add non-highlighted text before this annotation (if any gap)
+        if (currentPos < effectiveStart) {
             segments.push({
-                text: text.slice(currentPos, annotation.startOffset),
+                text: text.slice(currentPos, effectiveStart),
             });
         }
 
         // Add highlighted text
         segments.push({
-            text: text.slice(annotation.startOffset, annotation.endOffset),
+            text: text.slice(effectiveStart, annotation.endOffset),
             annotation,
         });
 
